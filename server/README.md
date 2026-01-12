@@ -14,6 +14,7 @@ To start server : npm dev / yarn dev
         phone,
         role,        // user | seller | admin
         address,
+        dob,
         wishlist
     }
 
@@ -22,18 +23,52 @@ To start server : npm dev / yarn dev
     {
         name,
         description,
-        price,
+        pid,
         mrp,
         discount,
-        category,
+        categories,
         brand,
-        images,
-        seller,
-        ratings,        // average rating
-        reviews,        // total reviews count or review data
-        totalRatings,   // total number of ratings
-        specifications
+        image,
+        crawledAt,
+        rating,        // average rating
+        reviewRatings,        // total reviews count or review data
+        ratingsCount,   // total number of ratings
+        reviewsCount,
+        specifications,
+        isFkAdvantage
     }
+
+    ```
+
+// **_ Cart Schema _**//
+
+    {
+        user,
+        items: [
+        {
+            product,
+            quantity,
+            price,
+            seller
+        }
+        ],
+        itemsPrice, // total price of all cart items
+        taxPrice,
+        shippingPrice,
+        totalPrice,
+        savedForLater: [
+        {
+            product,
+            quantity,
+            price,
+            seller
+        }
+        ],
+        updatedAt
+    }
+
+```
+
 
 //**_ Order Schema _**//
 
@@ -59,8 +94,10 @@ To start server : npm dev / yarn dev
         shippingPrice,
         totalPrice,
         orderStatus: {
-            enum, //pending | preprocessing | shipped | delivered | cancelled 
+            enum, //pending | preprocessing | shipped | delivered | cancelled
         },
         deliveredAt,
         trackingNumber
     }
+
+```

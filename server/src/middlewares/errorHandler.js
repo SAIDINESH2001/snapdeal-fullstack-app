@@ -9,10 +9,4 @@ const errorHandler = (err, req, res, next) => {
 }
 
 
-const notFoundError = (req, res, next) => {
-    const error = new Error(`Not Found - ${req.originalUrl}`);
-    error.statusCode = 404;
-    next(error);
-}
-
-module.exports = { errorHandler, notFoundError }
+module.exports = errorHandler; 
