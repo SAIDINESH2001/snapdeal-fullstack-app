@@ -1,7 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
-const connectDB = require('./src/config/connectDb.js');
+const connectDB = require('./src/config/connectDb');
+const {errorHandler, notFoundError} = require('./src/middlewares/errorHandler')
 
 
 //Load environment variables
@@ -18,6 +19,10 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(morgan('dev'));
+
+//Error Handling
+app.use(notFoundError);
+app.use(errorHandler);
 
 
 
