@@ -1,4 +1,8 @@
-//Project Folder Structure
+// *** Snap Deal ECommerce Full Stack *** //
+
+Technologies Used - MERN Stack (MongoDB, Express JS, React JS, Node JS)
+
+//*** Project Folder Structure ***//
 snapdeal-fullstack-app/
 │
 ├── client/
