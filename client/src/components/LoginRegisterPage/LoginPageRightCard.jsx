@@ -5,21 +5,18 @@ import useLogin from "../../hooks/useLogin";
 export const LoginPageRightCard = () => {
   const navigate = useNavigate();
 
-  // PAGE MODE → no refs passed
   const { mobile, setMobile, handleContinue, error } = useLogin();
 
   const onContinue = async () => {
     const res = await handleContinue();
 
     if (!res) return;
-
-    // EXISTING USER → OTP PAGE
     if (res.exists) {
-      navigate("/otp");
+      navigate("/otp", {
+        state: mobile,
+      });
       return;
     }
-
-    // NEW USER → REGISTER PAGE
     navigate("/register");
   };
 

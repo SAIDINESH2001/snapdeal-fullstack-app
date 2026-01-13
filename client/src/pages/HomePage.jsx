@@ -21,7 +21,7 @@ export const HomePage = () => {
         setLoginPhone={setLoginPhone}
       />
 
-      <SignUpModal ref={signupRef} phone={loginPhone} />
+      <SignUpModal ref={signupRef} />
       <OtpModal ref={otpRef} phone={loginPhone} />
 
       <TopInfoBar />

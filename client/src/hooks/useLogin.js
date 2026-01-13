@@ -24,45 +24,40 @@ const useLogin = (config = {}) => {
 
       const { type, value } = result;
       const res = await api.post("/users/check", { type, value });
-
-      // ---------------- PAGE MODE ----------------
-      // No refs → just return result to caller
-      if (!loginRef) {
-        return res.data;
-      }
-
-      // ---------------- MODAL MODE ----------------
-      const loginModal =
-        bootstrap.Modal.getOrCreateInstance(loginRef.current);
-
-      document.activeElement?.blur();
-      loginModal.hide();
-
-      // NEW USER → SIGNUP
-      if (!res.data.exists && signupRef?.current) {
-        loginRef.current.addEventListener(
-          "hidden.bs.modal",
-          () => {
-            bootstrap.Modal.getOrCreateInstance(
-              signupRef.current
-            ).show();
-          },
-          { once: true }
-        );
-      }
-
-      // EXISTING USER → OTP
-      if (res.data.exists && otpRef?.current) {
+      if (res.data.exists) {
         setLoginPhone?.(value);
 
         await api.post("/auth/send-otp", { phone: value });
 
+        if (!loginRef) return res.data;
+
+        const loginModal = bootstrap.Modal.getOrCreateInstance(
+          loginRef.current
+        );
+
+        document.activeElement?.blur();
+
+        setLoginPhone?.(value);
+
+        const loginEl = loginRef.current;
+
+        const onHidden = () => {
+          const otpModal = bootstrap.Modal.getOrCreateInstance(otpRef.current);
+          otpModal.show();
+        };
+
+        loginEl.addEventListener("hidden.bs.modal", onHidden, { once: true });
+
+        loginModal.hide();
+
+        return;
+      }
+
+      if (!res.data.exists && signupRef?.current) {
         loginRef.current.addEventListener(
           "hidden.bs.modal",
           () => {
-            bootstrap.Modal.getOrCreateInstance(
-              otpRef.current
-            ).show();
+            bootstrap.Modal.getOrCreateInstance(signupRef.current).show();
           },
           { once: true }
         );

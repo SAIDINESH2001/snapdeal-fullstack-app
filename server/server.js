@@ -1,14 +1,15 @@
-const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const connectDB = require('./src/config/connectDb');
 const errorHandler = require('./src/middlewares/errorHandler');
-const userRoutes = require('./src/routes/userRoutes')
+const userRoutes = require('./src/routes/userRoutes');
+const otpRoutes = require('./src/routes/otpRoutes');
 
 
-//Load environment variables
-dotenv.config();
+
 
 
 //Initializing express application
@@ -25,6 +26,7 @@ app.use(morgan('dev'));
 
 //Routing
 app.use('/api', userRoutes);
+app.use('/api/auth', otpRoutes);
 
 //Error Handling
 app.use(errorHandler);
