@@ -40,7 +40,7 @@ To start server : npm dev / yarn dev
 
     ```
 
-// **_ Cart Schema _**//
+//**_ Cart Schema _**//
 
     {
         user,
@@ -101,3 +101,34 @@ To start server : npm dev / yarn dev
     }
 
 ```
+// *** API End Points *** ///
+Authentication
+    - POST /api/auth/register
+    - POST /api/auth/login
+    - POST /api/auth/logout
+
+Products
+    - GET  /api/products/
+    - GET  /api/products/:id
+    - POST /api/products/
+    - PUT  /api/products/:id
+    - DELETE /api/products/:id
+    - GET /api/products/:category
+
+Cart
+    - GET /api/cart
+    - POST /api/cart/add
+    - PUT /api/cart/update
+    - DELETE /api/cart/remove
+
+Orders
+    - GET /api/orders
+    - GET /api/orders/:id
+    - POST /api/orders
+    - PUT /api/orders/:id/cancel
+    - GET /api/orders/:id/track
+
+Wishlist
+    - GET /api/wishlist
+    - POST /api/wishlist/add/:id
+    - DELETE /api/wishlist/remove/:id
