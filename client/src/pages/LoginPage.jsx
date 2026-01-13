@@ -1,5 +1,5 @@
-import { LoginPageLeftCard } from "../components/LoginPage/LoginPageLeftCard";
-import { LoginPageRightCard } from "../components/LoginPage/LoginPageRightCard";
+import { LoginPageLeftCard } from "../components/common/LoginPageLeftCard";
+import { LoginPageRightCard } from "../components/LoginRegisterPage/LoginPageRightCard";
 
 export default function LoginPage() {
   return (

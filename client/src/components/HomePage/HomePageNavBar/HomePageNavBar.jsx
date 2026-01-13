@@ -5,7 +5,7 @@ import {
 import { HomePageNavSearch } from "./HomePageNavSearch";
 import HomePageNavBarProfile from "./HomePageNavBarProfile";
 import { Link } from "react-router-dom";
-import LoginModal from "../../../models/LoginModel";
+import LoginModal from "../../../models/LoginModal";
 
 export default function HomePageNavBar() {
   return (
@@ -19,10 +19,9 @@ export default function HomePageNavBar() {
             style={{ marginRight: "200px" }}
           />
 
-          {/* Search */}
           <HomePageNavSearch />
 
-          {/* Profile Container */}
+
           <div className="d-flex align-items-center">
             <HomePageNavBarProfile />
             <Link to='https://play.google.com/store/search?q=snapdeal&c=apps'>
