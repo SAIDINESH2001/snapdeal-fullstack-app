@@ -1,16 +1,31 @@
+import { useRef, useState } from "react";
 import TopInfoBar from "../components/HomePage/TopInfoBar/TopInfoBar";
 import HomePageNavBar from "../components/HomePage/HomePageNavBar/HomePageNavBar";
 import LoginModal from "../models/LoginModal";
 import SignUpModal from "../models/SignupModal";
-
+import OtpModal from "../models/OtpModal";
 
 export const HomePage = () => {
-    return (
-        <div className="w-full">
-            <LoginModal />
-            <SignUpModal />
-            <TopInfoBar />
-            <HomePageNavBar />
-        </div>
-    )
-}
+  const loginRef = useRef(null);
+  const signupRef = useRef(null);
+  const otpRef = useRef(null);
+
+  const [loginPhone, setLoginPhone] = useState("");
+
+  return (
+    <div className="w-100">
+      <LoginModal
+        loginRef={loginRef}
+        signupRef={signupRef}
+        otpRef={otpRef}
+        setLoginPhone={setLoginPhone}
+      />
+
+      <SignUpModal ref={signupRef} phone={loginPhone} />
+      <OtpModal ref={otpRef} phone={loginPhone} />
+
+      <TopInfoBar />
+      <HomePageNavBar />
+    </div>
+  );
+};

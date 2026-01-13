@@ -1,5 +1,5 @@
 import NavBarLoginDropDown from "./NavBarLoginDropDown";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
 
 
 export default function HomePageNavBarProfile() {

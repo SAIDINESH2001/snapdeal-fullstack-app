@@ -1,8 +1,10 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const cors = require('cors');
 const connectDB = require('./src/config/connectDb');
-const errorHandler = require('./src/middlewares/errorHandler')
+const errorHandler = require('./src/middlewares/errorHandler');
+const userRoutes = require('./src/routes/userRoutes')
 
 
 //Load environment variables
@@ -16,10 +18,13 @@ const app = express();
 connectDB();
 
 //MiddleWares
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(morgan('dev'));
 
+//Routing
+app.use('/api', userRoutes);
 
 //Error Handling
 app.use(errorHandler);

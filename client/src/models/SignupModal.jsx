@@ -1,8 +1,39 @@
-import { LoginButton } from "../styles/HomePage/homePageNavBar.style"
+import { forwardRef } from "react";
+import { LoginButton } from "../styles/HomePage/homePageNavBar.style";
+import { useNavigate } from "react-router-dom";
+import * as bootstrap from "bootstrap";
+import useSignup from "../hooks/useSignUp";
 
-export default function SignUpModal() {
+const SignUpModal = forwardRef((_, ref) => {
+  const navigate = useNavigate();
+
+  const {
+    values,
+    errors,
+    loading,
+    handleChange,
+    handleSubmit,
+  } = useSignup();
+
+  const onContinue = async () => {
+    const res = await handleSubmit();
+
+    if (res?.success) {
+      const modal = bootstrap.Modal.getOrCreateInstance(ref.current);
+      document.activeElement?.blur();
+      modal.hide();
+
+      ref.current.addEventListener(
+        "hidden.bs.modal",
+        () => navigate("/login"),
+        { once: true }
+      );
+    }
+  };
+
   return (
     <div
+      ref={ref}
       className="modal fade"
       id="signUpModal"
       tabIndex="-1"
@@ -14,71 +45,98 @@ export default function SignUpModal() {
       >
         <div className="modal-content border-0 rounded-3 p-4">
 
-          <div className="modal-header border-0">
+          {/* HEADER */}
+          <div className="modal-header border-0 px-0">
             <div>
               <h5 className="modal-title fw-semibold mb-1">Sign Up</h5>
               <p className="small text-muted mb-0">
                 Create an account on Snapdeal
               </p>
             </div>
-
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            />
+            <button className="btn-close" data-bs-dismiss="modal" />
           </div>
 
-          <div className="modal-body px-4 pb-4">
+          {/* BODY */}
+          <div className="modal-body px-0 pb-0">
 
+            {/* MOBILE */}
             <input
-              type="text"
-              className="form-control mb-3"
+              name="phone"
+              value={values.phone}
+              onChange={handleChange}
+              className="form-control mb-2"
               placeholder="Mobile"
+              style={{ boxShadow: "none" }}
             />
+            {errors.phone && (
+              <div className="text-danger small mb-2">{errors.phone}</div>
+            )}
 
+            {/* EMAIL */}
             <input
               type="email"
-              className="form-control mb-3"
+              name="email"
+              value={values.email}
+              onChange={handleChange}
+              className="form-control mb-2"
               placeholder="Email"
+              style={{ boxShadow: "none" }}
             />
+            {errors.email && (
+              <div className="text-danger small mb-2">{errors.email}</div>
+            )}
 
+            {/* NAME */}
             <input
               type="text"
-              className="form-control mb-3"
+              name="name"
+              value={values.name}
+              onChange={handleChange}
+              className="form-control mb-2"
               placeholder="Name"
+              style={{ boxShadow: "none" }}
             />
+            {errors.name && (
+              <div className="text-danger small mb-2">{errors.name}</div>
+            )}
 
+            {/* DOB */}
             <input
-              type="text"
-              className="form-control mb-3"
-              placeholder="DOB  DD/MM/YYYY"
+              type="date"
+              name="dob"
+              value={values.dob}
+              onChange={handleChange}
+              className="form-control mb-2"
+              style={{ boxShadow: "none" }}
             />
+            {errors.dob && (
+              <div className="text-danger small mb-2">{errors.dob}</div>
+            )}
 
-            <div className="position-relative mb-2">
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Password"
-              />
-              <span
-                className="material-symbols-outlined position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
-                style={{ cursor: "pointer" }}
-              >
-                visibility_off
-              </span>
-            </div>
+            {/* PASSWORD */}
+            <input
+              type="password"
+              name="password"
+              value={values.password}
+              onChange={handleChange}
+              className="form-control mb-2"
+              placeholder="Password"
+              style={{ boxShadow: "none" }}
+            />
+            {errors.password && (
+              <div className="text-danger small mb-2">
+                {errors.password}
+              </div>
+            )}
 
-            <p className="small text-muted mb-3">
-              Password should have a minimum of 6 characters, at least
-              1 numeric and 1 alphabet
-            </p>
-
-            <div className="form-check mb-4">
+            {/* KEEP LOGGED IN */}
+            <div className="form-check mb-3">
               <input
                 className="form-check-input"
                 type="checkbox"
+                name="keepLoggedIn"
+                checked={values.keepLoggedIn}
+                onChange={handleChange}
                 id="keepLoggedIn"
               />
               <label
@@ -89,8 +147,18 @@ export default function SignUpModal() {
               </label>
             </div>
 
-            <LoginButton className="w-100 mb-3">
-              CONTINUE
+            {errors.server && (
+              <div className="text-danger small mb-2 text-center">
+                {errors.server}
+              </div>
+            )}
+
+            <LoginButton
+              className="w-100 mb-3"
+              disabled={loading}
+              onClick={onContinue}
+            >
+              {loading ? "PLEASE WAIT…" : "CONTINUE"}
             </LoginButton>
 
             <p className="text-center small text-muted mb-0">
@@ -103,4 +171,6 @@ export default function SignUpModal() {
       </div>
     </div>
   );
-}
+});
+
+export default SignUpModal;

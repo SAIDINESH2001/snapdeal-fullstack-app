@@ -1,8 +1,22 @@
 import { LoginButton } from "../styles/HomePage/homePageNavBar.style";
+import useLogin from "../hooks/useLogin";
 
-export default function LoginModal() {
+export default function LoginModal({
+  loginRef,
+  signupRef,
+  otpRef,
+  setLoginPhone,
+}) {
+  const { mobile, setMobile, handleContinue, error } = useLogin({
+    loginRef,
+    signupRef,
+    otpRef,
+    setLoginPhone,
+  });
+
   return (
     <div
+      ref={loginRef}
       className="modal fade"
       id="loginModal"
       tabIndex="-1"
@@ -10,9 +24,11 @@ export default function LoginModal() {
     >
       <div className="modal-dialog modal-dialog-centered modal-sm">
         <div className="modal-content border-0 rounded-3">
-
           <div className="modal-header border-0">
-            <h5 className="modal-title fw-semibold" style={{fontSize: "16px"}}>
+            <h5
+              className="modal-title fw-semibold"
+              style={{ fontSize: "16px" }}
+            >
               Login/Sign Up On Snapdeal
             </h5>
             <button
@@ -24,7 +40,10 @@ export default function LoginModal() {
           </div>
 
           <div className="modal-body px-4 pb-4">
-            <p className="text-center small text-muted mb-3" style={{fontSize: "12px"}}>
+            <p
+              className="text-center small text-muted mb-3"
+              style={{ fontSize: "12px" }}
+            >
               Please provide your Mobile Number or Email to
               <br />
               Login / Sign Up on Snapdeal
@@ -32,16 +51,25 @@ export default function LoginModal() {
 
             <input
               type="text"
-              className="form-control mb-3"
-              placeholder="Mobile Number/ Email"
-              style={{ height: "44px", fontSize:"12px", boxShadow: "none" }}
+              className="form-control mb-2"
+              placeholder="Mobile Number / Email"
+              style={{
+                height: "44px",
+                fontSize: "12px",
+                boxShadow: "none",
+              }}
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
             />
 
-            <LoginButton className="w-100">
+            {error && (
+              <div className="text-danger small mb-2 text-center">{error}</div>
+            )}
+
+            <LoginButton className="w-100" onClick={handleContinue}>
               CONTINUE
             </LoginButton>
           </div>
-
         </div>
       </div>
     </div>

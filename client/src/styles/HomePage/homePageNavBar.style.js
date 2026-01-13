@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 export const HeaderBar = styled.header`
-  height: 72px;         
-  border-bottom: 1px solid #eee;
+  height: 72px;     
+  border-bottom: 1px dashed #eee;
   font-family: Arial, Helvetica, sans-serif;
   width: 100%;
   padding:40px;
