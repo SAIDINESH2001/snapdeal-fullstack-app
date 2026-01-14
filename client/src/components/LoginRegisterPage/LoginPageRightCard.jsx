@@ -5,19 +5,23 @@ import useLogin from "../../hooks/useLogin";
 export const LoginPageRightCard = () => {
   const navigate = useNavigate();
 
-  // ✅ DEFINE CALLBACK
-  const onExistingUser = (phone) => {
-    navigate("/otp", { state: phone });
+  const onExistingUser = (value, type) => {
+    navigate("/otp", {
+      state: { value, type },
+    });
+  };
+
+  const onNewUser = (value, type) => {
+    navigate("/register", {
+      state: { value, type },
+    });
   };
 
   const { mobile, setMobile, handleContinue, error } = useLogin({
+    mode: "page",
     onExistingUser,
+    onNewUser,
   });
-
-  const onContinue = async () => {
-    await handleContinue();
-    // ❌ no return handling here
-  };
 
   return (
     <div
@@ -52,7 +56,7 @@ export const LoginPageRightCard = () => {
 
       {error && <div className="text-danger small mb-2">{error}</div>}
 
-      <LoginButton className="w-100 mb-4" onClick={onContinue}>
+      <LoginButton className="w-100 mb-4" onClick={handleContinue}>
         CONTINUE
       </LoginButton>
 

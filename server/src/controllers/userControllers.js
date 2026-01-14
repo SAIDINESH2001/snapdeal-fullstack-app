@@ -1,6 +1,7 @@
 const User = require('../models/userSchema');
 const {userInputValidation} = require('../validations/userValidation');
 const bcrypt = require("bcryptjs");
+const generateOtp = require('../utils/generateOtp');
 
 exports.checkUser = async (req,res,next) => {
     try {
@@ -19,6 +20,7 @@ exports.checkUser = async (req,res,next) => {
                 exists: false,
             })
         }
+        
         res.json({
             success:true,
             message: `User exists`,
@@ -39,11 +41,11 @@ exports.postUser = async (req,res,next) => {
                 message: validationResult,
             })
         }
-        const { name, email, phone, password } = req.body;
+        const { name, email, phone, password , role} = req.body;
         const dob = validationResult.parsedDate;
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds)
-        const user = await User.create({name, email, phone, password: hashedPassword, dob});
+        const user = await User.create({name, email, phone, password: hashedPassword, dob, role});
         res.json({
             success: true,
             message: `User Registered Successfully`,

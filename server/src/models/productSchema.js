@@ -1,24 +1,22 @@
 const mongoose = require('mongoose');
 
-
-
 const productSchema = new mongoose.Schema({
     pid: {
         type: String,
         required: true,
+        unique: true,
         trim: true,
+        index: true
     },
     name: {
         type: String,
         required: true,
         trim: true,
     },
-    image: [
-        {
-            type: String,
-            required: true
-        }
-    ],
+    image: [{
+        type: String,
+        required: true
+    }],
     description: {
         type: String,
         trim: true,
@@ -29,30 +27,53 @@ const productSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    categories : [
-        {
-            type: String,
-            trim: true,
-            required: true,
-        }
-    ],
-    crawledAt: {
+    productMainCategory: {
         type: String,
-        default: null,
+        required: true,
+        enum: ["Men's Fashion", "Women's Fashion", "Home & Kitchen", "Kid's Fashion", "Beauty & Health", "Electronics"], 
+        index: true
+    },
+    productType: {
+        type: String, 
+        required: true,
+        trim: true,
+        index: true
+    },
+    genderCategory: {
+        type: String,
+        required: true,
+        enum: ["Men", "Women", "Unisex", "Boys", "Girls"],
+        default: "Unisex",
+        index:true
+    },
+    subCategory: {
+        type: String,
+        required: true,
+        trim: true,
+        index:true
+    },
+    sizes: [{
+        type: String, 
+        trim: true
+    }],
+    stockQuantity: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0
     },
     discount: {
-        type: String,
+        type: Number,
         required: true,
-        trim: true,
-    },
-    isFkAdvantage: {
-        type: Boolean,
-        default: false,
+        index: true
     },
     mrp: {
-        type: String,
+        type: Number,
         required: true,
-        trim: true,
+    },
+    sellingPrice: { 
+        type: Number,
+        required: true
     },
     purl: {
         type: String,
@@ -60,31 +81,32 @@ const productSchema = new mongoose.Schema({
         trim: true,
     },
     rating: {
-        type: String,
-        required: true,
-        trim: true,
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
     },
     reviewRatings: {
         type: String,
-        required: true,
         trim: true,
     },
     ratingsCount: {
-        type: String,
-        required: true,
-        trim: true,
+        type: Number,
+        default: 0
     },
     reviewsCount: {
-        type: String,
-        required: true,
-        trim: true,
+        type: Number,
+        default: 0
     },
     specifications: {
-        type: String,
-        required: true,
-        trim: true,
+        type: Map, 
+        of: String
     }
+}, { 
+    timestamps: true
 });
 
-const Products = mongoose.model('products', productSchema);
+const Products = mongoose.model('SnapDeal-Products', productSchema);
 module.exports = Products;
+
+

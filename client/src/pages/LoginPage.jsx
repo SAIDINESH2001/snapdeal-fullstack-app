@@ -5,7 +5,7 @@ import { OtpPage } from "./OtpPage";
 
 export default function LoginPage() {
   const [phone, setPhone] = useState("");
-  const [step, setStep] = useState("LOGIN"); // LOGIN | OTP
+  const [step, setStep] = useState("LOGIN"); 
 
   return (
     <>

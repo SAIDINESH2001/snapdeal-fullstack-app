@@ -1,9 +1,10 @@
 import NavBarLoginDropDown from "./NavBarLoginDropDown";
-import useAuth from "../../../hooks/useAuth";
+import { useAuth } from "../../../hooks/useAuth";
 import { LoginButton } from "../../../styles/HomePage/homePageNavBar.style";
 
 export default function HomePageNavBarProfile() {
-  const { isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const isAuthenticated = !!user;
 
   return (
     <div className="d-flex align-items-center">
@@ -26,35 +27,41 @@ export default function HomePageNavBarProfile() {
             </span>
 
             <span className="fw-semibold small text-nowrap">
-              {isAuthenticated ? "Profile" : "Login"}
+              {isAuthenticated ? user.name.split(' ')[0] : "Login"}
             </span>
           </div>
         </button>
 
         {isAuthenticated ? (
-              <div className="dropdown-menu p-0 border-0 ms-3" style={{ width: "260px" }}>
-                <div className="bg-dark text-white rounded-3 overflow-hidden">
-                  <div className="px-3 py-2 d-flex align-items-center gap-2">
-                   <span className="material-symbols-outlined">box</span>
-                    <span className="fw-medium">Orders</span>
-                  </div>
-                  <div className="px-3 py-2 d-flex align-items-center gap-2">
-                    <span className="material-symbols-outlined">featured_seasonal_and_gifts</span>
-                    <span className="fw-medium">E - Gift Voucher</span>
-                  </div>
-                  <hr className="m-0 border-secondary mb-3" />
-                          <div className="px-3 pb-3">
-                            <LoginButton
-                              className="w-100"
-                              data-bs-toggle="modal"
-                              data-bs-target="#loginModal"
-                              onClick={logout}
-                            >
-                              LOG OUT
-                            </LoginButton>
-                          </div>
-                </div>
+          <div
+            className="dropdown-menu p-0 border-0 ms-3"
+            style={{ width: "260px" }}
+          >
+            <div className="bg-dark text-white rounded-3 overflow-hidden">
+              <div className="px-3 py-2 d-flex align-items-center gap-2">
+                <span className="material-symbols-outlined">box</span>
+                <span className="fw-medium">Orders</span>
               </div>
+
+              <div className="px-3 py-2 d-flex align-items-center gap-2">
+                <span className="material-symbols-outlined">
+                  featured_seasonal_and_gifts
+                </span>
+                <span className="fw-medium">E - Gift Voucher</span>
+              </div>
+
+              <hr className="m-0 border-secondary mb-3" />
+
+              <div className="px-3 pb-3">
+                <LoginButton
+                  className="w-100"
+                  onClick={logout}
+                >
+                  LOG OUT
+                </LoginButton>
+              </div>
+            </div>
+          </div>
         ) : (
           <NavBarLoginDropDown />
         )}
@@ -70,7 +77,9 @@ export default function HomePageNavBarProfile() {
         >
           shopping_cart
         </span>
-        <span className="fw-semibold small text-nowrap">My Cart</span>
+        <span className="fw-semibold small text-nowrap">
+          My Cart
+        </span>
       </div>
     </div>
   );

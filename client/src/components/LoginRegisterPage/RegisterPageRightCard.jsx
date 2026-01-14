@@ -5,7 +5,6 @@ import useSignup from "../../hooks/useSignUp";
 export const RegisterPageRightCard = () => {
   const navigate = useNavigate();
 
-  // PAGE MODE → same hook as SignupModal
   const { values, errors, loading, handleChange, handleSubmit } = useSignup();
 
   const onContinue = async () => {

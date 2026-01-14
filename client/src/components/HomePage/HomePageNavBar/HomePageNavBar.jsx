@@ -5,7 +5,6 @@ import {
 import { HomePageNavSearch } from "./HomePageNavSearch";
 import HomePageNavBarProfile from "./HomePageNavBarProfile";
 import { Link } from "react-router-dom";
-import LoginModal from "../../../models/LoginModal";
 
 export default function HomePageNavBar() {
   return (

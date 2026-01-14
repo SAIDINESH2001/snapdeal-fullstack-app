@@ -39,6 +39,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    otp: {
+      type: String,
+    },
     address: [
       {
         street: String,

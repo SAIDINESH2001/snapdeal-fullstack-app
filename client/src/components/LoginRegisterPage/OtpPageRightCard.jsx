@@ -1,62 +1,38 @@
 import { LoginButton } from "../../styles/HomePage/homePageNavBar.style";
 import { useEffect, useState } from "react";
 import api from "../../services/axios";
-import { useNavigate } from "react-router-dom";
-import {
-  signInWithPhoneNumber,
-  RecaptchaVerifier,
-} from "firebase/auth";
-import { auth } from "../../services/firebase";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
-export const OtpPageRightCard = ({ phone }) => {
+export const OtpPageRightCard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { setUser } = useAuth();
+
+  const { type, value } = location.state || {};
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState(null);
 
-  // 🔐 Send OTP when page loads
   useEffect(() => {
     const sendOtp = async () => {
       try {
         setError("");
-
-        if (!window.recaptchaVerifier) {
-          window.recaptchaVerifier = new RecaptchaVerifier(
-            auth,
-            "recaptcha-container",
-            { size: "invisible" }
-          );
-        }
-
-        const result = await signInWithPhoneNumber(
-          auth,
-          `+91${phone}`,
-          window.recaptchaVerifier
-        );
-
-        setConfirmationResult(result);
-      } catch (err) {
-        console.error("FIREBASE SEND OTP ERROR >>>", err);
-        setError("Failed to send OTP. Please retry login.");
+        await api.post("/auth/send-otp", { type, value });
+      } catch {
+        setError("Failed to send OTP");
       }
     };
 
-    if (phone) {
+    if (type && value) {
       sendOtp();
     } else {
-      setError("Invalid phone number");
+      setError("Invalid login identifier");
     }
-  }, [phone]);
+  }, [type, value]);
 
-  // 🔑 Verify OTP
   const handleVerify = async () => {
-    if (!confirmationResult) {
-      setError("OTP session expired. Please retry login.");
-      return;
-    }
-
     if (!/^\d{6}$/.test(otp)) {
       setError("Enter valid 6-digit OTP");
       return;
@@ -66,28 +42,22 @@ export const OtpPageRightCard = ({ phone }) => {
       setLoading(true);
       setError("");
 
-      const firebaseUser =
-        await confirmationResult.confirm(otp);
-
-      const idToken =
-        await firebaseUser.user.getIdToken();
-      console.log(idToken);
-
-      const res = await api.post("/auth/firebase-login", {
-        token: idToken,
+      const res = await api.post("/auth/verify-otp", {
+        type,
+        value,
+        otp,
       });
 
-      if (res.data.success) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        navigate("/");
-        return;
-      }
+      localStorage.setItem("token", res.data.token);
 
-      setError("Invalid or expired OTP");
+      const me = await api.get("/auth/refresh");
+      setUser(me.data.user);
+
+      navigate("/");
     } catch (err) {
-      console.error("OTP VERIFY ERROR >>>", err);
-      setError("OTP verification failed");
+      setError(
+        err?.response?.data?.error || "Invalid or expired OTP"
+      );
     } finally {
       setLoading(false);
     }
@@ -103,7 +73,7 @@ export const OtpPageRightCard = ({ phone }) => {
       <p className="text-center text-muted mb-3" style={{ fontSize: "13px" }}>
         Enter OTP sent to
         <br />
-        <strong>{phone}</strong>
+        <strong>{value}</strong>
       </p>
 
       <input

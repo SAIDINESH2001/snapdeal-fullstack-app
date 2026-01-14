@@ -6,8 +6,10 @@ const cors = require('cors');
 const connectDB = require('./src/config/connectDb');
 const errorHandler = require('./src/middlewares/errorHandler');
 const userRoutes = require('./src/routes/userRoutes');
-const authRoutes = require("./src/routes/authRoutes");
-
+const otpRoutes = require('./src/routes/otpRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const categoryRoutes = require('./src/routes/categoryRoutes');
+const productRoutes = require('./src/routes/productRoutes');
 
 
 
@@ -29,7 +31,10 @@ app.use(morgan('dev'));
 
 //Routing
 app.use('/api', userRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/api", otpRoutes);
+app.use("/api", authRoutes);
+app.use('/api', categoryRoutes);
+app.use('/api', productRoutes);
 
 //Error Handling
 app.use(errorHandler);

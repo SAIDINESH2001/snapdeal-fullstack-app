@@ -1,102 +1,81 @@
 import { useState } from "react";
-import * as bootstrap from "bootstrap";
 import api from "../services/axios";
-import { checkUserLogin } from "../utils/validations/userInputValidations";
-import {
-  signInWithPhoneNumber,
-  RecaptchaVerifier,
-} from "firebase/auth";
-import { auth } from "../services/firebase";
+import * as bootstrap from "bootstrap";
 
-let confirmationResult; // module-scoped, intentionally shared
+export default function useLogin({
+  mode, // "modal" | "page"
 
-const useLogin = (config = {}) => {
-  const {
-    loginRef = null,
-    signupRef = null,
-    otpRef = null,
-    setLoginPhone = null,
-    onExistingUser = null,
-  } = config;
+  // modal-only
+  loginRef,
+  otpRef,
+  signupRef,
+  setLoginPhone,
 
+  // page-only
+  onExistingUser,
+  onNewUser,
+}) {
   const [mobile, setMobile] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
-  const sendFirebaseOtp = async (phone) => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        "recaptcha-container",
-        {
-          size: "invisible",
-        }
-      );
-    }
-
-    confirmationResult = await signInWithPhoneNumber(
-      auth,
-      `+91${phone}`,
-      window.recaptchaVerifier
-    );
-  };
+  const detectType = (value) =>
+    /^\d+$/.test(value) ? "phone" : "email";
 
   const handleContinue = async () => {
+    if (!mobile) {
+      setError("Required");
+      return;
+    }
+
+    const type = detectType(mobile);
+
     try {
-      setError(null);
+      const checkRes = await api.post("/users/check", {
+        type,
+        value: mobile,
+      });
 
-      const result = checkUserLogin(mobile);
-      if (typeof result === "string") {
-        setError(result);
-        return;
-      }
+      if (checkRes.data.exists) {
+        await api.post("/auth/send-otp", {
+          type,
+          value: mobile,
+        });
 
-      const { type, value } = result;
-      const res = await api.post("/users/check", { type, value });
+        // ---------- MODAL FLOW ----------
+        if (mode === "modal") {
+          setLoginPhone(mobile);
 
-      if (res.data.exists) {
-        setLoginPhone?.(value);
+          document.activeElement?.blur();
 
-        await sendFirebaseOtp(value);
+          bootstrap.Modal.getInstance(
+            loginRef.current
+          )?.hide();
 
-        // PAGE MODE
-        if (!loginRef) {
-          onExistingUser?.(value);
-          return;
+          new bootstrap.Modal(
+            otpRef.current
+          ).show();
         }
 
-        // MODAL MODE
-        const loginModal = bootstrap.Modal.getOrCreateInstance(
-          loginRef.current
-        );
+        // ---------- PAGE FLOW ----------
+        if (mode === "page") {
+          onExistingUser(mobile, type);
+        }
+      } else {
+        if (mode === "modal") {
+          bootstrap.Modal.getInstance(
+            loginRef.current
+          )?.hide();
 
-        document.activeElement?.blur();
+          new bootstrap.Modal(
+            signupRef.current
+          ).show();
+        }
 
-        const onHidden = () => {
-          bootstrap.Modal.getOrCreateInstance(otpRef.current).show();
-        };
-
-        loginRef.current.addEventListener(
-          "hidden.bs.modal",
-          onHidden,
-          { once: true }
-        );
-
-        loginModal.hide();
-        return;
+        if (mode === "page") {
+          onNewUser(mobile, type);
+        }
       }
-
-      // New user → signup modal
-      if (!res.data.exists && signupRef?.current) {
-        loginRef.current.addEventListener(
-          "hidden.bs.modal",
-          () => {
-            bootstrap.Modal.getOrCreateInstance(signupRef.current).show();
-          },
-          { once: true }
-        );
-      }
-    } catch (err) {
-      console.error("useLogin ERROR >>>", err);
+    } catch {
       setError("Something went wrong");
     }
   };
@@ -106,11 +85,5 @@ const useLogin = (config = {}) => {
     setMobile,
     handleContinue,
     error,
-    confirmationResult,
   };
-};
-
-// === Important: export the module-scoped confirmationResult so other modules can import it ===
-export { confirmationResult };
-
-export default useLogin;
+}

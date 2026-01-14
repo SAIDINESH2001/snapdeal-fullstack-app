@@ -8,6 +8,7 @@ export default function LoginModal({
   setLoginPhone,
 }) {
   const { mobile, setMobile, handleContinue, error } = useLogin({
+    mode: "modal",
     loginRef,
     signupRef,
     otpRef,

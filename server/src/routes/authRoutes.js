@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const {
-  firebaseLogin,
-} = require("../controllers/fireAuthControllers");
+const auth = require("../middlewares/authHandler");
+const { getMe } = require("../controllers/authControllers");
 
-router.post("/firebase-login", firebaseLogin);
+router.get("/auth/refresh", auth, getMe);
 
 module.exports = router;
