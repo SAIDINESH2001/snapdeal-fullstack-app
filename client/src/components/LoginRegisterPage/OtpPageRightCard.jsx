@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { userNavigation } from "../../utils/navigations/loginNavigation";
 
 export const OtpPageRightCard = () => {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export const OtpPageRightCard = () => {
       const me = await api.get("/auth/refresh");
       setUser(me.data.user);
 
-      navigate("/");
+      userNavigation(navigate, res.data.role);
     } catch (err) {
       setError(
         err?.response?.data?.error || "Invalid or expired OTP"

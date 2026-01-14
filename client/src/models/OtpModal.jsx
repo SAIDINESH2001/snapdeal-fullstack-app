@@ -3,6 +3,7 @@ import * as bootstrap from "bootstrap";
 import api from "../services/axios";
 import { LoginButton } from "../styles/HomePage/homePageNavBar.style";
 import { useNavigate } from "react-router-dom";
+import { userNavigation } from "../utils/navigations/loginNavigation";
 
 const OtpModal = forwardRef(({ type, value }, ref) => {
   const navigate = useNavigate();
@@ -45,7 +46,8 @@ const OtpModal = forwardRef(({ type, value }, ref) => {
       localStorage.setItem("token", res.data.token);
 
       bootstrap.Modal.getInstance(ref.current).hide();
-      navigate("/");
+
+      userNavigation(navigate, res.data.role)
     } catch (err) {
       setError(
         err?.response?.data?.error || "Invalid or expired OTP"

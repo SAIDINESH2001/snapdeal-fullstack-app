@@ -6,6 +6,7 @@ export default function HomePageNavBarProfile() {
   const { user, logout } = useAuth();
   const isAuthenticated = !!user;
 
+
   return (
     <div className="d-flex align-items-center">
       <div className="dropdown me-4">

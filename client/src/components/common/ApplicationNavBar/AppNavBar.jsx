@@ -18,12 +18,17 @@ export const MainNavbar = ({user}) => {
             <button className="btn btn-dark px-4">Search</button>
           </div>
         </div>
-
         <div className="d-flex align-items-center gap-4 text-white">
-          <div className="btn text-light d-flex align-items-center gap-2">
+          {user.role === 'customer' ?  (
+                      <div className="btn text-light d-flex align-items-center gap-2">
             <span>Cart</span>
             <span className="material-symbols-outlined">shopping_cart</span>
           </div>
+          ) : (<div className="btn text-light d-flex align-items-center gap-2">
+            <span>Log Out</span>
+            <span className="material-symbols-outlined">logout</span>
+          </div>)}
+
 
           <div className="btn text-light d-flex align-items-center gap-2">
             <span>{user && user.name || 'Profile'}</span>

@@ -1,12 +1,17 @@
 import { LoginButton } from "../../../styles/HomePage/homePageNavBar.style";
+import {useNavigate} from 'react-router-dom';
 
 export default function NavBarLoginDropDown() {
+  const navigate = useNavigate();
+  const handleAccount = () => {
+    navigate('/login');
+  }
   return (
     <div className="dropdown-menu p-0 border-0 ms-3" style={{ width: "260px" }}>
       <div className="bg-dark text-white rounded-3 overflow-hidden">
         <div className="px-3 py-2 d-flex align-items-center gap-2">
           <span className="material-symbols-outlined">person</span>
-          <span className="fw-medium">Your Account</span>
+          <span className="fw-medium" style={{cursor: 'pointer'}} onClick={handleAccount}>Your Account</span>
         </div>
 
         <div className="px-3 py-2 d-flex align-items-center gap-2">

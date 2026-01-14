@@ -2,6 +2,7 @@ const Otp = require("../models/otpSchema");
 const generateOtp = require("../utils/generateOtp");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require('../models/userSchema')
 
 exports.sendOtp = async (req, res) => {
   const { type, value } = req.body;
@@ -67,11 +68,13 @@ exports.verifyOtp = async (req, res) => {
   }
 
   await Otp.deleteOne({ _id: record._id });
+  const user = await User.findOne({[type]: value});
+  const role = user?.role || "customer";
   const token = jwt.sign(
-    { type, value },
+    { type, value, role },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
 
-  return res.json({ token });
+  return res.json({ token , role});
 };
