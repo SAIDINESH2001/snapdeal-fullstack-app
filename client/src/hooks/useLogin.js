@@ -2,6 +2,13 @@ import { useState } from "react";
 import * as bootstrap from "bootstrap";
 import api from "../services/axios";
 import { checkUserLogin } from "../utils/validations/userInputValidations";
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+} from "firebase/auth";
+import { auth } from "../services/firebase";
+
+let confirmationResult; // module-scoped, intentionally shared
 
 const useLogin = (config = {}) => {
   const {
@@ -9,13 +16,34 @@ const useLogin = (config = {}) => {
     signupRef = null,
     otpRef = null,
     setLoginPhone = null,
+    onExistingUser = null,
   } = config;
 
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState(null);
 
+  const sendFirebaseOtp = async (phone) => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible",
+        }
+      );
+    }
+
+    confirmationResult = await signInWithPhoneNumber(
+      auth,
+      `+91${phone}`,
+      window.recaptchaVerifier
+    );
+  };
+
   const handleContinue = async () => {
     try {
+      setError(null);
+
       const result = checkUserLogin(mobile);
       if (typeof result === "string") {
         setError(result);
@@ -24,35 +52,40 @@ const useLogin = (config = {}) => {
 
       const { type, value } = result;
       const res = await api.post("/users/check", { type, value });
+
       if (res.data.exists) {
         setLoginPhone?.(value);
 
-        await api.post("/auth/send-otp", { phone: value });
+        await sendFirebaseOtp(value);
 
-        if (!loginRef) return res.data;
+        // PAGE MODE
+        if (!loginRef) {
+          onExistingUser?.(value);
+          return;
+        }
 
+        // MODAL MODE
         const loginModal = bootstrap.Modal.getOrCreateInstance(
           loginRef.current
         );
 
         document.activeElement?.blur();
 
-        setLoginPhone?.(value);
-
-        const loginEl = loginRef.current;
-
         const onHidden = () => {
-          const otpModal = bootstrap.Modal.getOrCreateInstance(otpRef.current);
-          otpModal.show();
+          bootstrap.Modal.getOrCreateInstance(otpRef.current).show();
         };
 
-        loginEl.addEventListener("hidden.bs.modal", onHidden, { once: true });
+        loginRef.current.addEventListener(
+          "hidden.bs.modal",
+          onHidden,
+          { once: true }
+        );
 
         loginModal.hide();
-
         return;
       }
 
+      // New user → signup modal
       if (!res.data.exists && signupRef?.current) {
         loginRef.current.addEventListener(
           "hidden.bs.modal",
@@ -62,7 +95,8 @@ const useLogin = (config = {}) => {
           { once: true }
         );
       }
-    } catch {
+    } catch (err) {
+      console.error("useLogin ERROR >>>", err);
       setError("Something went wrong");
     }
   };
@@ -72,7 +106,11 @@ const useLogin = (config = {}) => {
     setMobile,
     handleContinue,
     error,
+    confirmationResult,
   };
 };
+
+// === Important: export the module-scoped confirmationResult so other modules can import it ===
+export { confirmationResult };
 
 export default useLogin;

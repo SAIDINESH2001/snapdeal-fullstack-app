@@ -1,32 +1,98 @@
-import { forwardRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import * as bootstrap from "bootstrap";
 import api from "../services/axios";
 import { LoginButton } from "../styles/HomePage/homePageNavBar.style";
 import { useNavigate } from "react-router-dom";
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+} from "firebase/auth";
+import { auth } from "../services/firebase";
+import { confirmationResult as sharedConfirmation } from "../hooks/useLogin";
 
 const OtpModal = forwardRef(({ phone }, ref) => {
   const navigate = useNavigate();
+
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] =
+    useState(sharedConfirmation);
+
+  // Reset state every time modal opens
+  useEffect(() => {
+    const modalEl = ref.current;
+    if (!modalEl) return;
+
+    const reset = () => {
+      setOtp("");
+      setError("");
+      setLoading(false);
+    };
+
+    modalEl.addEventListener("shown.bs.modal", reset);
+    return () =>
+      modalEl.removeEventListener("shown.bs.modal", reset);
+  }, [ref]);
 
   const handleVerify = async () => {
+    if (!confirmationResult) {
+      setError("OTP session expired. Please resend OTP.");
+      return;
+    }
+
     if (!/^\d{6}$/.test(otp)) {
       setError("Enter valid 6-digit OTP");
       return;
     }
 
-    const res = await api.post("/auth/verify-otp", {
-      phone,
-      otp,
-    });
+    try {
+      setLoading(true);
+      setError("");
 
-    if (res.data.success) {
-      bootstrap.Modal.getOrCreateInstance(ref.current).hide();
+      const firebaseUser =
+        await confirmationResult.confirm(otp);
+
+      const idToken =
+        await firebaseUser.user.getIdToken();
+
+      const res = await api.post("/auth/firebase-login", {
+        token: idToken,
+      });
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      bootstrap.Modal.getOrCreateInstance(ref.current).hide();
       navigate("/");
-    } else {
-      setError("Invalid OTP");
+    } catch {
+      setError("Invalid or expired OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    try {
+      setError("");
+
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(
+          "recaptcha-container",
+          { size: "invisible" },
+          auth
+        );
+      }
+
+      const result = await signInWithPhoneNumber(
+        auth,
+        `+91${phone}`,
+        window.recaptchaVerifier
+      );
+
+      setConfirmationResult(result);
+    } catch {
+      setError("Failed to resend OTP");
     }
   };
 
@@ -55,9 +121,14 @@ const OtpModal = forwardRef(({ phone }, ref) => {
           </div>
 
           <div className="modal-body text-center px-4">
+            {/* LOCK IMAGE — PRESERVED */}
             <div
               className="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle"
-              style={{ width: "90px", height: "90px", background: "#f5f5f5" }}
+              style={{
+                width: "90px",
+                height: "90px",
+                background: "#f5f5f5",
+              }}
             >
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9OV-s9rorFm-Hb8ZCLZv0y-ijtKyAwJ2Dkg&s"
@@ -90,18 +161,26 @@ const OtpModal = forwardRef(({ phone }, ref) => {
               }}
             />
 
-            {error && <div className="text-danger small mb-2">{error}</div>}
+            {error && (
+              <div className="text-danger small mb-2">
+                {error}
+              </div>
+            )}
 
             <div
               className="text-primary small mb-4"
               style={{ cursor: "pointer" }}
-              onClick={() => api.post("/auth/send-otp", { phone })}
+              onClick={resendOtp}
             >
               Resend OTP
             </div>
 
-            <LoginButton className="w-100" onClick={handleVerify}>
-              CONTINUE
+            <LoginButton
+              className="w-100"
+              onClick={handleVerify}
+              disabled={loading}
+            >
+              {loading ? "VERIFYING..." : "CONTINUE"}
             </LoginButton>
           </div>
         </div>

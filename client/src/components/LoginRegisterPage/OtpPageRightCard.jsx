@@ -1,15 +1,61 @@
 import { LoginButton } from "../../styles/HomePage/homePageNavBar.style";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../services/axios";
 import { useNavigate } from "react-router-dom";
+import {
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+} from "firebase/auth";
+import { auth } from "../../services/firebase";
 
 export const OtpPageRightCard = ({ phone }) => {
-  const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+
+  // 🔐 Send OTP when page loads
+  useEffect(() => {
+    const sendOtp = async () => {
+      try {
+        setError("");
+
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier(
+            auth,
+            "recaptcha-container",
+            { size: "invisible" }
+          );
+        }
+
+        const result = await signInWithPhoneNumber(
+          auth,
+          `+91${phone}`,
+          window.recaptchaVerifier
+        );
+
+        setConfirmationResult(result);
+      } catch (err) {
+        console.error("FIREBASE SEND OTP ERROR >>>", err);
+        setError("Failed to send OTP. Please retry login.");
+      }
+    };
+
+    if (phone) {
+      sendOtp();
+    } else {
+      setError("Invalid phone number");
+    }
+  }, [phone]);
+
+  // 🔑 Verify OTP
   const handleVerify = async () => {
-    setError("");
+    if (!confirmationResult) {
+      setError("OTP session expired. Please retry login.");
+      return;
+    }
 
     if (!/^\d{6}$/.test(otp)) {
       setError("Enter valid 6-digit OTP");
@@ -17,9 +63,18 @@ export const OtpPageRightCard = ({ phone }) => {
     }
 
     try {
-      const res = await api.post("/auth/verify-otp", {
-        phone,
-        otp,
+      setLoading(true);
+      setError("");
+
+      const firebaseUser =
+        await confirmationResult.confirm(otp);
+
+      const idToken =
+        await firebaseUser.user.getIdToken();
+      console.log(idToken);
+
+      const res = await api.post("/auth/firebase-login", {
+        token: idToken,
       });
 
       if (res.data.success) {
@@ -30,8 +85,11 @@ export const OtpPageRightCard = ({ phone }) => {
       }
 
       setError("Invalid or expired OTP");
-    } catch {
-      setError("Verification failed. Try again.");
+    } catch (err) {
+      console.error("OTP VERIFY ERROR >>>", err);
+      setError("OTP verification failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,6 +117,7 @@ export const OtpPageRightCard = ({ phone }) => {
         }}
         style={{
           height: "44px",
+          fontSize: "14px",
           letterSpacing: "6px",
           boxShadow: "none",
         }}
@@ -70,18 +129,12 @@ export const OtpPageRightCard = ({ phone }) => {
         </div>
       )}
 
-      <div
-        className="text-center text-primary small mb-4"
-        style={{ cursor: "pointer" }}
-        onClick={() =>
-          api.post("/auth/send-otp", { phone })
-        }
+      <LoginButton
+        className="w-100"
+        onClick={handleVerify}
+        disabled={loading}
       >
-        Resend OTP
-      </div>
-
-      <LoginButton className="w-100" onClick={handleVerify}>
-        CONTINUE
+        {loading ? "VERIFYING..." : "CONTINUE"}
       </LoginButton>
     </div>
   );

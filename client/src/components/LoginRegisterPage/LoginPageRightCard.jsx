@@ -5,19 +5,18 @@ import useLogin from "../../hooks/useLogin";
 export const LoginPageRightCard = () => {
   const navigate = useNavigate();
 
-  const { mobile, setMobile, handleContinue, error } = useLogin();
+  // ✅ DEFINE CALLBACK
+  const onExistingUser = (phone) => {
+    navigate("/otp", { state: phone });
+  };
+
+  const { mobile, setMobile, handleContinue, error } = useLogin({
+    onExistingUser,
+  });
 
   const onContinue = async () => {
-    const res = await handleContinue();
-
-    if (!res) return;
-    if (res.exists) {
-      navigate("/otp", {
-        state: mobile,
-      });
-      return;
-    }
-    navigate("/register");
+    await handleContinue();
+    // ❌ no return handling here
   };
 
   return (

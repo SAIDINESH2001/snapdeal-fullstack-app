@@ -9,6 +9,7 @@ export default function App() {
   return (
     <>
       <GlobalStyles />
+      <div id="recaptcha-container"></div>
         <Routes>
           <Route path="/" element={<HomePage />}></Route>;
           <Route path="/login" element={<LoginPage />}/>
