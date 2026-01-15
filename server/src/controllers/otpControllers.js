@@ -76,5 +76,5 @@ exports.verifyOtp = async (req, res) => {
     { expiresIn: "7d" }
   );
 
-  return res.json({ token , role});
+  return res.json({ token , type, value, role});
 };

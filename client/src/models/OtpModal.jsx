@@ -5,12 +5,13 @@ import { LoginButton } from "../styles/HomePage/homePageNavBar.style";
 import { useNavigate } from "react-router-dom";
 import { userNavigation } from "../utils/navigations/loginNavigation";
 
-const OtpModal = forwardRef(({ type, value }, ref) => {
+export const OtpModal = forwardRef(({ type, value }, ref) => {
   const navigate = useNavigate();
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendStatus, setResendStatus] = useState("");
 
   useEffect(() => {
     const modalEl = ref.current;
@@ -20,11 +21,11 @@ const OtpModal = forwardRef(({ type, value }, ref) => {
       setOtp("");
       setError("");
       setLoading(false);
+      setResendStatus("");
     };
 
     modalEl.addEventListener("shown.bs.modal", reset);
-    return () =>
-      modalEl.removeEventListener("shown.bs.modal", reset);
+    return () => modalEl.removeEventListener("shown.bs.modal", reset);
   }, [ref]);
 
   const handleVerify = async () => {
@@ -33,25 +34,29 @@ const OtpModal = forwardRef(({ type, value }, ref) => {
       return;
     }
 
+    if (!type || !value) {
+      setError("Login session expired. Please try again.");
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
 
       const res = await api.post("/auth/verify-otp", {
-        type,
-        value,
+        type,   // phone or email
+        value,  // number or email string
         otp,
       });
 
       localStorage.setItem("token", res.data.token);
 
-      bootstrap.Modal.getInstance(ref.current).hide();
+      const modalInstance = bootstrap.Modal.getInstance(ref.current);
+      if (modalInstance) modalInstance.hide();
 
-      userNavigation(navigate, res.data.role)
+      userNavigation(navigate, res.data.role);
     } catch (err) {
-      setError(
-        err?.response?.data?.error || "Invalid or expired OTP"
-      );
+      setError(err?.response?.data?.error || err?.response?.data?.message || "Invalid or expired OTP");
     } finally {
       setLoading(false);
     }
@@ -60,38 +65,32 @@ const OtpModal = forwardRef(({ type, value }, ref) => {
   const resendOtp = async () => {
     try {
       setError("");
+      setResendStatus("");
+      if (!type || !value) return;
+
       await api.post("/auth/send-otp", { type, value });
-    } catch {
-      setError("Failed to resend OTP");
+      setResendStatus("OTP sent successfully!");
+      setTimeout(() => setResendStatus(""), 3000);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to resend OTP");
     }
   };
 
   return (
-    <div
-      ref={ref}
-      id="otpModal"
-      className="modal fade"
-      tabIndex="-1"
-      aria-hidden="true"
-    >
+    <div ref={ref} id="otpModal" className="modal fade" tabIndex="-1" aria-hidden="true">
       <div className="modal-dialog modal-dialog-centered modal-sm">
         <div className="modal-content border-0 rounded-3 p-4">
           <div className="modal-header border-0">
             <h5 className="modal-title fw-semibold" style={{ fontSize: "16px" }}>
               Verify OTP
             </h5>
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="modal"
-            />
+            <button type="button" className="btn-close" data-bs-dismiss="modal" />
           </div>
 
           <div className="modal-body text-center px-4">
             <p className="text-muted mb-3" style={{ fontSize: "13px" }}>
-              Enter OTP sent to
-              <br />
-              <strong>{value}</strong>
+              Enter OTP sent to <br />
+              <strong>{value || "your device"}</strong>
             </p>
 
             <input
@@ -112,25 +111,18 @@ const OtpModal = forwardRef(({ type, value }, ref) => {
               }}
             />
 
-            {error && (
-              <div className="text-danger small mb-2">
-                {error}
-              </div>
-            )}
+            {error && <div className="text-danger small mb-2">{error}</div>}
+            {resendStatus && <div className="text-success small mb-2">{resendStatus}</div>}
 
             <div
               className="text-primary small mb-4"
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", fontWeight: "500" }}
               onClick={resendOtp}
             >
               Resend OTP
             </div>
 
-            <LoginButton
-              className="w-100"
-              onClick={handleVerify}
-              disabled={loading}
-            >
+            <LoginButton className="w-100" onClick={handleVerify} disabled={loading}>
               {loading ? "VERIFYING..." : "CONTINUE"}
             </LoginButton>
           </div>
@@ -139,5 +131,3 @@ const OtpModal = forwardRef(({ type, value }, ref) => {
     </div>
   );
 });
-
-export default OtpModal;

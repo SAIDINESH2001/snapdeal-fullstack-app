@@ -3,7 +3,7 @@ import TopInfoBar from "../components/HomePage/TopInfoBar/TopInfoBar";
 import HomePageNavBar from "../components/HomePage/HomePageNavBar/HomePageNavBar";
 import LoginModal from "../models/LoginModal";
 import SignUpModal from "../models/SignupModal";
-import OtpModal from "../models/OtpModal";
+import {OtpModal} from "../models/OtpModal";
 import { CategoryBar } from "../components/HomePage/CategoryBar/CategoryBar";
 import HomeCarousel from "../components/HomePage/HomeCarousal/HomeCarousal";
 
@@ -12,7 +12,7 @@ export const HomePage = () => {
   const signupRef = useRef(null);
   const otpRef = useRef(null);
 
-  const [loginPhone, setLoginPhone] = useState("");
+  const [loginData, setLoginData] = useState({ value: "", type: "" });
 
   return (
     <div className="w-100">
@@ -20,11 +20,16 @@ export const HomePage = () => {
         loginRef={loginRef}
         signupRef={signupRef}
         otpRef={otpRef}
-        setLoginPhone={setLoginPhone}
+        setLoginPhone={(data) => setLoginData(data)} 
       />
 
       <SignUpModal ref={signupRef} />
-      <OtpModal ref={otpRef} type="phone" value={loginPhone} />
+      
+      <OtpModal 
+        ref={otpRef} 
+        type={loginData.type} 
+        value={loginData.value} 
+      />
 
       <TopInfoBar />
       <HomePageNavBar />

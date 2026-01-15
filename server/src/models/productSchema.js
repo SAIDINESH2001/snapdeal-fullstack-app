@@ -1,13 +1,6 @@
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
-    pid: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        index: true
-    },
     name: {
         type: String,
         required: true,
@@ -74,11 +67,6 @@ const productSchema = new mongoose.Schema({
     sellingPrice: { 
         type: Number,
         required: true
-    },
-    purl: {
-        type: String,
-        required: true,
-        trim: true,
     },
     rating: {
         type: Number,

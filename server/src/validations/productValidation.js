@@ -1,6 +1,5 @@
 const productValidation = (data) => {
     const{
-            pid,
             name,
             image,
             description,
@@ -14,7 +13,6 @@ const productValidation = (data) => {
             mrp,
             discount,
             sellingPrice,
-            purl,
             rating,
             ratingsCount,
             reviewsCount,
@@ -23,7 +21,7 @@ const productValidation = (data) => {
 
     const errors = [];
 
-    const requiredStrings = { pid, name, description, brand, productMainCategory, subCategory, productType, genderCategory, purl };
+    const requiredStrings = { name, description, brand, productMainCategory, subCategory, productType, genderCategory };
     
     for (const [key, value] of Object.entries(requiredStrings)) {
         if (!value || typeof value !== 'string' || value.trim().length === 0) {

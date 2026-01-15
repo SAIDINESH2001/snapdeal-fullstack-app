@@ -11,13 +11,14 @@ export default function HomePageNavBar() {
     <HeaderBar>
       <div className="container-fluid h-100 px-4">
         <div className="d-flex align-items-center justify-content-between h-100 w-100">
-          <img
+          <Link to='/'>
+                    <img
             src="./snapdeal-logo.png"
             alt="Snap Deal Logo"
             width={210}
             style={{ marginRight: "200px" }}
           />
-
+          </Link>
           <HomePageNavSearch />
 
 

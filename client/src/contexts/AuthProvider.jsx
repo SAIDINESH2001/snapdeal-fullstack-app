@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../services/axios";
 import { AuthContext } from "./authContext";
+import { useNavigate } from "react-router-dom";
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    navigate('/');
     setUser(null);
   };
 

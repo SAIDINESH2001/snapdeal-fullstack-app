@@ -1,89 +1,70 @@
 import { useState } from "react";
 import api from "../services/axios";
 import * as bootstrap from "bootstrap";
+import { checkUserLogin } from "../utils/validations/userInputValidations";
 
 export default function useLogin({
-  mode, // "modal" | "page"
-
-  // modal-only
+  mode,
   loginRef,
   otpRef,
   signupRef,
   setLoginPhone,
-
-  // page-only
   onExistingUser,
   onNewUser,
 }) {
   const [mobile, setMobile] = useState("");
   const [error, setError] = useState("");
 
-  const detectType = (value) =>
-    /^\d+$/.test(value) ? "phone" : "email";
-
   const handleContinue = async () => {
-    if (!mobile) {
-      setError("Required");
+    setError("");
+
+    // Validate using the utility
+    const validation = checkUserLogin(mobile);
+
+    // If it's a string, it's an error message
+    if (typeof validation === "string") {
+      setError(validation);
       return;
     }
 
-    const type = detectType(mobile);
+    const { type, value } = validation;
 
     try {
-      const checkRes = await api.post("/users/check", {
-        type,
-        value: mobile,
-      });
+      const checkRes = await api.post("/users/check", { type, value });
 
       if (checkRes.data.exists) {
-        await api.post("/auth/send-otp", {
-          type,
-          value: mobile,
-        });
+        await api.post("/auth/send-otp", { type, value });
 
-        // ---------- MODAL FLOW ----------
         if (mode === "modal") {
-          setLoginPhone(mobile);
+          // Send object to parent state
+          setLoginPhone({ type, value });
 
           document.activeElement?.blur();
+          const modalInst = bootstrap.Modal.getInstance(loginRef.current);
+          modalInst?.hide();
 
-          bootstrap.Modal.getInstance(
-            loginRef.current
-          )?.hide();
-
-          new bootstrap.Modal(
-            otpRef.current
-          ).show();
+          const otpModal = new bootstrap.Modal(otpRef.current);
+          otpModal.show();
         }
 
-        // ---------- PAGE FLOW ----------
         if (mode === "page") {
-          onExistingUser(mobile, type);
+          onExistingUser(value, type);
         }
       } else {
         if (mode === "modal") {
-          bootstrap.Modal.getInstance(
-            loginRef.current
-          )?.hide();
-
-          new bootstrap.Modal(
-            signupRef.current
-          ).show();
+          setLoginPhone({ type, value }); // Ensure signup also knows the info
+          bootstrap.Modal.getInstance(loginRef.current)?.hide();
+          new bootstrap.Modal(signupRef.current).show();
         }
 
         if (mode === "page") {
-          onNewUser(mobile, type);
+          onNewUser(value, type);
         }
       }
-    } catch {
-      setError("Something went wrong");
+    } catch (err) {
+      setError(err.response?.data?.message || "Something went wrong");
     }
   };
 
-  return {
-    mobile,
-    setMobile,
-    handleContinue,
-    error,
-  };
+  return { mobile, setMobile, handleContinue, error };
 }
