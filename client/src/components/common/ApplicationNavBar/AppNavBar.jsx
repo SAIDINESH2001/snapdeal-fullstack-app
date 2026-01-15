@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 export const MainNavbar = () => {
   const {user, logout} = useAuth();
   return (
-    <nav className="py-1" style={{backgroundColor: '#E40046'}}>
+    <nav className="py-1" style={{backgroundColor: '#E40046', position: 'sticky', top: '0', zIndex: '5000'}}>
       <div className="container-fluid d-flex align-items-center gap-4 px-5">
         <div className="d-flex align-items-center gap-3 text-white fw-bold fs-4">
           <Link to={user?.role === 'seller' ? '/seller' : '/'}><img src="/snapdeal-white.png" alt="Logo" width={150} height={30} style={{objectFit : "cover"}}/></Link>

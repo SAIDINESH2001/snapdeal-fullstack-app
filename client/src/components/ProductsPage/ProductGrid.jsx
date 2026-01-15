@@ -1,9 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 export const ProductGrid = ({ products = [] }) => {
+  const navigate = useNavigate();
+  const handleClick = (id) => {
+    if(!id) {
+      console.log('No ID');
+    }
+    navigate(`/product/${id}`);
+  }
   return (
     <div className="row g-4 mt-4 mx-4">
       {products.map((product, i) => (
         <div key={product._id || i} className="col-6 col-md-4 col-lg-3">
-          <div className="card h-100 border-0">
+          <div className="card h-100 border-0" onClick={() => handleClick(product._id)}>
             <img
               src={product.image?.[0]}
               alt={product.name}

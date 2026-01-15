@@ -7,6 +7,7 @@ import { OtpPage } from "./pages/OtpPage";
 import { ProductPage } from "./pages/ProductPage";
 import { SellerPage } from "./pages/SellerPage";
 import { SellerAddProduct } from "./components/SellerPage/SellerAddPage";
+import { ProductSummaryPage } from "./pages/ProductSummaryPage";
 
 export default function App() {
   return (
@@ -17,7 +18,10 @@ export default function App() {
           <Route path="/login" element={<LoginPage />}/>
           <Route path='/register' element={<RegisterPage />}/>;
           <Route path='/otp' element={<OtpPage />}/>
+          <Route path="/product/:productId" element={<ProductSummaryPage />}/>
           <Route path="/products/:mainCategory/:subCategory/:category" element={<ProductPage />}/>
+          <Route path="/products/:mainCategory/:subCategory" element={<ProductPage />}/>
+          <Route path="/products/:category" element={<ProductPage />}/>
           <Route path='/seller' element={<SellerPage />} />
           <Route path='/seller/add-product' element={<SellerAddProduct />} />
         </Routes>

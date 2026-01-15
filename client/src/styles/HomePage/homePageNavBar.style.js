@@ -6,6 +6,11 @@ export const HeaderBar = styled.header`
   font-family: Arial, Helvetica, sans-serif;
   width: 100%;
   padding:40px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  
 `;
 
 export const DownloadBtn = styled.button`

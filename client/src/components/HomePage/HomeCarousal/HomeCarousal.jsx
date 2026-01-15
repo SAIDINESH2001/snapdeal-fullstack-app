@@ -6,6 +6,7 @@ import { slides } from './homeCarousalService';
 export const HomeCarousel = () => {
 
   return (
+    <>
     <S.CarouselWrapper>
       <Carousel 
         fade 
@@ -24,6 +25,8 @@ export const HomeCarousel = () => {
         ))}
       </Carousel>
     </S.CarouselWrapper>
+    <div className='text-center'><img src="https://g.sdlcdn.com/imgs/a/b/c/feedConfig/freedeliverystripwebupdated.jpg" alt="" className=' mt-3 object-fit-cover rounded mb-5' style={{width: '98%'}}/></div>
+    </>
   );
 };
 

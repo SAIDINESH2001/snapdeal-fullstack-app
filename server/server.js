@@ -10,6 +10,7 @@ const otpRoutes = require('./src/routes/otpRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const productRoutes = require('./src/routes/productRoutes');
+const reviewRoutes = require('./src/routes/reviewRoutes');
 
 
 
@@ -35,6 +36,7 @@ app.use("/api", otpRoutes);
 app.use("/api", authRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', productRoutes);
+app.use('/api', reviewRoutes);
 
 //Error Handling
 app.use(errorHandler);

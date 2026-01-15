@@ -6,6 +6,7 @@ import SignUpModal from "../models/SignupModal";
 import {OtpModal} from "../models/OtpModal";
 import { CategoryBar } from "../components/HomePage/CategoryBar/CategoryBar";
 import HomeCarousel from "../components/HomePage/HomeCarousal/HomeCarousal";
+import { HomeDeal } from "../components/HomePage/HomeDeals/homeDeals";
 
 export const HomePage = () => {
   const loginRef = useRef(null);
@@ -35,6 +36,7 @@ export const HomePage = () => {
       <HomePageNavBar />
       <CategoryBar />
       <HomeCarousel />
+      <HomeDeal />
     </div>
   );
 };
