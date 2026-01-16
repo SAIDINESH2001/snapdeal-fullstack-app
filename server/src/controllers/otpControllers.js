@@ -71,8 +71,9 @@ exports.verifyOtp = async (req, res) => {
   const user = await User.findOne({[type]: value});
   const role = user?.role || "customer";
   const name = user?.name;
+  const id = user?._id;
   const token = jwt.sign(
-    { type, value, role,name },
+    { id, type, value, role,name },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );

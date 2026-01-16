@@ -81,8 +81,8 @@ export const OtpModal = forwardRef(({ type, value }, ref) => {
 
   return (
     <div ref={ref} id="otpModal" className="modal fade" tabIndex="-1" aria-hidden="true">
-      <div className="modal-dialog modal-dialog-centered modal-sm">
-        <div className="modal-content border-0 rounded-3 p-4">
+      <div className="modal-dialog modal-dialog-centered modal-sm" style={{width: '350px'}}>
+        <div className="modal-content border-0 rounded-3 p-4" style={{width: '350px'}}>
           <div className="modal-header border-0">
             <h5 className="modal-title fw-semibold" style={{ fontSize: "16px" }}>
               Verify OTP

@@ -23,9 +23,9 @@ export default function LoginModal({
       tabIndex="-1"
       aria-hidden="true"
     >
-      <div className="modal-dialog modal-dialog-centered modal-sm">
-        <div className="modal-content border-0 rounded-3">
-          <div className="modal-header border-0">
+      <div className="modal-dialog modal-dialog-centered" style={{width: '350px'}}>
+        <div className="modal-content border-0 rounded-3 p-3" style={{height: '350px'}}>
+          <div className="modal-header border-0 mt-2">
             <h5
               className="modal-title fw-semibold"
               style={{ fontSize: "16px" }}
@@ -67,7 +67,7 @@ export default function LoginModal({
               <div className="text-danger small mb-2 text-center">{error}</div>
             )}
 
-            <LoginButton className="w-100" onClick={handleContinue}>
+            <LoginButton className="w-100 mt-3" onClick={handleContinue}>
               CONTINUE
             </LoginButton>
           </div>

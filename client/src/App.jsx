@@ -8,6 +8,7 @@ import { ProductPage } from "./pages/ProductPage";
 import { SellerPage } from "./pages/SellerPage";
 import { SellerAddProduct } from "./components/SellerPage/SellerAddPage";
 import { ProductSummaryPage } from "./pages/ProductSummaryPage";
+import { AdminPage } from "./pages/AdminPage";
 
 export default function App() {
   return (
@@ -23,7 +24,8 @@ export default function App() {
           <Route path="/products/:mainCategory/:subCategory" element={<ProductPage />}/>
           <Route path="/products/:category" element={<ProductPage />}/>
           <Route path='/seller' element={<SellerPage />} />
-          <Route path='/seller/add-product' element={<SellerAddProduct />} />
+          <Route path='/add-product' element={<SellerAddProduct />} />
+          <Route path='/admin' element={<AdminPage />} />
         </Routes>
     </>
   );
