@@ -4,8 +4,10 @@ import api from "../services/axios";
 import { LoginButton } from "../styles/HomePage/homePageNavBar.style";
 import { useNavigate } from "react-router-dom";
 import { userNavigation } from "../utils/navigations/loginNavigation";
+import { useAuth } from "../hooks/useAuth";
 
 export const OtpModal = forwardRef(({ type, value }, ref) => {
+  const {setUser} = useAuth();
   const navigate = useNavigate();
 
   const [otp, setOtp] = useState("");
@@ -44,12 +46,13 @@ export const OtpModal = forwardRef(({ type, value }, ref) => {
       setError("");
 
       const res = await api.post("/auth/verify-otp", {
-        type,   // phone or email
-        value,  // number or email string
+        type,   
+        value, 
         otp,
       });
 
       localStorage.setItem("token", res.data.token);
+      setUser(res.data.user);
 
       const modalInstance = bootstrap.Modal.getInstance(ref.current);
       if (modalInstance) modalInstance.hide();

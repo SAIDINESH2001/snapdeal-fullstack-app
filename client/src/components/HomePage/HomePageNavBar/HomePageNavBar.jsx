@@ -6,7 +6,7 @@ import { HomePageNavSearch } from "./HomePageNavSearch";
 import HomePageNavBarProfile from "./HomePageNavBarProfile";
 import { Link } from "react-router-dom";
 
-export default function HomePageNavBar() {
+export default function HomePageNavBar({user}) {
   return (
     <HeaderBar>
       <div className="container-fluid h-100 px-4">
@@ -23,7 +23,7 @@ export default function HomePageNavBar() {
 
 
           <div className="d-flex align-items-center">
-            <HomePageNavBarProfile />
+            <HomePageNavBarProfile user={user}/>
             <Link to='https://play.google.com/store/search?q=snapdeal&c=apps'>
               <DownloadBtn className="ms-2">↗ Download App</DownloadBtn>
             </Link>

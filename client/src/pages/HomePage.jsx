@@ -12,7 +12,7 @@ export const HomePage = () => {
   const loginRef = useRef(null);
   const signupRef = useRef(null);
   const otpRef = useRef(null);
-
+  const [user, setUser] = useState(null);
   const [loginData, setLoginData] = useState({ value: "", type: "" });
 
   return (
@@ -30,10 +30,11 @@ export const HomePage = () => {
         ref={otpRef} 
         type={loginData.type} 
         value={loginData.value} 
+        onLoginSuccess = {(userData) => setUser(userData)}
       />
 
       <TopInfoBar />
-      <HomePageNavBar />
+      <HomePageNavBar user={user}/>
       <CategoryBar />
       <HomeCarousel />
       <HomeDeal />

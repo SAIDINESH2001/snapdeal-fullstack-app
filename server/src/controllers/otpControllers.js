@@ -70,11 +70,12 @@ exports.verifyOtp = async (req, res) => {
   await Otp.deleteOne({ _id: record._id });
   const user = await User.findOne({[type]: value});
   const role = user?.role || "customer";
+  const name = user?.name;
   const token = jwt.sign(
-    { type, value, role },
+    { type, value, role,name },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
 
-  return res.json({ token , type, value, role});
+  return res.json({ token , type, value, role, user});
 };
