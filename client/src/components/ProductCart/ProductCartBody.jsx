@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Container, Alert, Button } from "react-bootstrap";
 import { CartModal } from "../../models/CartModel/CartModal"; 
 
-export const ProductCartBody = () => {
+export const ProductCartBody = ({cartProduct}) => {
   const [active, setActive] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const handleOpenModal = () => setShowModal(true);
@@ -19,9 +19,7 @@ export const ProductCartBody = () => {
             >
               <span className="material-symbols-outlined me-3">check_circle</span>
               <p className="m-0 flex-grow-1" style={{ fontSize: "14px" }}>
-                Renee Black Matte Kajal 1 g Pencil ( Pack of 1 ) is already
-                present in your cart. Please make use of the quantity field to
-                increase quantity.
+                {cartProduct?.name} is added to the cart.
               </p>
               <span 
                 className="material-symbols-outlined ms-auto cursor-pointer" 
@@ -36,13 +34,13 @@ export const ProductCartBody = () => {
           <div className="d-flex align-items-center justify-content-between p-5 bg-white">
             <div className="d-flex align-items-center gap-3 flex-grow-1 border-end pe-4" style={{ flexBasis: '0' }}>
                <img
-                src="/kajal-preview.png" 
+                src={cartProduct?.image[0]} 
                 alt="Product"
                 style={{ width: "60px", height: "60px", objectFit: "contain" }}
               />
               <div>
-                <p className="m-0 text-muted small mb-1">Renee Black Matte Kajal...</p>
-                <p className="m-0 fw-bold fs-6">Rs. 389</p>
+                <p className="m-0 text-muted small mb-1">{cartProduct?.name}</p>
+                <p className="m-0 fw-bold fs-6">Rs. {cartProduct?.sellingPrice}</p>
               </div>
             </div>
 

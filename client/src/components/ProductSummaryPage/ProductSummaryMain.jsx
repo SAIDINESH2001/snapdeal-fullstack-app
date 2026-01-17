@@ -12,7 +12,7 @@ export const ProductDetails = ({ product, loading }) => {
             {product.image &&
               product.image.map((img, index) => {
                 return (
-                  <div key={index} className="d-flex flex-column gap-2">
+                  <div key={index} className="d-flex flex-column gap-2 m-2">
                     <img src={img} alt={product.name} />
                   </div>
                 );

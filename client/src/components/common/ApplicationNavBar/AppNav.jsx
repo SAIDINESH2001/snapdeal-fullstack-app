@@ -2,8 +2,10 @@ import { useState } from "react";
 import { AppNavInfoTopBar } from "./AppNavInfoTopBar";
 import { MainNavbar } from "./AppNavBar";
 import { CartModal } from "../../../models/CartModel/CartModal";
+import { useAuth } from "../../../hooks/useAuth";
 
-export const AppNav = ({ user }) => {
+export const AppNav = () => {
+  const {user} = useAuth();
   const [showModal, setShowModal] = useState(false);
 
   const handleOpenModal = () => {
