@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema(
     cartItems: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "products",
+        ref: "SnapDeal-Products",
       },
     ],
   },

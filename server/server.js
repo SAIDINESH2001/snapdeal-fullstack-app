@@ -12,6 +12,7 @@ const categoryRoutes = require('./src/routes/categoryRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const reviewRoutes = require('./src/routes/reviewRoutes');
 const sellerRoutes = require('./src/routes/sellerRoutes');
+const cartRoutes = require('./src/routes/cartRoutes');
 
 
 
@@ -39,6 +40,7 @@ app.use('/api', categoryRoutes);
 app.use('/api', productRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', sellerRoutes);
+app.use('/api', cartRoutes);
 
 //Error Handling
 app.use(errorHandler);

@@ -110,7 +110,7 @@ export default function HomePageNavBarProfile({ onCartClick }) {
       </div>
 
       <div 
-        className="btn d-flex flex-column align-items-center justify-content-center me-4 p-0 border-0 shadow-none" 
+        className="btn d-flex flex-column align-items-center justify-content-center me-4 p-0 border-0 shadow-none position-relative" 
         style={{ width: "56px", cursor: 'pointer' }}
         onClick={() => {
           console.log("Homepage Cart Clicked");
@@ -121,6 +121,7 @@ export default function HomePageNavBarProfile({ onCartClick }) {
           shopping_cart
         </span>
         <span className="fw-semibold small text-nowrap pe-none">My Cart</span>
+        <span className="position-absolute text-white rounded-circle" style={{top: '-10px', left:'40px', fontSize:'12px', background: '#e40046', width:'20px', height:'20px'}}>0</span>
       </div>
     </div>
   );
