@@ -145,3 +145,34 @@ exports.getProductByStatus = async(req,res,next) => {
     next(error);
   }
 }
+
+
+
+exports.getSearchProducts = async (req, res, next) => {
+  try {
+    const { keyword } = req.query;
+    let query = {};
+    if (keyword) {
+      const searchWords = keyword.trim().split(/\s+/);
+      const regexPattern = searchWords.map(word => `(?=.*${word})`).join("");
+      console.log(keyword)
+      
+      query = {
+        name: {
+          $regex: regexPattern,
+          $options: "i",
+        },
+      };
+    }
+
+    const products = await Products.find(query);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -3,21 +3,20 @@ import { ProductHeaderSort } from "./ProductHeaderSort";
 import { ProductGrid } from "./ProductGrid";
 import { useParams } from "react-router-dom";
 
-export const ProductSideBar = ({ products }) => {
+
+export const ProductSideBar = ({ products, onSortChange }) => {
   const { mainCategory, category } = useParams();
+
   return (
     <div className="container-fluid mt-3">
       <div className="row">
         <aside className="col-md-3 col-lg-2 border-end px-4">
           <div className="mb-4">
-            <h6 className="fw-bold">{}</h6>
+            <h6 className="fw-bold">Category</h6>
             <ul className="list-unstyled ms-2">
-              {(mainCategory && category) && (
+              {mainCategory && category && (
                 <>
-                  <li className="text-danger">
-                    {" "}
-                    - {mainCategory}{" "}
-                  </li>
+                  <li className="text-danger"> - {mainCategory} </li>
                   <li className="ms-3 mt-2" style={{ fontSize: "12px" }}>
                     {category}{" "}
                     <span className="text-muted float-end">{products.length}</span>
@@ -56,7 +55,7 @@ export const ProductSideBar = ({ products }) => {
             <h6 className="fw-bold">Customer Rating</h6>
             {[4, 3, 2, 1].map((r) => (
               <div key={r} className="form-check small">
-                <input className="form-check-input" type="radio" />
+                <input className="form-check-input" type="radio" name="rating" />
                 <label className="form-check-label">
                   {"★".repeat(r)}
                   {"☆".repeat(5 - r)} & Up
@@ -65,8 +64,9 @@ export const ProductSideBar = ({ products }) => {
             ))}
           </div>
         </aside>
+
         <main className="col-md-9 col-lg-10">
-          <ProductHeaderSort products={products} />
+          <ProductHeaderSort products={products} onSortChange={onSortChange} />
           <ProductGrid products={products} />
         </main>
       </div>

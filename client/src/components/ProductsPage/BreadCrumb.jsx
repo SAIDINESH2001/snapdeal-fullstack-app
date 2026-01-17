@@ -18,8 +18,7 @@ export const BreadcrumbAndTrending = () => {
     <div className="border-top">
       <div className="container-fluid px-5 py-3">
         <div className="mb-3 text-muted medium">
-          Home /
-          {(mainCategory && <span className="mx-1">{mainCategory} /</span>)}
+          {(mainCategory && <span className="mx-1">Home / {mainCategory} /</span>)}
           {(subCategory && <span className={category? "" :"text-dark"}>{subCategory} /</span>)}
           {category && <span className="mx-1 text-dark"> {category}</span>}
         </div>

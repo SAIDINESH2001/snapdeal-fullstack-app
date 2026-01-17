@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Col, Badge, Button, Row, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 export const ProductSummaryRightMain = ({ product, loading }) => {
+  const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState(null);
   if (loading || !product) return null;
   return (
@@ -86,6 +88,7 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
           variant="dark"
           className="px-5 py-3 fw-bold rounded-0 flex-grow-1"
           style={{ backgroundColor: "#333" }}
+          onClick={() => navigate(`/cart/addToCart/${product._id}`)}
         >
           ADD TO CART
         </Button>

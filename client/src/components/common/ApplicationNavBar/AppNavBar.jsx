@@ -1,42 +1,68 @@
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
-import {Link} from 'react-router-dom';
 
-export const MainNavbar = () => {
-  const {user, logout} = useAuth();
+export const MainNavbar = ({ user, onCartClick }) => {
+  const { logout } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/products/search?q=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
   return (
-    <nav className="py-1" style={{backgroundColor: '#E40046', position: 'sticky', top: '0', zIndex: '5000'}}>
+    <nav
+      className="py-1 shadow-sm"
+      style={{
+        backgroundColor: "#E40046",
+        position: "sticky",
+        top: "0",
+        zIndex: "1030", 
+      }}
+    >
       <div className="container-fluid d-flex align-items-center gap-4 px-5">
         <div className="d-flex align-items-center gap-3 text-white fw-bold fs-4">
-          <Link to={user?.role === 'seller' ? '/seller' : '/'}><img src="/snapdeal-white.png" alt="Logo" width={150} height={30} style={{objectFit : "cover"}}/></Link>
-          <span className="btn fs-3 text-white"><span className="material-symbols-outlined">menu</span></span>
+          <Link to={user?.role === "seller" ? "/seller" : "/"}>
+            <img src="/snapdeal-white.png" alt="Logo" width={150} height={30} style={{ objectFit: "cover" }} />
+          </Link>
+          <span className="btn fs-3 text-white border-0"><span className="material-symbols-outlined pe-none">menu</span></span>
         </div>
 
         <div className="flex-grow-1">
-          <div className="input-group w-75">
+          <form onSubmit={handleSearch} className="input-group w-75 mx-auto">
             <input
-              type="text" 
-              className="form-control px-3 border border-none"
-              style={{boxShadow: 'none'}}
+              type="text"
+              className="form-control px-3 border-0 shadow-none"
               placeholder="Search products & brands"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button className="btn btn-dark px-4">Search</button>
-          </div>
+            <button type="submit" className="btn btn-dark px-4 border-0" style={{backgroundColor: '#2d2d2d'}}>Search</button>
+          </form>
         </div>
+
         <div className="d-flex align-items-center gap-4 text-white">
-          {user?.role === 'customer' ?  (
-                      <div className="btn text-light d-flex align-items-center gap-2">
-            <span>Cart</span>
-            <span className="material-symbols-outlined">shopping_cart</span>
-          </div>
-          ) : (<div className="btn text-light d-flex align-items-center gap-2" onClick={logout}>
-            <span>Log Out</span>
-            <span className="material-symbols-outlined">logout</span>
-          </div>)}
-
-
-          <div className="btn text-light d-flex align-items-center gap-2">
-            <span>{user && user.name || 'Profile'}</span>
-            <span className="material-symbols-outlined">person</span>
+          {user?.role === "customer" && (
+            <div
+              className="btn text-light d-flex align-items-center gap-2 border-0 p-2"
+              onClick={() => {
+                console.log("DEBUG: Cart button clicked in Navbar");
+                onCartClick(); 
+              }}
+              style={{ cursor: "pointer", position: 'relative', zIndex: 5 }}
+            >
+              <span className="pe-none" style={{fontSize: '14px'}}>Cart</span>
+              <span className="material-symbols-outlined pe-none">shopping_cart</span>
+            </div>
+          )}
+          
+          <div className="btn text-light d-flex align-items-center gap-2 border-0" onClick={logout}>
+            <span className="pe-none" style={{fontSize: '14px'}}>Log Out</span>
+            <span className="material-symbols-outlined pe-none">logout</span>
           </div>
         </div>
       </div>

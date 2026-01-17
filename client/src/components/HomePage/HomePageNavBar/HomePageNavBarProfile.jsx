@@ -41,7 +41,7 @@ const NavBarLoginContent = () => {
 };
 
 
-export default function HomePageNavBarProfile() {
+export default function HomePageNavBarProfile({ onCartClick }) {
   const { user, logout, loading } = useAuth();
   const isAuthenticated = !!user;
   const dropdownContainerRef = useRef(null);
@@ -70,7 +70,7 @@ export default function HomePageNavBarProfile() {
     <div className="d-flex align-items-center">
       <div className="dropdown me-4" ref={dropdownContainerRef}>
         <button
-          className="btn p-0 border-0 bg-transparent"
+          className="btn p-0 border-0 bg-transparent shadow-none"
           type="button"
           data-bs-toggle="dropdown"
           aria-expanded="false"
@@ -109,11 +109,18 @@ export default function HomePageNavBarProfile() {
         </div>
       </div>
 
-      <div className="btn d-flex flex-column align-items-center justify-content-center me-4" style={{ width: "56px" }}>
-        <span className="material-symbols-outlined" style={{ fontSize: "24px", lineHeight: 1 }}>
+      <div 
+        className="btn d-flex flex-column align-items-center justify-content-center me-4 p-0 border-0 shadow-none" 
+        style={{ width: "56px", cursor: 'pointer' }}
+        onClick={() => {
+          console.log("Homepage Cart Clicked");
+          onCartClick();
+        }}
+      >
+        <span className="material-symbols-outlined pe-none" style={{ fontSize: "24px", lineHeight: 1 }}>
           shopping_cart
         </span>
-        <span className="fw-semibold small text-nowrap">My Cart</span>
+        <span className="fw-semibold small text-nowrap pe-none">My Cart</span>
       </div>
     </div>
   );

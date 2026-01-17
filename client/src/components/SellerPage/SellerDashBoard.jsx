@@ -99,7 +99,6 @@ export const SellerDashboard = ({sellerProducts}) => {
                 </div>
             </Card>
 
-            {/* Main Content: Tracking Table */}
             <Card className="border-0 shadow-sm overflow-hidden">
                 <Card.Header className="bg-white py-3 border-0">
                     <h5 className="fw-bold mb-0">Recent Submissions & Status</h5>
