@@ -1,0 +1,27 @@
+
+.custom-accordion .accordion-collapse {
+  border: none !important;
+}
+
+.accordion-section {
+  border-top: 1px solid #eee;
+  cursor: pointer;
+}
+
+
+.custom-accordion .btn:focus {
+  box-shadow: none !important;
+}
+
+
+.accordion-section .row-cols-3 .col {
+    padding: 5px 15px;
+}
+
+.cursor-pointer {
+    transition: background 0.2s;
+}
+
+.cursor-pointer:hover {
+    background-color: #f8f9fa !important;
+}
