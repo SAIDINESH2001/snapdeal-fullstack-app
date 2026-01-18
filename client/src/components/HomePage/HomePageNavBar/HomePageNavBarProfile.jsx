@@ -15,7 +15,11 @@ const NavBarLoginContent = () => {
           Your Account
         </span>
       </div>
-      <div className="px-3 py-2 d-flex align-items-center gap-2">
+      <div 
+        className="px-3 py-2 d-flex align-items-center gap-2" 
+        style={{ cursor: 'pointer' }} 
+        onClick={() => navigate('/orders')}
+      >
         <span className="material-symbols-outlined">box</span>
         <span className="fw-medium">Your Orders</span>
       </div>
@@ -43,10 +47,18 @@ const NavBarLoginContent = () => {
 
 export default function HomePageNavBarProfile({ onCartClick }) {
   const { user, logout, loading } = useAuth();
-  const { cartCount } = useCartContext(); 
+  const { cartCount, fetchCartCount } = useCartContext(); 
+  const navigate = useNavigate();
   
   const isAuthenticated = !!user;
   const dropdownContainerRef = useRef(null);
+
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCartCount();
+    }
+  }, [isAuthenticated, fetchCartCount]);
 
   useEffect(() => {
     const dropdownElement = dropdownContainerRef.current;
@@ -89,7 +101,11 @@ export default function HomePageNavBarProfile({ onCartClick }) {
         <div className="dropdown-menu p-0 border-0 ms-3 shadow" style={{ width: "260px" }}>
           {isAuthenticated ? (
             <div className="bg-dark text-white rounded-3 overflow-hidden">
-               <div className="px-3 py-2 d-flex align-items-center gap-2">
+               <div 
+                className="px-3 py-2 d-flex align-items-center gap-2" 
+                style={{ cursor: 'pointer' }} 
+                onClick={() => navigate('/orders')}
+               >
                  <span className="material-symbols-outlined">box</span>
                  <span className="fw-medium">Orders</span>
                </div>
@@ -113,9 +129,7 @@ export default function HomePageNavBarProfile({ onCartClick }) {
       <div 
         className="btn d-flex flex-column align-items-center justify-content-center me-4 p-0 border-0 shadow-none position-relative" 
         style={{ width: "56px", cursor: 'pointer' }}
-        onClick={() => {
-          onCartClick();
-        }}
+        onClick={() => onCartClick()}
       >
         <span className="material-symbols-outlined pe-none" style={{ fontSize: "24px", lineHeight: 1 }}>
           shopping_cart

@@ -55,3 +55,55 @@ exports.postUser = async (req,res,next) => {
         next(err);
     }
 }
+
+exports.getUserProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id; 
+        
+        const user = await User.findById(userId).select('+address'); 
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            user: {
+                name: user.name,
+                email: user.email,
+                phone: user.phone, 
+                address: user.address || [] 
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.addAddress = async (req, res, next) => {
+    try {
+        const userId = req.user.id; 
+        const { street, city, state, zipCode, country, isDefault } = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { 
+                $push: { 
+                    address: { street, city, state, zipCode, country, isDefault } 
+                } 
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Address added successfully",
+            address: updatedUser.address 
+        });
+    } catch (error) {
+        next(error);
+    }
+};

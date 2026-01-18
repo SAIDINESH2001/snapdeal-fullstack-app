@@ -3,18 +3,27 @@ import api from "../services/axios";
 import { useCartContext } from "../contexts/cartContext";
 
 export const useCart = (show) => {
-  const { fetchCartCount } = useCartContext();
+  const { fetchCartCount, setCartCount } = useCartContext(); //
   const [cartProducts, setCartProducts] = useState([]);
+  const [savedAddresses, setSavedAddresses] = useState([]); //
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const fetchCartProducts = useCallback(async () => {
+  const fetchCheckoutData = useCallback(async () => {
+    if (!show) return; //
+
     try {
       setLoading(true);
-      const res = await api.get("/users/getCart");
-      if (res.data?.success) {
-        const products = res.data.products || [];
+      
+      const [cartRes, profileRes] = await Promise.allSettled([
+        api.get("/users/getCart"),
+        api.get("/users/profile") //
+      ]);
+
+      if (cartRes.status === "fulfilled" && cartRes.value.data?.success) {
+        const products = cartRes.value.data.products || [];
         setCartProducts(products);
+        setCartCount(products.length); 
         
         const initialQuantities = {};
         products.forEach(item => {
@@ -22,16 +31,21 @@ export const useCart = (show) => {
         });
         setQuantities(initialQuantities);
       }
+
+      if (profileRes.status === "fulfilled" && profileRes.value.data?.success) {
+        setSavedAddresses(profileRes.value.data.user.address || []); //
+      }
+
     } catch (error) {
-      console.error("Cart fetch error:", error);
+      console.error("Checkout fetch error:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [show, setCartCount]);
 
   useEffect(() => {
-    if (show) fetchCartProducts();
-  }, [show, fetchCartProducts]);
+    fetchCheckoutData();
+  }, [fetchCheckoutData]);
 
   const handleRemove = async (productId) => {
     try {
@@ -54,5 +68,13 @@ export const useCart = (show) => {
     return acc + (item.sellingPrice * qty);
   }, 0);
 
-  return { cartProducts, quantities, loading, subTotal, handleQuantityChange, handleRemove };
+  return { 
+    cartProducts, 
+    savedAddresses, 
+    quantities, 
+    loading, 
+    subTotal, 
+    handleQuantityChange, 
+    handleRemove 
+  };
 };

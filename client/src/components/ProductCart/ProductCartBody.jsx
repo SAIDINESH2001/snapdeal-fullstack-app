@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { Container, Alert, Button } from "react-bootstrap";
 import { CartModal } from "../../models/CartModel/CartModal"; 
+import { PaymentModal } from "../../models/PaymentModal/PaymentModal"; 
 import { useCartContext } from "../../contexts/cartContext";
 import { useCart } from "../../hooks/useCart"; 
 
 export const ProductCartBody = ({ cartProduct }) => {
   const [active, setActive] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false); // New state
+
+  const handleOpenCart = () => setShowCartModal(true);
+  const handleCloseCart = () => setShowCartModal(false);
+
+  const handleOpenPayment = () => setShowPaymentModal(true);
+  const handleClosePayment = () => setShowPaymentModal(false);
 
   const { cartCount } = useCartContext();
   const { subTotal, loading } = useCart(true);
@@ -67,6 +73,7 @@ export const ProductCartBody = ({ cartProduct }) => {
               <Button
                 className="px-4 py-2 border-0 fw-bold"
                 style={{ backgroundColor: "#E40046", fontSize: "13px", borderRadius: '2px' }}
+                onClick={handleOpenPayment} // Trigger Payment Modal
               >
                 PROCEED TO CHECKOUT
               </Button>
@@ -75,7 +82,7 @@ export const ProductCartBody = ({ cartProduct }) => {
                 variant="dark"
                 className="px-4 py-2 fw-bold"
                 style={{ backgroundColor: "#333", fontSize: "13px", borderRadius: '2px' }}
-                onClick={handleOpenModal}
+                onClick={handleOpenCart}
               >
                 VIEW CART
               </Button>
@@ -84,7 +91,8 @@ export const ProductCartBody = ({ cartProduct }) => {
         </div>
       </Container>
 
-      <CartModal show={showModal} handleClose={handleCloseModal} />
+      <CartModal show={showCartModal} handleClose={handleCloseCart} />
+      <PaymentModal show={showPaymentModal} handleClose={handleClosePayment} />
     </>
   );
 };

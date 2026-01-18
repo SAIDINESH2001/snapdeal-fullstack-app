@@ -13,6 +13,7 @@ const productRoutes = require('./src/routes/productRoutes');
 const reviewRoutes = require('./src/routes/reviewRoutes');
 const sellerRoutes = require('./src/routes/sellerRoutes');
 const cartRoutes = require('./src/routes/cartRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
 
 
 
@@ -41,6 +42,7 @@ app.use('/api', productRoutes);
 app.use('/api', reviewRoutes);
 app.use('/api', sellerRoutes);
 app.use('/api', cartRoutes);
+app.use('/api', orderRoutes);
 
 //Error Handling
 app.use(errorHandler);
