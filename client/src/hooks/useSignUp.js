@@ -13,8 +13,6 @@ const initialState = {
 export default function useSignup() {
   const [values, setValues] = useState(initialState);
   const [loading, setLoading] = useState(false);
-
-  // errors via ref only
   const errorsRef = useRef({});
 
   const handleChange = (e) => {

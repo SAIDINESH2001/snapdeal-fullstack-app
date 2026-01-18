@@ -18,10 +18,7 @@ export default function useLogin({
   const handleContinue = async () => {
     setError("");
 
-    // Validate using the utility
     const validation = checkUserLogin(mobile);
-
-    // If it's a string, it's an error message
     if (typeof validation === "string") {
       setError(validation);
       return;
@@ -36,7 +33,6 @@ export default function useLogin({
         await api.post("/auth/send-otp", { type, value });
 
         if (mode === "modal") {
-          // Send object to parent state
           setLoginPhone({ type, value });
 
           document.activeElement?.blur();
@@ -52,7 +48,7 @@ export default function useLogin({
         }
       } else {
         if (mode === "modal") {
-          setLoginPhone({ type, value }); // Ensure signup also knows the info
+          setLoginPhone({ type, value });
           bootstrap.Modal.getInstance(loginRef.current)?.hide();
           new bootstrap.Modal(signupRef.current).show();
         }

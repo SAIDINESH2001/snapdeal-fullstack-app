@@ -3,21 +3,21 @@ import api from "../services/axios";
 import { useCartContext } from "../contexts/cartContext";
 
 export const useCart = (show) => {
-  const { fetchCartCount, setCartCount } = useCartContext(); //
+  const { fetchCartCount, setCartCount } = useCartContext(); 
   const [cartProducts, setCartProducts] = useState([]);
-  const [savedAddresses, setSavedAddresses] = useState([]); //
+  const [savedAddresses, setSavedAddresses] = useState([]); 
   const [quantities, setQuantities] = useState({});
   const [loading, setLoading] = useState(false);
 
   const fetchCheckoutData = useCallback(async () => {
-    if (!show) return; //
+    if (!show) return; 
 
     try {
       setLoading(true);
       
       const [cartRes, profileRes] = await Promise.allSettled([
         api.get("/users/getCart"),
-        api.get("/users/profile") //
+        api.get("/users/profile") 
       ]);
 
       if (cartRes.status === "fulfilled" && cartRes.value.data?.success) {
@@ -33,7 +33,7 @@ export const useCart = (show) => {
       }
 
       if (profileRes.status === "fulfilled" && profileRes.value.data?.success) {
-        setSavedAddresses(profileRes.value.data.user.address || []); //
+        setSavedAddresses(profileRes.value.data.user.address || []); 
       }
 
     } catch (error) {

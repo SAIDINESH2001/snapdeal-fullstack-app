@@ -44,3 +44,34 @@ exports.getMyOrders = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getAllOrders = async(req,res,next) => {
+    try {
+        const orders = await Order.find();
+        res.json({
+            success: true,
+            orders,
+        })
+    }
+    catch(error) {
+        next(error);
+    }
+}
+
+
+exports.updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { orderStatus: status },
+            { new: true }
+        );
+
+        res.status(200).json({ success: true, data: updatedOrder });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};

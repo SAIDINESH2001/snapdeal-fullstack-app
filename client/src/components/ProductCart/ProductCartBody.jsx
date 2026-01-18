@@ -8,7 +8,7 @@ import { useCart } from "../../hooks/useCart";
 export const ProductCartBody = ({ cartProduct }) => {
   const [active, setActive] = useState(true);
   const [showCartModal, setShowCartModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false); // New state
+  const [showPaymentModal, setShowPaymentModal] = useState(false); 
 
   const handleOpenCart = () => setShowCartModal(true);
   const handleCloseCart = () => setShowCartModal(false);
@@ -73,7 +73,7 @@ export const ProductCartBody = ({ cartProduct }) => {
               <Button
                 className="px-4 py-2 border-0 fw-bold"
                 style={{ backgroundColor: "#E40046", fontSize: "13px", borderRadius: '2px' }}
-                onClick={handleOpenPayment} // Trigger Payment Modal
+                onClick={handleOpenPayment} 
               >
                 PROCEED TO CHECKOUT
               </Button>

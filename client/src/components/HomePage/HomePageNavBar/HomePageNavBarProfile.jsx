@@ -18,7 +18,7 @@ const NavBarLoginContent = () => {
       <div 
         className="px-3 py-2 d-flex align-items-center gap-2" 
         style={{ cursor: 'pointer' }} 
-        onClick={() => navigate('/orders')}
+        onClick={() => navigate('/login')}
       >
         <span className="material-symbols-outlined">box</span>
         <span className="fw-medium">Your Orders</span>
@@ -104,7 +104,7 @@ export default function HomePageNavBarProfile({ onCartClick }) {
                <div 
                 className="px-3 py-2 d-flex align-items-center gap-2" 
                 style={{ cursor: 'pointer' }} 
-                onClick={() => navigate('/orders')}
+                onClick={() => navigate('/myOrders')}
                >
                  <span className="material-symbols-outlined">box</span>
                  <span className="fw-medium">Orders</span>

@@ -10,6 +10,7 @@ import { SellerAddProduct } from "./components/SellerPage/SellerAddPage";
 import { ProductSummaryPage } from "./pages/ProductSummaryPage";
 import { AdminPage } from "./pages/AdminPage";
 import { ProductCartPage } from "./pages/ProductCartPage";
+import { OrdersPage } from "./pages/OrdersPage";
 
 export default function App() {
   return (
@@ -29,6 +30,8 @@ export default function App() {
           <Route path='/add-product' element={<SellerAddProduct />} />
           <Route path='/admin' element={<AdminPage />} />
           <Route path="/cart/addToCart/:productId" element={<ProductCartPage />}/>
+          <Route path="/myOrders" element={<OrdersPage />}/>
+
         </Routes>
     </>
   );
