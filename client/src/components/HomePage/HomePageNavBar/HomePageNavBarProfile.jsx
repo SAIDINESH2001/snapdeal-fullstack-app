@@ -3,6 +3,7 @@ import * as bootstrap from "bootstrap";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from 'react-router-dom';
 import { LoginButton } from "../../../styles/HomePage/homePageNavBar.style";
+import { useCartContext } from "../../../contexts/cartContext"; 
 
 const NavBarLoginContent = () => {
   const navigate = useNavigate();
@@ -40,9 +41,10 @@ const NavBarLoginContent = () => {
   );
 };
 
-
 export default function HomePageNavBarProfile({ onCartClick }) {
   const { user, logout, loading } = useAuth();
+  const { cartCount } = useCartContext(); 
+  
   const isAuthenticated = !!user;
   const dropdownContainerRef = useRef(null);
 
@@ -57,7 +59,6 @@ export default function HomePageNavBarProfile({ onCartClick }) {
       if (oldInstance) {
         oldInstance.dispose();
       }
-
       new bootstrap.Dropdown(toggleBtn);
     }
   }, [isAuthenticated, loading]); 
@@ -88,21 +89,21 @@ export default function HomePageNavBarProfile({ onCartClick }) {
         <div className="dropdown-menu p-0 border-0 ms-3 shadow" style={{ width: "260px" }}>
           {isAuthenticated ? (
             <div className="bg-dark text-white rounded-3 overflow-hidden">
-              <div className="px-3 py-2 d-flex align-items-center gap-2">
-                <span className="material-symbols-outlined">box</span>
-                <span className="fw-medium">Orders</span>
-              </div>
-              <div className="px-3 py-2 d-flex align-items-center gap-2">
-                <span className="material-symbols-outlined">featured_seasonal_and_gifts</span>
-                <span className="fw-medium">E - Gift Voucher</span>
-              </div>
-              <hr className="m-0 border-secondary mb-3" />
-              <div className="px-3 pb-3">
-                <LoginButton className="w-100" onClick={logout}>
-                  LOG OUT
-                </LoginButton>
-              </div>
-            </div>
+               <div className="px-3 py-2 d-flex align-items-center gap-2">
+                 <span className="material-symbols-outlined">box</span>
+                 <span className="fw-medium">Orders</span>
+               </div>
+               <div className="px-3 py-2 d-flex align-items-center gap-2">
+                 <span className="material-symbols-outlined">featured_seasonal_and_gifts</span>
+                 <span className="fw-medium">E - Gift Voucher</span>
+               </div>
+               <hr className="m-0 border-secondary mb-3" />
+               <div className="px-3 pb-3">
+                 <LoginButton className="w-100" onClick={logout}>
+                   LOG OUT
+                 </LoginButton>
+               </div>
+             </div>
           ) : (
             <NavBarLoginContent />
           )}
@@ -113,7 +114,6 @@ export default function HomePageNavBarProfile({ onCartClick }) {
         className="btn d-flex flex-column align-items-center justify-content-center me-4 p-0 border-0 shadow-none position-relative" 
         style={{ width: "56px", cursor: 'pointer' }}
         onClick={() => {
-          console.log("Homepage Cart Clicked");
           onCartClick();
         }}
       >
@@ -121,7 +121,23 @@ export default function HomePageNavBarProfile({ onCartClick }) {
           shopping_cart
         </span>
         <span className="fw-semibold small text-nowrap pe-none">My Cart</span>
-        <span className="position-absolute text-white rounded-circle" style={{top: '-10px', left:'40px', fontSize:'12px', background: '#e40046', width:'20px', height:'20px'}}>0</span>
+        
+        {cartCount > 0 && (
+          <span 
+            className="position-absolute d-flex align-items-center justify-content-center text-white rounded-circle fw-bold" 
+            style={{
+              top: '-10px', 
+              left: '38px', 
+              fontSize: '11px', 
+              background: '#e40046', 
+              width: '20px', 
+              height: '20px',
+              border: '2px solid white' 
+            }}
+          >
+            {cartCount}
+          </span>
+        )}
       </div>
     </div>
   );

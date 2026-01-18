@@ -69,3 +69,41 @@ exports.getCartProducts = async(req,res,next) => {
         next(error);
     }
 }
+
+exports.removeFromCart = async (req, res, next) => {
+  try {
+    const { productId } = req.params;
+    
+    const userId = req?.user?.id; 
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication failed: No user ID found"
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { cartItems: productId } 
+      },
+      { new: true } 
+    ).populate("cartItems"); 
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found in database"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Item removed from cart successfully",
+      products: user.cartItems 
+    });
+  } catch (error) {
+    next(error); 
+  }
+};

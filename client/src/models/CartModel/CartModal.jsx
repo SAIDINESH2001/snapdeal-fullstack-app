@@ -13,7 +13,16 @@ export const CartModal = ({ show, handleClose }) => {
     handleRemove 
   } = useCart(show);
 
-  if (loading && cartProducts.length === 0) return null;
+  if (loading && cartProducts.length === 0) {
+    return (
+      <S.StyledModal show={show} onHide={handleClose} size="xl" centered>
+        <Modal.Body className="text-center py-5">
+          <div className="spinner-border text-danger" role="status"></div>
+          <p className="mt-2 text-muted">Loading your cart...</p>
+        </Modal.Body>
+      </S.StyledModal>
+    );
+  }
 
   return (
     <S.StyledModal show={show} onHide={handleClose} size="xl" centered>
@@ -35,37 +44,53 @@ export const CartModal = ({ show, handleClose }) => {
             </Row>
 
             {cartProducts.map((item) => {
-              const currentQty = quantities[item._id] || 1;
+              const currentQty = (quantities && quantities[item._id]) ? quantities[item._id] : 1;
+
               return (
                 <S.CartItemRow key={item._id}>
                   <Row className="align-items-start mx-0 py-3 border-bottom">
                     <Col md={5} className="d-flex gap-3">
-                      <img src={item.image?.[0]} width="80" height="80" alt={item.name} style={{ objectFit: "contain" }} />
+                      <img 
+                        src={item.image?.[0]} 
+                        width="80" 
+                        height="80" 
+                        alt={item.name} 
+                        style={{ objectFit: "contain" }} 
+                      />
                       <div>
                         <p className="mb-1 small fw-bold text-dark">{item.name}</p>
                         <p className="extra-small text-muted mb-0" style={{ fontSize: "11px" }}>Brand: {item.brand}</p>
                         <div 
-                          className="text-muted mt-2 d-flex align-items-center gap-1 small cursor-pointer hover-danger"
+                          className="text-muted mt-2 d-flex align-items-center gap-1 small cursor-pointer"
+                          style={{ cursor: 'pointer' }}
                           onClick={() => handleRemove(item._id)}
                         >
                           <span className="material-symbols-outlined fs-6">close</span> REMOVE
                         </div>
                       </div>
                     </Col>
+                    
                     <Col md={1} className="text-center small pt-1">Rs. {item.sellingPrice}</Col>
+                    
                     <Col md={2} className="text-center">
                       <Form.Select 
                         size="sm" 
                         value={currentQty} 
                         onChange={(e) => handleQuantityChange(item._id, e.target.value)}
                       >
-                        {[1, 2, 3].map(num => <option key={num} value={num}>{num}</option>)}
+                        {[1, 2, 3, 4, 5].map(num => (
+                          <option key={num} value={num}>{num}</option>
+                        ))}
                       </Form.Select>
                     </Col>
+                    
                     <Col md={3} className="pt-1">
                       <p className="text-success mb-0 fw-bold small">FREE Delivery</p>
                     </Col>
-                    <Col md={1} className="text-end small fw-bold pt-1">Rs. {item.sellingPrice * currentQty}</Col>
+                    
+                    <Col md={1} className="text-end small fw-bold pt-1">
+                      Rs. {(item.sellingPrice * currentQty).toLocaleString()}
+                    </Col>
                   </Row>
                 </S.CartItemRow>
               );
@@ -82,7 +107,6 @@ export const CartModal = ({ show, handleClose }) => {
     </S.StyledModal>
   );
 };
-
 
 const EmptyCartView = ({ handleClose }) => (
   <div className="d-flex flex-column align-items-center justify-content-center py-5">
@@ -105,11 +129,14 @@ const CartFooter = ({ subTotal }) => (
         </Col>
         <Col md={3} className="ms-auto text-end pe-4">
           <div className="d-flex justify-content-between mb-1 small text-secondary">
-            <span>Sub Total:</span><span className="text-white">Rs. {subTotal}</span>
+            <span>Sub Total:</span>
+            <span className="text-white">Rs. {subTotal.toLocaleString()}</span>
           </div>
         </Col>
         <Col md={3}>
-          <S.ActionButton onClick={() => alert("Checkout...")}>Proceed to Pay Rs. {subTotal}</S.ActionButton>
+          <S.ActionButton onClick={() => alert("Proceeding to payment...")}>
+            Proceed to Pay Rs. {subTotal.toLocaleString()}
+          </S.ActionButton>
         </Col>
       </Row>
     </Container>
