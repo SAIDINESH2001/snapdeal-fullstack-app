@@ -171,7 +171,7 @@ export const AdminDashboard = () => {
                                 defaultValue={item.orderStatus}
                                 id={`sel-${item._id}`}
                               >
-                                {['Order Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(s => (
+                                {['Order Placed', 'Processing', 'Shipped', 'Delivered'].map(s => (
                                   <option key={s} value={s}>{s}</option>
                                 ))}
                               </Form.Select>
