@@ -62,11 +62,12 @@ export const ReviewsSection = ({ product }) => {
     e.preventDefault();
     try {
       await api.post(`/reviews/upsert/${productId}`, { rating, title, comment });
-      alert(alreadyReviewed ? "Review updated!" : "Review submitted!");
-      setShowForm(false);
-      fetchData();
+      
+      // Force page reload to refresh both Product Header and Reviews List
+      window.location.reload(); 
+      
     } catch (err) {
-      alert(err.response?.data?.message || "Operation failed");
+      console.error("Submission failed", err);
     }
   };
 

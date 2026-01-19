@@ -138,7 +138,7 @@ export const AdminDashboard = () => {
                       <tr key={item._id} className="align-middle border-bottom transition-all">
                         <td className="ps-4 py-4">
                           <div className="fw-bold text-[#334155]" style={{ fontSize: '13.5px' }}>
-                            {activeTab === 'orders' ? `#ORD-${item._id.slice(-6).toUpperCase()}` : item.name}
+                            {activeTab === 'orders' ? `ORDERID - #${item._id.toUpperCase()}` : item.name}
                           </div>
                           <div className="text-muted extra-small">
                             {activeTab === 'orders' ? `${item.items.length} items • ${item.paymentMethod}` : `${item.brand} • ${item.productType}`}
