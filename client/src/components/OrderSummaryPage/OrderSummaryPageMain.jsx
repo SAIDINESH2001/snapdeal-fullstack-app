@@ -11,6 +11,13 @@ export const OrderDetailPage = () => {
     const [order, setOrder] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const stages = [
+        { label: 'Order Placed', icon: 'bi-box-seam' },
+        { label: 'Processing', icon: 'bi-gear' },
+        { label: 'Shipped', icon: 'bi-truck' },
+        { label: 'Delivered', icon: 'bi-house-check' }
+    ];
+
     const fetchOrderDetail = async () => {
         try {
             setIsLoading(true);
@@ -39,6 +46,8 @@ export const OrderDetailPage = () => {
     if (!order) return <div className="text-center py-5">Order not found.</div>;
 
     const statusStyle = getStatusStyle(order.orderStatus);
+    const currentStep = stages.findIndex(s => s.label.toLowerCase() === order.orderStatus.toLowerCase());
+    const isCancelled = order.orderStatus.toLowerCase() === 'cancelled';
 
     return (
         <div className="w-100 d-flex flex-column align-items-center bg-white" style={{ minHeight: '100vh' }}>
@@ -58,6 +67,43 @@ export const OrderDetailPage = () => {
                         BACK TO ORDERS
                     </Button>
                 </div>
+
+                {!isCancelled && (
+                    <div className="mb-5 px-5">
+                        <div className="d-flex justify-content-between position-relative" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                            <div className="position-absolute" style={{ top: '20px', left: '0', right: '0', height: '2px', background: '#eee', zIndex: 0 }}></div>
+                            
+                            {currentStep > 0 && (
+                                <div className="position-absolute" style={{ 
+                                    top: '20px', left: '0', 
+                                    width: `${(currentStep / (stages.length - 1)) * 100}%`, 
+                                    height: '2px', background: '#16a34a', zIndex: 1, transition: 'width 0.4s ease' 
+                                }}></div>
+                            )}
+
+                            {stages.map((stage, index) => {
+                                const isActive = index <= currentStep;
+                                return (
+                                    <div key={index} className="text-center position-relative" style={{ zIndex: 2 }}>
+                                        <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
+                                            style={{ 
+                                                width: '40px', height: '40px', 
+                                                backgroundColor: isActive ? '#16a34a' : '#fff',
+                                                border: `2px solid ${isActive ? '#16a34a' : '#eee'}`,
+                                                color: isActive ? '#fff' : '#ccc',
+                                                fontSize: '18px'
+                                            }}>
+                                            <i className={`bi ${stage.icon}`}></i>
+                                        </div>
+                                        <div className="fw-bold" style={{ color: isActive ? '#333' : '#ccc', fontSize: '11px' }}>
+                                            {stage.label.toUpperCase()}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
 
                 <Row className="g-4">
                     <Col md={8}>
