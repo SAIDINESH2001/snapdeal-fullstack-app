@@ -1,48 +1,45 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const reviewSchema = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "products",
-      required: true,
-      index: true,
-    },
+const reviewSchema = new mongoose.Schema({
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
-      index: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SnapDeal-Products',
+        required: true
+    },
+    orderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order',
+        required: true
+    },
+    userName: {
+        type: String, 
+        required: true
     },
     rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 5,
-    },
-    title: {
-      type: String,
-      trim: true,
-      maxlength: 100,
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5
     },
     comment: {
-      type: String,
-      trim: true,
-      maxlength: 1000,
-    },
-    images: [
-      {
         type: String,
-      },
-    ],
-    isVerifiedPurchase: {
-      type: Boolean,
-      default: false,
+        required: true,
+        trim: true,
+        maxLength: [500, "Review cannot exceed 500 characters"]
     },
-  },
-  { timestamps: true }
-);
+    images: [String],
+    isVerifiedPurchase: {
+        type: Boolean,
+        default: true 
+    }
+}, { timestamps: true });
 
-reviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
-module.exports = mongoose.model("Review", reviewSchema);
+reviewSchema.index({ user: 1, productId: 1 }, { unique: true });
+const Review = mongoose.model('Review', reviewSchema);
+module.exports = Review;

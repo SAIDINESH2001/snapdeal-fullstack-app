@@ -75,3 +75,31 @@ exports.updateOrderStatus = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+exports.getOrderDetail = async (req, res, next) => {
+    try {
+        const { orderId } = req.params;
+        const userId = req.user.id;
+        const order = await Order.findOne({ 
+            _id: orderId, 
+            user: userId 
+        });
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order details not found."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            order: order
+        });
+    } catch (error) {
+        if (error.name === 'CastError') {
+            return res.status(400).json({ success: false, message: "Invalid Order ID format" });
+        }
+        next(error);
+    }
+};

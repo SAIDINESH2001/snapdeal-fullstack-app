@@ -1,22 +1,47 @@
 const Review = require("../models/reviewSchema");
+const Order = require("../models/orderSchema"); 
 const Products = require("../models/productSchema");
-const recalcProductRating = require('../utils/ratingCalculator')
+const recalcProductRating = require('../utils/ratingCalculator');
 
 exports.upsertReview = async (req, res) => {
   const { productId } = req.params;
   const { rating, title, comment, images = [] } = req.body;
   const userId = req.user.id;
 
-  const review = await Review.findOneAndUpdate(
-    { product: productId, user: userId },
-    { rating, title, comment, images },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
+  try {
+    const hasOrdered = await Order.findOne({
+      user: userId,
+      orderStatus: "Delivered",
+      "items.productId": productId
+    });
 
-  await recalcProductRating(productId);
+    if (!hasOrdered) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Eligibility failed: You can only review products that have been delivered to you." 
+      });
+    }
 
-  res.status(200).json({ success: true, review });
+    const review = await Review.findOneAndUpdate(
+      { product: productId, user: userId },
+      { 
+        rating, 
+        title, 
+        comment, 
+        images,
+        isVerifiedPurchase: true 
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    await recalcProductRating(productId);
+
+    res.status(200).json({ success: true, review });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
+
 
 exports.getProductReviews = async (req, res) => {
   const { productId } = req.params;
