@@ -63,7 +63,6 @@ export const ReviewsSection = ({ product }) => {
     try {
       await api.post(`/reviews/upsert/${productId}`, { rating, title, comment });
       
-      // Force page reload to refresh both Product Header and Reviews List
       window.location.reload(); 
       
     } catch (err) {

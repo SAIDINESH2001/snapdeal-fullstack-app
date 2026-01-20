@@ -1,7 +1,7 @@
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Modal, Form } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../../services/axios";
 
 export const OrderDetailPage = () => {
@@ -11,6 +11,15 @@ export const OrderDetailPage = () => {
     const [order, setOrder] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    // Review States
+    const [reviewedProducts, setReviewedProducts] = useState({}); // Stores { productId: true/false }
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [rating, setRating] = useState(0);
+    const [hover, setHover] = useState(0);
+    const [comment, setComment] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const stages = [
         { label: 'Order Placed', icon: 'bi-box-seam' },
         { label: 'Processing', icon: 'bi-gear' },
@@ -18,21 +27,84 @@ export const OrderDetailPage = () => {
         { label: 'Delivered', icon: 'bi-house-check' }
     ];
 
-    const fetchOrderDetail = async () => {
+    // Check which items in the order have already been reviewed
+    const checkReviewStatus = useCallback(async (items) => {
+        const statusMap = {};
+        for (const item of items) {
+            try {
+                const res = await api.get(`/reviews/check-eligibility/${item.productId}`);
+                statusMap[item.productId] = res.data.alreadyReviewed;
+            } catch (err) {
+                console.error("Eligibility check failed", err);
+            }
+        }
+        setReviewedProducts(statusMap);
+    }, []);
+
+    const fetchOrderDetail = useCallback(async () => {
         try {
             setIsLoading(true);
             const res = await api.get(`/my-orders/${orderId}`);
-            setOrder(res.data.order);
+            const fetchedOrder = res.data.order;
+            setOrder(fetchedOrder);
+            
+            // Only check review status if the order is delivered
+            if (fetchedOrder.orderStatus.toLowerCase() === 'delivered') {
+                checkReviewStatus(fetchedOrder.items);
+            }
         } catch (err) {
             console.error("Fetch Error:", err);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [orderId, checkReviewStatus]);
 
     useEffect(() => {
         fetchOrderDetail();
-    }, [orderId]);
+    }, [fetchOrderDetail]);
+
+    const handleOpenReview = async (item) => {
+        setSelectedItem(item);
+        setRating(0);
+        setComment("");
+
+        // If already reviewed, fetch the existing review to allow editing
+        if (reviewedProducts[item.productId]) {
+            try {
+                const res = await api.get(`/products/${item.productId}/reviews`);
+                const myReview = res.data.reviews.find(r => (r.user?._id || r.user) === user._id);
+                if (myReview) {
+                    setRating(myReview.rating);
+                    setComment(myReview.comment);
+                }
+            } catch (err) {
+                console.error("Error fetching review", err);
+            }
+        }
+        setShowReviewModal(true);
+    };
+
+    const submitReview = async (e) => {
+        e.preventDefault();
+        try {
+            setIsSubmitting(true);
+            await api.post(`/reviews/upsert/${selectedItem.productId}`, {
+                rating,
+                comment,
+                userName: user.name,
+                orderId: order._id
+            });
+            
+            // Update local state so the UI reflects the new review status
+            setReviewedProducts(prev => ({ ...prev, [selectedItem.productId]: true }));
+            setShowReviewModal(false);
+            alert("Review saved successfully!");
+        } catch (err) {
+            alert(err.response?.data?.message || "Failed to submit review");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const getStatusStyle = (status) => {
         const s = status?.toLowerCase();
@@ -72,7 +144,6 @@ export const OrderDetailPage = () => {
                     <div className="mb-5 px-5">
                         <div className="d-flex justify-content-between position-relative" style={{ maxWidth: '800px', margin: '0 auto' }}>
                             <div className="position-absolute" style={{ top: '20px', left: '0', right: '0', height: '2px', background: '#eee', zIndex: 0 }}></div>
-                            
                             {currentStep > 0 && (
                                 <div className="position-absolute" style={{ 
                                     top: '20px', left: '0', 
@@ -80,7 +151,6 @@ export const OrderDetailPage = () => {
                                     height: '2px', background: '#16a34a', zIndex: 1, transition: 'width 0.4s ease' 
                                 }}></div>
                             )}
-
                             {stages.map((stage, index) => {
                                 const isActive = index <= currentStep;
                                 return (
@@ -114,7 +184,7 @@ export const OrderDetailPage = () => {
                                     <span className="fw-bold" style={{ color: statusStyle.color }}>{order.orderStatus.toUpperCase()}</span>
                                 </div>
                                 <div className="small text-muted">
-                                    Placed on {new Date(order.orderedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                    Placed on {new Date(order.orderedAt).toLocaleDateString('en-GB')}
                                 </div>
                             </Card.Body>
                         </Card>
@@ -130,42 +200,22 @@ export const OrderDetailPage = () => {
                                         <div className="flex-grow-1">
                                             <div className="fw-bold text-dark mb-1" style={{ fontSize: '14px' }}>{item.name}</div>
                                             <div className="text-muted" style={{ fontSize: '12px' }}>Qty: {item.quantity} × ₹{item.price.toLocaleString()}</div>
+                                            
+                                            {order.orderStatus.toLowerCase() === 'delivered' && (
+                                                <button 
+                                                    className="btn btn-link p-0 mt-1 text-danger fw-bold text-decoration-none"
+                                                    style={{ fontSize: '11px' }}
+                                                    onClick={() => handleOpenReview(item)}
+                                                >
+                                                    {reviewedProducts[item.productId] ? "EDIT REVIEW" : "WRITE A REVIEW"}
+                                                </button>
+                                            )}
                                         </div>
                                         <div className="fw-bold text-dark">₹{(item.price * item.quantity).toLocaleString()}</div>
                                     </div>
                                 ))}
                             </Card.Body>
                         </Card>
-
-                        <Row className="g-4">
-                            <Col md={6}>
-                                <Card className="rounded-0 border h-100" style={{ boxShadow: 'none' }}>
-                                    <Card.Header className="bg-white fw-bold small border-bottom">SHIPPING ADDRESS</Card.Header>
-                                    <Card.Body className="small lh-lg">
-                                        <div className="fw-bold text-dark mb-1" style={{ fontSize: '13px' }}>{order.shippingAddress.name || user.name}</div>
-                                        {order.shippingAddress.street}<br />
-                                        {order.shippingAddress.city}, {order.shippingAddress.state}<br />
-                                        {order.shippingAddress.zipCode}<br />
-                                        <div className="mt-2"><span className="text-muted">Mobile:</span> <span className="text-dark fw-bold">{order.shippingAddress.phone}</span></div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <Col md={6}>
-                                <Card className="rounded-0 border h-100" style={{ boxShadow: 'none' }}>
-                                    <Card.Header className="bg-white fw-bold small border-bottom">PAYMENT METHOD</Card.Header>
-                                    <Card.Body className="small">
-                                        <div className="mb-2 d-flex justify-content-between">
-                                            <span className="text-muted">Method:</span>
-                                            <span className="fw-bold text-dark">{order.paymentMethod}</span>
-                                        </div>
-                                        <div className="d-flex justify-content-between">
-                                            <span className="text-muted">Payment Status:</span>
-                                            <span className="fw-bold text-success">{order.paymentStatus}</span>
-                                        </div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        </Row>
                     </Col>
 
                     <Col md={4}>
@@ -190,6 +240,60 @@ export const OrderDetailPage = () => {
                     </Col>
                 </Row>
             </Container>
+
+            {/* Review Modal */}
+            <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)} centered className="rounded-0">
+                <Modal.Header closeButton className="border-0 pb-0">
+                    <Modal.Title className="fs-6 fw-bold">RATE THIS PRODUCT</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="text-center px-4 pb-4">
+                    {selectedItem && (
+                        <div className="d-flex gap-3 mb-4 align-items-center bg-light p-2 border">
+                            <img src={selectedItem.image[0]} width="45" height="45" style={{ objectFit: 'contain' }} alt="" />
+                            <span className="small fw-bold text-truncate" style={{maxWidth: '250px'}}>{selectedItem.name}</span>
+                        </div>
+                    )}
+                    <Form onSubmit={submitReview}>
+                        <div className="mb-4 d-flex justify-content-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <span 
+                                    key={star} 
+                                    className="material-symbols-outlined" 
+                                    style={{ 
+                                        cursor: 'pointer', 
+                                        color: (hover || rating) >= star ? '#e40046' : '#ccc', 
+                                        fontSize: '40px',
+                                        userSelect: 'none'
+                                    }}
+                                    onMouseEnter={() => setHover(star)}
+                                    onMouseLeave={() => setHover(0)}
+                                    onClick={() => setRating(star)}
+                                >
+                                    {(hover || rating) >= star ? 'star' : 'star_outline'}
+                                </span>
+                            ))}
+                        </div>
+                        <Form.Control 
+                            as="textarea" 
+                            rows={4} 
+                            placeholder="Share your experience with this product..." 
+                            className="rounded-0 mb-3 shadow-none border"
+                            style={{ fontSize: '14px' }}
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            required
+                        />
+                        <Button 
+                            type="submit" 
+                            variant="danger" 
+                            className="w-100 rounded-0 fw-bold py-2"
+                            disabled={isSubmitting || rating === 0}
+                        >
+                            {isSubmitting ? "SAVING..." : "SAVE REVIEW"}
+                        </Button>
+                    </Form>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };
