@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const Review = require("../models/reviewSchema");
 const Product = require("../models/productSchema");
+
 async function recalcProductRating(productId) {
   const stats = await Review.aggregate([
-    { $match: { product: new mongoose.Types.ObjectId(productId) } },
+    { $match: { productId: new mongoose.Types.ObjectId(productId) } }, 
     {
       $group: {
-        _id: "$product",
+        _id: "$productId",
         avgRating: { $avg: "$rating" },
         count: { $sum: 1 },
       },
@@ -16,8 +17,10 @@ async function recalcProductRating(productId) {
   const ratingData = stats[0] || { avgRating: 0, count: 0 };
 
   await Product.findByIdAndUpdate(productId, {
-    ratingAverage: Number(ratingData.avgRating.toFixed(1)),
-    ratingCount: ratingData.count,
+    rating: Number(ratingData.avgRating.toFixed(1)),
+    ratingsCount: ratingData.count,
+    reviewsCount: ratingData.count 
   });
 }
+
 module.exports = recalcProductRating;

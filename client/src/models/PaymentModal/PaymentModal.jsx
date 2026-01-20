@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Row, Col, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../services/axios';
@@ -8,7 +9,8 @@ export const PaymentModal = ({ show, handleClose }) => {
   const [step, setStep] = useState('summary');
   const [selectedMethod, setSelectedMethod] = useState('upi');
   const [isProcessing, setIsProcessing] = useState(false);
-
+  
+  const navigate = useNavigate();
   const { cartProducts, quantities, subTotal, savedAddresses, loading } = useCart(show);
   const { user } = useAuth();
 
@@ -28,8 +30,40 @@ export const PaymentModal = ({ show, handleClose }) => {
 
   const handlePayment = async () => {
     setIsProcessing(true);
+
+    const shippingData = {
+      street: selectedAddress.street,
+      city: selectedAddress.city,
+      state: selectedAddress.state,
+      zipCode: selectedAddress.zipCode,
+      phone: user?.phone || selectedAddress.phone
+    };
+
+    const orderItems = cartProducts.map(item => ({
+      productId: item._id,
+      quantity: quantities[item._id] || 1,
+      price: item.sellingPrice
+    }));
+
     try {
-      const { data } = await api.post("/users/create-order");
+      if (selectedMethod === 'cod') {
+        const verifyRes = await api.post("/users/verify-payment", {
+          paymentMethod: 'COD',
+          shippingAddress: shippingData,
+          items: orderItems,
+          razorpay_payment_id: 'COD_PAYMENT_' + Date.now(),
+          razorpay_order_id: 'COD_ORDER_' + Date.now(),
+          razorpay_signature: 'COD_SIG'
+        });
+
+        if (verifyRes.data.success) {
+          handleClose();
+          navigate('/'); 
+        }
+        return;
+      }
+
+      const { data } = await api.post("/users/create-order", { items: orderItems });
 
       if (data.success) {
         const options = {
@@ -41,20 +75,15 @@ export const PaymentModal = ({ show, handleClose }) => {
           handler: async function (response) {
             const verificationData = {
               ...response,
-              paymentMethod: selectedMethod === 'cod' ? 'COD' : (selectedMethod === 'card' ? 'Card' : 'UPI'),
-              shippingAddress: {
-                street: selectedAddress.street,
-                city: selectedAddress.city,
-                state: selectedAddress.state,
-                zipCode: selectedAddress.zipCode,
-                phone: user?.phone || selectedAddress.phone
-              }
+              paymentMethod: selectedMethod === 'card' ? 'Card' : 'UPI',
+              shippingAddress: shippingData,
+              items: orderItems
             };
+
             const verifyRes = await api.post("/users/verify-payment", verificationData);
             if (verifyRes.data.success) {
-              alert("Order placed successfully!");
               handleClose();
-              window.location.reload();
+              navigate('/'); 
             }
           },
           prefill: {
@@ -62,14 +91,20 @@ export const PaymentModal = ({ show, handleClose }) => {
             contact: user?.phone,
           },
           theme: { color: "#e40046" },
+          modal: {
+            ondismiss: function() {
+              setIsProcessing(false);
+            }
+          }
         };
         const rzp = new window.Razorpay(options);
         rzp.open();
       }
     } catch (error) {
-      alert("Payment initiation failed.", error);
+      alert("Payment failed. Please try again.");
+      console.error(error);
     } finally {
-      setIsProcessing(false);
+      if (selectedMethod === 'cod') setIsProcessing(false);
     }
   };
 
@@ -135,7 +170,6 @@ export const PaymentModal = ({ show, handleClose }) => {
                     </div>
                   ))}
                 </div>
-                <p className="extra-small text-muted mt-3">You will be redirected to Razorpay to complete the transaction safely.</p>
               </div>
             )}
 
@@ -146,7 +180,7 @@ export const PaymentModal = ({ show, handleClose }) => {
                 style={{ background: '#e40046', border: 'none', padding: '10px 60px', borderRadius: '3px', fontWeight: 'bold' }}
                 onClick={() => step === 'summary' ? setStep('payment') : handlePayment()}
               >
-                {step === 'summary' ? 'Continue' : isProcessing ? 'Opening Gateway...' : 'Pay Now'}
+                {step === 'summary' ? 'Continue' : isProcessing ? 'Processing...' : (selectedMethod === 'cod' ? 'Place Order' : 'Pay Now')}
               </Button>
             </div>
           </Col>
@@ -154,23 +188,23 @@ export const PaymentModal = ({ show, handleClose }) => {
           <Col md={5} className="p-4" style={{ backgroundColor: '#fcfcfc' }}>
             <h6 className="text-center fw-bold mb-4 small">Order Summary</h6>
             <div className="pe-2" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-              {cartProducts.map((item) => (
-                <div key={item._id} className="d-flex gap-3 mb-3 pb-3 border-bottom align-items-start">
-                  <img src={item.image?.[0]} width="40" height="40" style={{ objectFit: 'contain' }} alt="" />
-                  <div className="flex-grow-1" style={{ fontSize: '11px' }}>
-                    <div className="text-dark mb-1">{item.name}</div>
-                    <div className="text-muted">Qty: {quantities?.[item._id] || 1}</div>
+              {cartProducts.map((item) => {
+                const itemQty = quantities?.[item._id] || 1;
+                return (
+                  <div key={item._id} className="d-flex gap-3 mb-3 pb-3 border-bottom align-items-start">
+                    <img src={item.image?.[0]} width="40" height="40" style={{ objectFit: 'contain' }} alt="" />
+                    <div className="flex-grow-1" style={{ fontSize: '11px' }}>
+                      <div className="text-dark mb-1">{item.name}</div>
+                      <div className="text-muted">Qty: {itemQty}</div>
+                    </div>
+                    <div className="fw-bold small">₹{(item.sellingPrice * itemQty).toLocaleString()}</div>
                   </div>
-                  <div className="fw-bold small">₹{item.sellingPrice.toLocaleString()}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-4 border-top pt-2">
               <div className="d-flex justify-content-between fw-bold fs-6">
                 <span>Total Amount</span><span>₹ {subTotal.toLocaleString()}</span>
-              </div>
-              <div className="text-center mt-5">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" width="80" style={{ opacity: 0.6 }} alt="Razorpay" />
               </div>
             </div>
           </Col>

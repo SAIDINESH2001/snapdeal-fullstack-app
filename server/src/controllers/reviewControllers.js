@@ -1,35 +1,70 @@
 const Review = require("../models/reviewSchema");
+const Order = require("../models/orderSchema"); 
 const Products = require("../models/productSchema");
-const recalcProductRating = require('../utils/ratingCalculator')
+const recalcProductRating = require('../utils/ratingCalculator');
 
 exports.upsertReview = async (req, res) => {
   const { productId } = req.params;
-  const { rating, title, comment, images = [] } = req.body;
+  const { rating, comment, images = [] } = req.body;
   const userId = req.user.id;
+  const userName = req.user.name; 
 
-  const review = await Review.findOneAndUpdate(
-    { product: productId, user: userId },
-    { rating, title, comment, images },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
+  try {
+    const order = await Order.findOne({
+      user: userId,
+      orderStatus: "Delivered",
+      "items.productId": productId
+    });
 
-  await recalcProductRating(productId);
+    if (!order) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Eligibility failed: You can only review products delivered to you." 
+      });
+    }
 
-  res.status(200).json({ success: true, review });
+    const review = await Review.findOneAndUpdate(
+      { productId: productId, user: userId }, 
+      { 
+        user: userId,
+        productId: productId,
+        orderId: order._id, 
+        userName: userName, 
+        rating, 
+        comment, 
+        images,
+        isVerifiedPurchase: true 
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
+    );
+
+    await recalcProductRating(productId);
+
+    res.status(200).json({ success: true, review });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
+
 
 exports.getProductReviews = async (req, res) => {
   const { productId } = req.params;
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
 
-  const reviews = await Review.find({ product: productId })
-    .populate({ path: "user", model: "users", select: "name" })
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
+  try {
+    const reviews = await Review.find({ productId: productId }) 
+      .populate({ path: "user", model: "users", select: "name" })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
-  res.json({ success: true, reviews });
+    console.log(`Found ${reviews.length} reviews for ID: ${productId}`); 
+
+    res.json({ success: true, reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 exports.deleteReview = async (req, res) => {
@@ -42,3 +77,28 @@ exports.deleteReview = async (req, res) => {
   res.json({ success: true });
 };
 
+
+exports.checkEligibility = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const userId = req.user.id;
+
+    const hasOrdered = await Order.findOne({
+      user: userId,
+      orderStatus: "Delivered",
+      "items.productId": productId
+    });
+
+    const existingReview = await Review.findOne({ 
+        productId: productId, 
+        user: userId 
+    });
+
+    res.json({ 
+      eligible: !!hasOrdered, 
+      alreadyReviewed: !!existingReview 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

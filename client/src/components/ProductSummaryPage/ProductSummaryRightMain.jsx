@@ -83,7 +83,7 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
       <div className="mb-4">
         <p className="small fw-bold text-muted mb-2">Color</p>
         <div className="border border-primary d-inline-block p-1" style={{ width: "60px" }}>
-          <img src={product.image} alt="color" className="img-fluid" />
+          <img src={product.image[0]} alt="color" className="img-fluid" />
           <div className="text-center x-small text-muted" style={{ fontSize: "10px" }}>
             Multicolor
           </div>

@@ -8,6 +8,7 @@ router.post('/create', auth, orderController.createOrder);
 router.get('/my-orders', auth, orderController.getMyOrders);
 router.get('/orders', auth, authorize('admin'), orderController.getAllOrders);
 router.patch('/orders/:orderId/status', auth, authorize('admin'), orderController.updateOrderStatus);
+router.get('/my-orders/:orderId', auth, orderController.getOrderDetail);
 
 
 module.exports = router;

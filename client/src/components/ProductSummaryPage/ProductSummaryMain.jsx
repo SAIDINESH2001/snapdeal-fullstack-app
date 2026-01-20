@@ -21,7 +21,7 @@ export const ProductDetails = ({ product, loading }) => {
 
           <Col lg={5} md={10} className="text-center">
             <div className="position-relative border p-2">
-              <img src={product.image} alt="Product" className="img-fluid" />
+              <img src={product.image[0]} alt="Product" className="img-fluid" />
               <div className="mt-2 text-muted small">
                 <i className="bi bi-search"></i> Hover to zoom
               </div>

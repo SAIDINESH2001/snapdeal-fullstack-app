@@ -11,6 +11,7 @@ import { ProductSummaryPage } from "./pages/ProductSummaryPage";
 import { AdminPage } from "./pages/AdminPage";
 import { ProductCartPage } from "./pages/ProductCartPage";
 import { OrdersPage } from "./pages/OrdersPage";
+import { OrderSummaryPage } from "./pages/OrderSummaryPage";
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path='/admin' element={<AdminPage />} />
           <Route path="/cart/addToCart/:productId" element={<ProductCartPage />}/>
           <Route path="/myOrders" element={<OrdersPage />}/>
+          <Route path="/order-details/:orderId" element={<OrderSummaryPage />}/>
 
         </Routes>
     </>

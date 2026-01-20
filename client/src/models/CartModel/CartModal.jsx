@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Row, Col, Form, Modal, Container } from "react-bootstrap";
+import { Row, Col, Form, Modal, Container , Button} from "react-bootstrap";
 import * as S from "../../styles/ProductCart/cartModal.style";
 import { useCart } from "../../hooks/useCart"; 
 import { PaymentModal } from "../PaymentModal/PaymentModal"; 
+
 export const CartModal = ({ show, handleClose }) => {
   const { 
     cartProducts, 
@@ -47,55 +48,41 @@ export const CartModal = ({ show, handleClose }) => {
                 <Col md={5}>Item Details</Col>
                 <Col md={1} className="text-center">Price</Col>
                 <Col md={2} className="text-center">Quantity</Col>
-                <Col md={3}>Delivery with Charges</Col>
+                <Col md={3}>Delivery</Col>
                 <Col md={1} className="text-end">Subtotal</Col>
               </Row>
 
               {cartProducts.map((item) => {
-                const currentQty = (quantities && quantities[item._id]) ? quantities[item._id] : 1;
+                const currentQty = quantities[item._id] || 1;
 
                 return (
                   <S.CartItemRow key={item._id}>
                     <Row className="align-items-start mx-0 py-3 border-bottom">
                       <Col md={5} className="d-flex gap-3">
-                        <img 
-                          src={item.image?.[0]} 
-                          width="80" 
-                          height="80" 
-                          alt={item.name} 
-                          style={{ objectFit: "contain" }} 
-                        />
+                        <img src={item.image?.[0]} width="80" height="80" style={{ objectFit: "contain" }} alt="" />
                         <div>
                           <p className="mb-1 small fw-bold text-dark">{item.name}</p>
-                          <p className="extra-small text-muted mb-0" style={{ fontSize: "11px" }}>Brand: {item.brand}</p>
                           <div 
-                            className="text-muted mt-2 d-flex align-items-center gap-1 small cursor-pointer"
-                            style={{ cursor: 'pointer' }}
+                            className="text-muted mt-2 d-flex align-items-center gap-1 small cursor-pointer" style={{ cursor: 'pointer' }}
                             onClick={() => handleRemove(item._id)}
                           >
                             <span className="material-symbols-outlined fs-6">close</span> REMOVE
                           </div>
                         </div>
                       </Col>
-                      
                       <Col md={1} className="text-center small pt-1">Rs. {item.sellingPrice}</Col>
-                      
                       <Col md={2} className="text-center">
                         <Form.Select 
                           size="sm" 
                           value={currentQty} 
                           onChange={(e) => handleQuantityChange(item._id, e.target.value)}
                         >
-                          {[1, 2, 3, 4, 5].map(num => (
+                          {[1, 2, 3].map(num => (
                             <option key={num} value={num}>{num}</option>
                           ))}
                         </Form.Select>
                       </Col>
-                      
-                      <Col md={3} className="pt-1">
-                        <p className="text-success mb-0 fw-bold small">FREE Delivery</p>
-                      </Col>
-                      
+                      <Col md={3} className="pt-1 text-success fw-bold small">FREE Delivery</Col>
                       <Col md={1} className="text-end small fw-bold pt-1">
                         Rs. {(item.sellingPrice * currentQty).toLocaleString()}
                       </Col>
@@ -105,54 +92,33 @@ export const CartModal = ({ show, handleClose }) => {
               })}
             </>
           ) : (
-            <EmptyCartView handleClose={handleClose} />
+            <div className="text-center py-5">
+              <h5 className="text-muted">Your cart is empty</h5>
+              <Button className="btn-danger mt-3" onClick={handleClose}>CONTINUE SHOPPING</Button>
+            </div>
           )}
         </Modal.Body>
 
         {cartProducts.length > 0 && (
-          <CartFooter subTotal={subTotal} onProceed={handleOpenPayment} />
+          <S.StickyPaymentFooter>
+            <Container fluid>
+              <Row className="align-items-center">
+                <Col md={6} className="text-end ms-auto pe-4">
+                  <span className="text-secondary small me-3">Sub Total:</span>
+                  <span className="text-white fw-bold">Rs. {subTotal.toLocaleString()}</span>
+                </Col>
+                <Col md={3}>
+                  <S.ActionButton onClick={handleOpenPayment}>
+                    Proceed to Pay Rs. {subTotal.toLocaleString()}
+                  </S.ActionButton>
+                </Col>
+              </Row>
+            </Container>
+          </S.StickyPaymentFooter>
         )}
       </S.StyledModal>
 
-      <PaymentModal 
-        show={showPayment} 
-        handleClose={() => setShowPayment(false)} 
-      />
+      <PaymentModal show={showPayment} handleClose={() => setShowPayment(false)} />
     </>
   );
 };
-
-const EmptyCartView = ({ handleClose }) => (
-  <div className="d-flex flex-column align-items-center justify-content-center py-5">
-    <span className="material-symbols-outlined text-muted" style={{ fontSize: "64px" }}>shopping_basket</span>
-    <h5 className="mt-3 text-muted">Your cart is empty</h5>
-    <button className="btn btn-danger mt-3 rounded-0 px-4" onClick={handleClose}>CONTINUE SHOPPING</button>
-  </div>
-);
-
-const CartFooter = ({ subTotal, onProceed }) => (
-  <S.StickyPaymentFooter>
-    <Container fluid>
-      <Row className="align-items-center">
-        <Col md={5}>
-          <div className="d-flex flex-column gap-1 small text-secondary">
-            <span className="d-flex align-items-center gap-2">
-              <span className="material-symbols-outlined fs-6 text-white">verified_user</span> Safe Payments
-            </span>
-          </div>
-        </Col>
-        <Col md={3} className="ms-auto text-end pe-4">
-          <div className="d-flex justify-content-between mb-1 small text-secondary">
-            <span>Sub Total:</span>
-            <span className="text-white">Rs. {subTotal.toLocaleString()}</span>
-          </div>
-        </Col>
-        <Col md={3}>
-          <S.ActionButton onClick={onProceed}>
-            Proceed to Pay Rs. {subTotal.toLocaleString()}
-          </S.ActionButton>
-        </Col>
-      </Row>
-    </Container>
-  </S.StickyPaymentFooter>
-);

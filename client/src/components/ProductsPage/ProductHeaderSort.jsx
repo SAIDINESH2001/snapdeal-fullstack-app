@@ -14,12 +14,7 @@ export const ProductHeaderSort = ({ products, onSortChange }) => {
         </h4>
       </div>
 
-      <div className="d-flex gap-3">
-        <input
-          className="form-control form-control-sm"
-          placeholder="Search within category"
-          style={{ boxShadow: 'none' }}
-        />
+      <div className="me-3">
         <select 
           className="form-select form-select-sm" 
           style={{ boxShadow: 'none' }}
