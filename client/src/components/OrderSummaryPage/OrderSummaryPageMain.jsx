@@ -1,8 +1,11 @@
-import { Container, Row, Col, Card, Button, Modal, Form } from "react-bootstrap";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState, useCallback } from "react";
 import api from "../../services/axios";
+import OrderStatusTracker from "./OrderStatusTracker";
+import OrderItemList from "./OrderItemList";
+import ReviewModal from "./ReviewModal";
 
 export const OrderDetailPage = () => {
     const { orderId } = useParams();
@@ -10,7 +13,7 @@ export const OrderDetailPage = () => {
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [reviewedProducts, setReviewedProducts] = useState({}); 
+    const [reviewedProducts, setReviewedProducts] = useState({});
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [rating, setRating] = useState(0);
@@ -31,9 +34,7 @@ export const OrderDetailPage = () => {
             try {
                 const res = await api.get(`/reviews/check-eligibility/${item.productId}`);
                 statusMap[item.productId] = res.data.alreadyReviewed;
-            } catch (err) {
-                console.error("Eligibility check failed", err);
-            }
+            } catch (err) { console.error(err); }
         }
         setReviewedProducts(statusMap);
     }, []);
@@ -42,28 +43,20 @@ export const OrderDetailPage = () => {
         try {
             setIsLoading(true);
             const res = await api.get(`/my-orders/${orderId}`);
-            const fetchedOrder = res.data.order;
-            setOrder(fetchedOrder);
-            
-            if (fetchedOrder.orderStatus.toLowerCase() === 'delivered') {
-                checkReviewStatus(fetchedOrder.items);
+            setOrder(res.data.order);
+            if (res.data.order.orderStatus.toLowerCase() === 'delivered') {
+                checkReviewStatus(res.data.order.items);
             }
-        } catch (err) {
-            console.error("Fetch Error:", err);
-        } finally {
-            setIsLoading(false);
-        }
+        } catch (err) { console.error(err); }
+        finally { setIsLoading(false); }
     }, [orderId, checkReviewStatus]);
 
-    useEffect(() => {
-        fetchOrderDetail();
-    }, [fetchOrderDetail]);
+    useEffect(() => { fetchOrderDetail(); }, [fetchOrderDetail]);
 
     const handleOpenReview = async (item) => {
         setSelectedItem(item);
         setRating(0);
         setComment("");
-
         if (reviewedProducts[item.productId]) {
             try {
                 const res = await api.get(`/products/${item.productId}/reviews`);
@@ -72,9 +65,7 @@ export const OrderDetailPage = () => {
                     setRating(myReview.rating);
                     setComment(myReview.comment);
                 }
-            } catch (err) {
-                console.error("Error fetching review", err);
-            }
+            } catch (err) { console.error(err); }
         }
         setShowReviewModal(true);
     };
@@ -84,19 +75,12 @@ export const OrderDetailPage = () => {
         try {
             setIsSubmitting(true);
             await api.post(`/reviews/upsert/${selectedItem.productId}`, {
-                rating,
-                comment,
-                userName: user.name,
-                orderId: order._id
+                rating, comment, userName: user.name, orderId: order._id
             });
-            
             setReviewedProducts(prev => ({ ...prev, [selectedItem.productId]: true }));
             setShowReviewModal(false);
-        } catch (err) {
-            alert(err.response?.data?.message || "Failed to submit review");
-        } finally {
-            setIsSubmitting(false);
-        }
+        } catch (err) { alert(err.response?.data?.message || "Error"); }
+        finally { setIsSubmitting(false); }
     };
 
     const getStatusStyle = (status) => {
@@ -107,15 +91,15 @@ export const OrderDetailPage = () => {
         return { color: "#d97706", bg: "#fffbeb", border: "#fde68a" };
     };
 
-    if (isLoading) return <div className="text-center py-5">Loading Order Details...</div>;
+    if (isLoading) return <div className="text-center py-5">Loading...</div>;
     if (!order) return <div className="text-center py-5">Order not found.</div>;
 
     const statusStyle = getStatusStyle(order.orderStatus);
     const currentStep = stages.findIndex(s => s.label.toLowerCase() === order.orderStatus.toLowerCase());
-    const isCancelled = order.orderStatus.toLowerCase() === 'cancelled';
 
     return (
         <div className="w-100 d-flex flex-column align-items-center bg-white" style={{ minHeight: '100vh' }}>
+            {/* Header / Breadcrumb */}
             <div className="p-3 border-bottom w-100 d-flex justify-content-center bg-white sticky-top" style={{ zIndex: 10 }}>
                 <div style={{ width: "80%", fontSize: '12px', color: '#888' }}>
                     Home / My Orders / <span style={{ color: '#333', fontWeight: '500' }}>#{order._id.toUpperCase()}</span>
@@ -128,44 +112,13 @@ export const OrderDetailPage = () => {
                         <h4 className="fw-normal m-0" style={{ fontSize: '22px' }}>Order Details</h4>
                         <p className="text-muted small m-0">Order ID: #{order._id.toUpperCase()}</p>
                     </div>
-                    <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)} className="rounded-0 border-1 px-3" style={{ fontSize: '12px', fontWeight: '600' }}>
+                    <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)} className="rounded-0 px-3" style={{ fontSize: '12px', fontWeight: '600' }}>
                         BACK TO ORDERS
                     </Button>
                 </div>
 
-                {!isCancelled && (
-                    <div className="mb-5 px-5">
-                        <div className="d-flex justify-content-between position-relative" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                            <div className="position-absolute" style={{ top: '20px', left: '0', right: '0', height: '2px', background: '#eee', zIndex: 0 }}></div>
-                            {currentStep > 0 && (
-                                <div className="position-absolute" style={{ 
-                                    top: '20px', left: '0', 
-                                    width: `${(currentStep / (stages.length - 1)) * 100}%`, 
-                                    height: '2px', background: '#16a34a', zIndex: 1, transition: 'width 0.4s ease' 
-                                }}></div>
-                            )}
-                            {stages.map((stage, index) => {
-                                const isActive = index <= currentStep;
-                                return (
-                                    <div key={index} className="text-center position-relative" style={{ zIndex: 2 }}>
-                                        <div className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
-                                            style={{ 
-                                                width: '40px', height: '40px', 
-                                                backgroundColor: isActive ? '#16a34a' : '#fff',
-                                                border: `2px solid ${isActive ? '#16a34a' : '#eee'}`,
-                                                color: isActive ? '#fff' : '#ccc',
-                                                fontSize: '18px'
-                                            }}>
-                                            <i className={`bi ${stage.icon}`}></i>
-                                        </div>
-                                        <div className="fw-bold" style={{ color: isActive ? '#333' : '#ccc', fontSize: '11px' }}>
-                                            {stage.label.toUpperCase()}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                {order.orderStatus.toLowerCase() !== 'cancelled' && (
+                    <OrderStatusTracker stages={stages} currentStep={currentStep} />
                 )}
 
                 <Row className="g-4">
@@ -176,39 +129,16 @@ export const OrderDetailPage = () => {
                                     <span className="small text-muted me-2">Current Status:</span>
                                     <span className="fw-bold" style={{ color: statusStyle.color }}>{order.orderStatus.toUpperCase()}</span>
                                 </div>
-                                <div className="small text-muted">
-                                    Placed on {new Date(order.orderedAt).toLocaleDateString('en-GB')}
-                                </div>
+                                <div className="small text-muted">Placed on {new Date(order.orderedAt).toLocaleDateString('en-GB')}</div>
                             </Card.Body>
                         </Card>
 
-                        <Card className="rounded-0 border mb-4" style={{ boxShadow: 'none' }}>
-                            <Card.Header className="bg-white fw-bold small py-3 border-bottom">ITEMS IN THIS ORDER ({order.items.length})</Card.Header>
-                            <Card.Body className="p-0">
-                                {order.items.map((item, index) => (
-                                    <div key={index} className="d-flex align-items-center p-3 border-bottom gap-4">
-                                        <div style={{ width: '70px', height: '70px', border: '1px solid #f0f0f0', padding: '2px' }}>
-                                            <img src={item.image[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                        </div>
-                                        <div className="flex-grow-1">
-                                            <div className="fw-bold text-dark mb-1" style={{ fontSize: '14px' }}>{item.name}</div>
-                                            <div className="text-muted" style={{ fontSize: '12px' }}>Qty: {item.quantity} × ₹{item.price.toLocaleString()}</div>
-                                            
-                                            {order.orderStatus.toLowerCase() === 'delivered' && (
-                                                <button 
-                                                    className="btn btn-link p-0 mt-1 text-danger fw-bold text-decoration-none"
-                                                    style={{ fontSize: '11px' }}
-                                                    onClick={() => handleOpenReview(item)}
-                                                >
-                                                    {reviewedProducts[item.productId] ? "EDIT REVIEW" : "WRITE A REVIEW"}
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className="fw-bold text-dark">₹{(item.price * item.quantity).toLocaleString()}</div>
-                                    </div>
-                                ))}
-                            </Card.Body>
-                        </Card>
+                        <OrderItemList 
+                            items={order.items} 
+                            orderStatus={order.orderStatus} 
+                            reviewedProducts={reviewedProducts} 
+                            onOpenReview={handleOpenReview} 
+                        />
                     </Col>
 
                     <Col md={4}>
@@ -234,59 +164,19 @@ export const OrderDetailPage = () => {
                 </Row>
             </Container>
 
-            {/* Review Modal */}
-            <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)} centered className="rounded-0">
-                <Modal.Header closeButton className="border-0 pb-0">
-                    <Modal.Title className="fs-6 fw-bold">RATE THIS PRODUCT</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="text-center px-4 pb-4">
-                    {selectedItem && (
-                        <div className="d-flex gap-3 mb-4 align-items-center bg-light p-2 border">
-                            <img src={selectedItem.image[0]} width="45" height="45" style={{ objectFit: 'contain' }} alt="" />
-                            <span className="small fw-bold text-truncate" style={{maxWidth: '250px'}}>{selectedItem.name}</span>
-                        </div>
-                    )}
-                    <Form onSubmit={submitReview}>
-                        <div className="mb-4 d-flex justify-content-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <span 
-                                    key={star} 
-                                    className="material-symbols-outlined" 
-                                    style={{ 
-                                        cursor: 'pointer', 
-                                        color: (hover || rating) >= star ? '#e40046' : '#ccc', 
-                                        fontSize: '40px',
-                                        userSelect: 'none'
-                                    }}
-                                    onMouseEnter={() => setHover(star)}
-                                    onMouseLeave={() => setHover(0)}
-                                    onClick={() => setRating(star)}
-                                >
-                                    {(hover || rating) >= star ? 'star' : 'star_outline'}
-                                </span>
-                            ))}
-                        </div>
-                        <Form.Control 
-                            as="textarea" 
-                            rows={4} 
-                            placeholder="Share your experience with this product..." 
-                            className="rounded-0 mb-3 shadow-none border"
-                            style={{ fontSize: '14px' }}
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            required
-                        />
-                        <Button 
-                            type="submit" 
-                            variant="danger" 
-                            className="w-100 rounded-0 fw-bold py-2"
-                            disabled={isSubmitting || rating === 0}
-                        >
-                            {isSubmitting ? "SAVING..." : "SAVE REVIEW"}
-                        </Button>
-                    </Form>
-                </Modal.Body>
-            </Modal>
+            <ReviewModal 
+                show={showReviewModal} 
+                onHide={() => setShowReviewModal(false)}
+                selectedItem={selectedItem}
+                rating={rating}
+                hover={hover}
+                comment={comment}
+                isSubmitting={isSubmitting}
+                setRating={setRating}
+                setHover={setHover}
+                setComment={setComment}
+                onSubmit={submitReview}
+            />
         </div>
     );
 };
