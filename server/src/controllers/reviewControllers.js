@@ -59,7 +59,7 @@ exports.getProductReviews = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    console.log(`Found ${reviews.length} reviews for ID: ${productId}`); // Debug log
+    console.log(`Found ${reviews.length} reviews for ID: ${productId}`); 
 
     res.json({ success: true, reviews });
   } catch (error) {

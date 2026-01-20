@@ -10,9 +10,7 @@ export const OrderDetailPage = () => {
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-
-    // Review States
-    const [reviewedProducts, setReviewedProducts] = useState({}); // Stores { productId: true/false }
+    const [reviewedProducts, setReviewedProducts] = useState({}); 
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [rating, setRating] = useState(0);
@@ -27,7 +25,6 @@ export const OrderDetailPage = () => {
         { label: 'Delivered', icon: 'bi-house-check' }
     ];
 
-    // Check which items in the order have already been reviewed
     const checkReviewStatus = useCallback(async (items) => {
         const statusMap = {};
         for (const item of items) {
@@ -48,7 +45,6 @@ export const OrderDetailPage = () => {
             const fetchedOrder = res.data.order;
             setOrder(fetchedOrder);
             
-            // Only check review status if the order is delivered
             if (fetchedOrder.orderStatus.toLowerCase() === 'delivered') {
                 checkReviewStatus(fetchedOrder.items);
             }
@@ -68,7 +64,6 @@ export const OrderDetailPage = () => {
         setRating(0);
         setComment("");
 
-        // If already reviewed, fetch the existing review to allow editing
         if (reviewedProducts[item.productId]) {
             try {
                 const res = await api.get(`/products/${item.productId}/reviews`);
@@ -95,10 +90,8 @@ export const OrderDetailPage = () => {
                 orderId: order._id
             });
             
-            // Update local state so the UI reflects the new review status
             setReviewedProducts(prev => ({ ...prev, [selectedItem.productId]: true }));
             setShowReviewModal(false);
-            alert("Review saved successfully!");
         } catch (err) {
             alert(err.response?.data?.message || "Failed to submit review");
         } finally {
