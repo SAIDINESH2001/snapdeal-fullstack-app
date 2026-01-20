@@ -5,33 +5,37 @@ const recalcProductRating = require('../utils/ratingCalculator');
 
 exports.upsertReview = async (req, res) => {
   const { productId } = req.params;
-  const { rating, title, comment, images = [] } = req.body;
+  const { rating, comment, images = [] } = req.body;
   const userId = req.user.id;
+  const userName = req.user.name; 
 
   try {
-    const hasOrdered = await Order.findOne({
+    const order = await Order.findOne({
       user: userId,
       orderStatus: "Delivered",
       "items.productId": productId
     });
 
-    if (!hasOrdered) {
+    if (!order) {
       return res.status(403).json({ 
         success: false, 
-        message: "Eligibility failed: You can only review products that have been delivered to you." 
+        message: "Eligibility failed: You can only review products delivered to you." 
       });
     }
 
     const review = await Review.findOneAndUpdate(
       { productId: productId, user: userId }, 
       { 
+        user: userId,
+        productId: productId,
+        orderId: order._id, 
+        userName: userName, 
         rating, 
-        title, 
         comment, 
         images,
         isVerifiedPurchase: true 
       },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
     );
 
     await recalcProductRating(productId);
@@ -41,6 +45,7 @@ exports.upsertReview = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 exports.getProductReviews = async (req, res) => {
   const { productId } = req.params;
