@@ -14,6 +14,7 @@ const reviewRoutes = require('./src/routes/reviewRoutes');
 const sellerRoutes = require('./src/routes/sellerRoutes');
 const cartRoutes = require('./src/routes/cartRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
+const trendingRoutes = require('./src/routes/trendingRoutes');
 
 
 
@@ -43,6 +44,7 @@ app.use('/api', reviewRoutes);
 app.use('/api', sellerRoutes);
 app.use('/api', cartRoutes);
 app.use('/api', orderRoutes);
+app.use('/api/trending', trendingRoutes);
 
 //Error Handling
 app.use(errorHandler);

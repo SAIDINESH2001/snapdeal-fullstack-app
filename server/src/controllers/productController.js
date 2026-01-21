@@ -47,30 +47,33 @@ exports.postProduct = async (req, res, next) => {
     next(error);
   }
 };
+
+
 exports.getProductsByCategory = async (req, res, next) => {
   try {
     const { productMainCategory, subCategory, productType } = req.params;
     const query = { status: 'approved' };
 
-    if (productMainCategory && productMainCategory !== 'undefined') {
-        query.productMainCategory = productMainCategory;
+    const isValid = (val) => val && val !== 'undefined' && val !== '' && val !== 'null';
+
+    if (isValid(productMainCategory)) {
+      query.productType = new RegExp(`^${productMainCategory}$`, 'i');
     }
     
-    if (subCategory && subCategory !== 'undefined') {
-        query.subCategory = subCategory;
+    if (isValid(subCategory) && subCategory !== 'undefined') {
+      query.subCategory = new RegExp(`^${subCategory}$`, 'i');
     }
     
-    if (productType && productType !== 'undefined') {
-        query.productType = productType;
+    if (isValid(productType) && productType !== 'undefined') {
+      query.productType = new RegExp(`^${productType}$`, 'i');
     }
 
-    const products = await Products.find(query);
+    const products = await Products.find(query).sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       count: products.length,
-      products,
-      appliedFilters: query
+      products
     });
   } catch (error) {
     next(error);
