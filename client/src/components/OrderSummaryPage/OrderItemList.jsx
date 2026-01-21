@@ -2,6 +2,8 @@ import React from "react";
 import { Card } from "react-bootstrap";
 
 const OrderItemList = ({ items, orderStatus, reviewedProducts, onOpenReview }) => {
+    const isDelivered = orderStatus.toLowerCase() === 'delivered';
+
     return (
         <Card className="rounded-0 border mb-4" style={{ boxShadow: 'none' }}>
             <Card.Header className="bg-white fw-bold small py-3 border-bottom">
@@ -17,7 +19,7 @@ const OrderItemList = ({ items, orderStatus, reviewedProducts, onOpenReview }) =
                             <div className="fw-bold text-dark mb-1" style={{ fontSize: '14px' }}>{item.name}</div>
                             <div className="text-muted" style={{ fontSize: '12px' }}>Qty: {item.quantity} × ₹{item.price.toLocaleString()}</div>
                             
-                            {orderStatus.toLowerCase() === 'delivered' && (
+                            {isDelivered && (
                                 <button 
                                     className="btn btn-link p-0 mt-1 text-danger fw-bold text-decoration-none"
                                     style={{ fontSize: '11px' }}

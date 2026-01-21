@@ -48,9 +48,26 @@ const orderSchema = new mongoose.Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['Order Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+        enum: [
+            'Order Placed', 
+            'Processing', 
+            'Shipped', 
+            'Delivered', 
+            'Cancelled',
+            'Return Pending',
+            'Returned',
+            'Replace Pending',
+            'Replaced'
+        ],
         default: 'Order Placed'
     },
+    actionHistory: [
+        {
+            actionType: { type: String, enum: ['cancel', 'return', 'replace'] },
+            reason: String,
+            timestamp: { type: Date, default: Date.now }
+        }
+    ],
     orderedAt: {
         type: Date,
         default: Date.now

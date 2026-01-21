@@ -103,3 +103,67 @@ exports.getOrderDetail = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.handleOrderAction = async (req, res, next) => {
+    try {
+        const { orderId, action } = req.params;
+        const { reason } = req.body;
+        const userId = req.user.id;
+
+        const order = await Order.findOne({ _id: orderId, user: userId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        let newStatus;
+        const currentStatus = order.orderStatus.toLowerCase();
+
+        if (action === 'cancel') {
+            if (['delivered', 'cancelled', 'shipped'].includes(currentStatus)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "Order cannot be cancelled once it is shipped or delivered." 
+                });
+            }
+            newStatus = 'Cancelled';
+        } else if (action === 'return') {
+            if (currentStatus !== 'delivered') {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "Only delivered orders can be returned." 
+                });
+            }
+            newStatus = 'Return Pending';
+        } else if (action === 'replace') {
+            if (currentStatus !== 'delivered') {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: "Only delivered orders can be replaced." 
+                });
+            }
+            newStatus = 'Replace Pending';
+        } else {
+            return res.status(400).json({ success: false, message: "Invalid action" });
+        }
+
+        order.orderStatus = newStatus;
+        
+        order.actionHistory = order.actionHistory || [];
+        order.actionHistory.push({
+            actionType: action,
+            reason: reason,
+            timestamp: new Date()
+        });
+
+        await order.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Order ${action} request submitted successfully.`,
+            orderStatus: order.orderStatus
+        });
+    } catch (error) {
+        next(error);
+    }
+};
