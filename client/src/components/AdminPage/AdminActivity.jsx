@@ -9,9 +9,9 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
       'Shipped': { bg: '#e1effe', color: '#1e429f' },
       'Processing': { bg: '#fef3c7', color: '#92400e' },
       'Order Placed': { bg: '#f3f4f6', color: '#374151' },
-      'Return_Pending': { bg: '#ffedd5', color: '#9a3412' },
+      'Return Pending': { bg: '#ffedd5', color: '#9a3412' },
       'Returned': { bg: '#f3e8ff', color: '#6b21a8' },
-      'Replace_Pending': { bg: '#dcfce7', color: '#166534' },
+      'Replace Pending': { bg: '#dcfce7', color: '#166534' },
       'Replaced': { bg: '#ecfeff', color: '#083344' }
     };
     return config[status] || config['Order Placed'];
@@ -85,7 +85,7 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                         defaultValue={item.orderStatus}
                         id={`sel-${item._id}`}
                       >
-                        {['Order Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return_Pending', 'Returned', 'Replace_Pending', 'Replaced'].map(s => (
+                        {['Order Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Pending', 'Returned', 'Replace Pending', 'Replaced'].map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </Form.Select>
