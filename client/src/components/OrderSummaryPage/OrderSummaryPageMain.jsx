@@ -1,4 +1,4 @@
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Modal, Form } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState, useCallback } from "react";
@@ -20,6 +20,11 @@ export const OrderDetailPage = () => {
     const [hover, setHover] = useState(0);
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [showActionModal, setShowActionModal] = useState(false);
+    const [actionType, setActionType] = useState(""); 
+    const [actionReason, setActionReason] = useState("");
+    const [isActionSubmitting, setIsActionSubmitting] = useState(false);
 
     const stages = [
         { label: 'Order Placed', icon: 'bi-box-seam' },
@@ -52,6 +57,27 @@ export const OrderDetailPage = () => {
     }, [orderId, checkReviewStatus]);
 
     useEffect(() => { fetchOrderDetail(); }, [fetchOrderDetail]);
+
+    const handleOrderAction = async () => {
+        if (!actionReason.trim()) return alert("Please provide a reason.");
+        try {
+            setIsActionSubmitting(true);
+            await api.post(`/my-orders/${orderId}/${actionType}`, { reason: actionReason });
+            alert(`Order ${actionType} request submitted successfully.`);
+            setShowActionModal(false);
+            fetchOrderDetail(); 
+        } catch (err) {
+            alert(err.response?.data?.message || "Error processing request");
+        } finally {
+            setIsActionSubmitting(false);
+        }
+    };
+
+    const openActionModal = (type) => {
+        setActionType(type);
+        setActionReason("");
+        setShowActionModal(true);
+    };
 
     const handleOpenReview = async (item) => {
         setSelectedItem(item);
@@ -96,10 +122,15 @@ export const OrderDetailPage = () => {
 
     const statusStyle = getStatusStyle(order.orderStatus);
     const currentStep = stages.findIndex(s => s.label.toLowerCase() === order.orderStatus.toLowerCase());
+    
+    const isDelivered = order.orderStatus.toLowerCase() === 'delivered';
+    const isCancelled = order.orderStatus.toLowerCase() === 'cancelled';
+    const isActionPending = ['return_pending', 'replace_pending', 'returned', 'replaced'].includes(order.orderStatus.toLowerCase());
+
+    const actionButtonStyle = { fontSize: '12px', fontWeight: '600' };
 
     return (
         <div className="w-100 d-flex flex-column align-items-center bg-white" style={{ minHeight: '100vh' }}>
-            {/* Header / Breadcrumb */}
             <div className="p-3 border-bottom w-100 d-flex justify-content-center bg-white sticky-top" style={{ zIndex: 10 }}>
                 <div style={{ width: "80%", fontSize: '12px', color: '#888' }}>
                     Home / My Orders / <span style={{ color: '#333', fontWeight: '500' }}>#{order._id.toUpperCase()}</span>
@@ -112,9 +143,52 @@ export const OrderDetailPage = () => {
                         <h4 className="fw-normal m-0" style={{ fontSize: '22px' }}>Order Details</h4>
                         <p className="text-muted small m-0">Order ID: #{order._id.toUpperCase()}</p>
                     </div>
-                    <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)} className="rounded-0 px-3" style={{ fontSize: '12px', fontWeight: '600' }}>
-                        BACK TO ORDERS
-                    </Button>
+                    <div className="d-flex gap-2">
+                        {!isDelivered && !isCancelled && !isActionPending && (
+                            <Button 
+                                variant="outline-secondary" 
+                                size="sm" 
+                                className="rounded-0 px-3" 
+                                style={actionButtonStyle}
+                                onClick={() => openActionModal('cancel')}
+                            >
+                                CANCEL ORDER
+                            </Button>
+                        )}
+                        
+                        {isDelivered && !isActionPending && (
+                            <>
+                                <Button 
+                                    variant="outline-secondary" 
+                                    size="sm" 
+                                    className="rounded-0 px-3" 
+                                    style={actionButtonStyle}
+                                    onClick={() => openActionModal('return')}
+                                >
+                                    RETURN
+                                </Button>
+                                <Button 
+                                    variant="outline-secondary" 
+                                    size="sm" 
+                                    className="rounded-0 px-3" 
+                                    style={actionButtonStyle}
+                                    onClick={() => openActionModal('replace')}
+                                >
+                                    REPLACE
+                                </Button>
+                            </>
+                        )}
+
+                        <Button 
+                            variant="outline-secondary" 
+                            size="sm" 
+                            onClick={() => navigate(-1)} 
+                            className="rounded-0 px-3" 
+                            style={actionButtonStyle}
+                        >
+                            BACK TO ORDERS
+                        </Button>
+                    </div>
                 </div>
 
                 {order.orderStatus.toLowerCase() !== 'cancelled' && (
@@ -163,6 +237,33 @@ export const OrderDetailPage = () => {
                     </Col>
                 </Row>
             </Container>
+
+            <Modal show={showActionModal} onHide={() => setShowActionModal(false)} centered className="rounded-0">
+                <Modal.Header closeButton className="border-0">
+                    <Modal.Title className="fw-normal text-uppercase" style={{ fontSize: '16px' }}>{actionType} Order</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="px-4 pb-4">
+                    <Form.Group>
+                        <Form.Label className="small text-muted">Reason for {actionType}</Form.Label>
+                        <Form.Control 
+                            as="textarea" 
+                            rows={3} 
+                            className="rounded-0 shadow-none"
+                            placeholder="Please provide a reason..."
+                            value={actionReason}
+                            onChange={(e) => setActionReason(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Button 
+                        variant="dark" 
+                        className="w-100 rounded-0 mt-3 py-2 fw-bold" 
+                        disabled={isActionSubmitting}
+                        onClick={handleOrderAction}
+                    >
+                        {isActionSubmitting ? "PROCESSING..." : `SUBMIT ${actionType.toUpperCase()} REQUEST`}
+                    </Button>
+                </Modal.Body>
+            </Modal>
 
             <ReviewModal 
                 show={showReviewModal} 

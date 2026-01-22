@@ -1,43 +1,87 @@
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 export const BreadcrumbAndTrending = () => {
-  const trends = [
-    "Shirts",
-    "Wallets",
-    "Jackets",
-    "Wall Decor",
-    "Jeans",
-    "Sarees",
-    "T-Shirts",
-    "Sneakers",
-  ];
-  const {mainCategory, subCategory, category} = useParams();
+  const [trends, setTrends] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { mainCategory, subCategory, category } = useParams();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchTrends = async () => {
+      setLoading(true);
+      try {
+        const query = mainCategory ? `?category=${encodeURIComponent(mainCategory)}` : "";
+        const response = await fetch(`http://localhost:5000/api/trending${query}`);
+        const data = await response.json();
+        setTrends(data);
+      } catch (error) {
+        console.log(error);
+        setTrends(["Shirts", "Wallets", "Sunglasses", "T-Shirts", "Sarees"]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrends();
+  }, [mainCategory]);
+
   return (
-    <div className="border-top">
+    <div className="border-top bg-light">
       <div className="container-fluid px-5 py-3">
-        <div className="mb-3 text-muted medium">
-          {(mainCategory && <span className="mx-1">Home / {mainCategory} /</span>)}
-          {(subCategory && <span className={category? "" :"text-dark"}>{subCategory} /</span>)}
-          {category && <span className="mx-1 text-dark"> {category}</span>}
-        </div>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb mb-3" style={{ fontSize: "14px", backgroundColor: "transparent" }}>
+            <li className="breadcrumb-item">
+              <Link to="/" className="text-decoration-none text-muted">Home</Link>
+            </li>
+            
+            {mainCategory && (
+              <li className={`breadcrumb-item ${!subCategory ? "active fw-bold text-dark" : ""}`}>
+                {subCategory ? (
+                  <Link to={`/products/${mainCategory}`} className="text-decoration-none text-muted">
+                    {decodeURIComponent(mainCategory)}
+                  </Link>
+                ) : (
+                  decodeURIComponent(mainCategory)
+                )}
+              </li>
+            )}
 
-        <div className="d-flex align-items-center flex-wrap gap-2">
-          <div className="text-muted d-flex align-items-center me-2">
-            <span className="me-1">📈</span>
-            <span>Trending searches:</span>
-          </div>
+            {subCategory && (
+              <li className={`breadcrumb-item ${!category ? "active fw-bold text-dark" : ""}`}>
+                {category ? (
+                  <Link to={`/products/${mainCategory}/${subCategory}`} className="text-decoration-none text-muted">
+                    {decodeURIComponent(subCategory)}
+                  </Link>
+                ) : (
+                  decodeURIComponent(subCategory)
+                )}
+              </li>
+            )}
 
-          {trends.map((item) => (
-            <button
-              key={item}
-              className="btn btn-outline-secondary btn-sm rounded px-3"
-              onClick={() => navigate(`/products/${item}`)}
-            >
-              {item}
-            </button>
-          ))}
+            {category && (
+              <li className="breadcrumb-item active fw-bold text-dark" aria-current="page">
+                {decodeURIComponent(category)}
+              </li>
+            )}
+          </ol>
+        </nav>
+
+        <div className="d-flex align-items-center flex-wrap gap-3">
+          <span className="fw-bold text-muted" style={{ fontSize: "13px" }}>📈 TRENDING:</span>
+          {loading ? (
+            <div className="spinner-border spinner-border-sm text-secondary"></div>
+          ) : (
+            trends.map((item) => (
+              <button
+                key={item}
+                className="btn btn-white border px-3 shadow-sm bg-white"
+                style={{ fontSize: "13px", paddingBlock: "4px" }}
+                onClick={() => navigate(`/products/${encodeURIComponent(item)}`)}
+              >
+                {item}
+              </button>
+            ))
+          )}
         </div>
       </div>
     </div>
