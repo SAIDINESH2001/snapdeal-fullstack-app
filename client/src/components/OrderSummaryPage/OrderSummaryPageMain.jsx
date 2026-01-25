@@ -26,6 +26,7 @@ export const OrderDetailPage = () => {
     const [actionReason, setActionReason] = useState("");
     const [isActionSubmitting, setIsActionSubmitting] = useState(false);
 
+    // Standard order tracking stages
     const stages = [
         { label: 'Order Placed', icon: 'bi-box-seam' },
         { label: 'Processing', icon: 'bi-gear' },
@@ -33,13 +34,15 @@ export const OrderDetailPage = () => {
         { label: 'Delivered', icon: 'bi-house-check' }
     ];
 
+    // Return tracking stages
     const returnStages = [
         { label: 'Return Requested', icon: 'bi-arrow-left-right' },
-        { label: 'Pickup Pending', icon: 'bi-box-seam' },
+        { label: 'Processing', icon: 'bi-gear' }, 
         { label: 'Picked Up', icon: 'bi-truck' },
         { label: 'Returned', icon: 'bi-check-circle' }
     ];
 
+    // Replacement tracking stages
     const replaceStages = [
         { label: 'Replace Requested', icon: 'bi-arrow-repeat' },
         { label: 'Processing', icon: 'bi-gear' },
@@ -137,6 +140,7 @@ export const OrderDetailPage = () => {
     const orderStatus = order.orderStatus.toLowerCase();
     const statusStyle = getStatusStyle(order.orderStatus);
     
+    // --- UPDATED PROGRESS LOGIC ---
     let activeStages = stages;
     let currentStep = stages.findIndex(s => s.label.toLowerCase() === orderStatus);
     
@@ -145,13 +149,26 @@ export const OrderDetailPage = () => {
 
     if (isReturning) {
         activeStages = returnStages;
-        if (orderStatus === 'return_pending') currentStep = 0;
-        if (orderStatus === 'returned') currentStep = 3;
+        // If pending, manually set to index 1 to show progress to "Processing"
+        if (orderStatus === 'return_pending') {
+            currentStep = 1;
+        } else if (orderStatus === 'returned') {
+            currentStep = 3;
+        } else {
+            currentStep = 0; // Request Received
+        }
     } else if (isReplacing) {
         activeStages = replaceStages;
-        if (orderStatus === 'replace_pending') currentStep = 0;
-        if (orderStatus === 'replaced') currentStep = 3;
+        // If pending, manually set to index 1 to show progress to "Processing"
+        if (orderStatus === 'replace_pending') {
+            currentStep = 1;
+        } else if (orderStatus === 'replaced') {
+            currentStep = 3;
+        } else {
+            currentStep = 0; // Request Received
+        }
     }
+    // -------------------------------
 
     const isDelivered = orderStatus === 'delivered';
     const isCancelled = orderStatus === 'cancelled';
@@ -175,47 +192,23 @@ export const OrderDetailPage = () => {
                     </div>
                     <div className="d-flex gap-2">
                         {!isDelivered && !isCancelled && !isActionPending && (
-                            <Button 
-                                variant="outline-secondary" 
-                                size="sm" 
-                                className="rounded-0 px-3" 
-                                style={actionButtonStyle}
-                                onClick={() => openActionModal('cancel')}
-                            >
+                            <Button variant="outline-secondary" size="sm" className="rounded-0 px-3" style={actionButtonStyle} onClick={() => openActionModal('cancel')}>
                                 CANCEL ORDER
                             </Button>
                         )}
                         
                         {isDelivered && !isActionPending && (
                             <>
-                                <Button 
-                                    variant="outline-secondary" 
-                                    size="sm" 
-                                    className="rounded-0 px-3" 
-                                    style={actionButtonStyle}
-                                    onClick={() => openActionModal('return')}
-                                >
+                                <Button variant="outline-secondary" size="sm" className="rounded-0 px-3" style={actionButtonStyle} onClick={() => openActionModal('return')}>
                                     RETURN
                                 </Button>
-                                <Button 
-                                    variant="outline-secondary" 
-                                    size="sm" 
-                                    className="rounded-0 px-3" 
-                                    style={actionButtonStyle}
-                                    onClick={() => openActionModal('replace')}
-                                >
+                                <Button variant="outline-secondary" size="sm" className="rounded-0 px-3" style={actionButtonStyle} onClick={() => openActionModal('replace')}>
                                     REPLACE
                                 </Button>
                             </>
                         )}
 
-                        <Button 
-                            variant="outline-secondary" 
-                            size="sm" 
-                            onClick={() => navigate(-1)} 
-                            className="rounded-0 px-3" 
-                            style={actionButtonStyle}
-                        >
+                        <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)} className="rounded-0 px-3" style={actionButtonStyle}>
                             BACK TO ORDERS
                         </Button>
                     </div>
@@ -242,12 +235,7 @@ export const OrderDetailPage = () => {
                             </Card.Body>
                         </Card>
 
-                        <OrderItemList 
-                            items={order.items} 
-                            orderStatus={order.orderStatus} 
-                            reviewedProducts={reviewedProducts} 
-                            onOpenReview={handleOpenReview} 
-                        />
+                        <OrderItemList items={order.items} orderStatus={order.orderStatus} reviewedProducts={reviewedProducts} onOpenReview={handleOpenReview} />
                     </Col>
 
                     <Col md={4}>
@@ -280,39 +268,15 @@ export const OrderDetailPage = () => {
                 <Modal.Body className="px-4 pb-4">
                     <Form.Group>
                         <Form.Label className="small text-muted">Reason for {actionType}</Form.Label>
-                        <Form.Control 
-                            as="textarea" 
-                            rows={3} 
-                            className="rounded-0 shadow-none"
-                            placeholder="Please provide a reason..."
-                            value={actionReason}
-                            onChange={(e) => setActionReason(e.target.value)}
-                        />
+                        <Form.Control as="textarea" rows={3} className="rounded-0 shadow-none" placeholder="Please provide a reason..." value={actionReason} onChange={(e) => setActionReason(e.target.value)} />
                     </Form.Group>
-                    <Button 
-                        variant="dark" 
-                        className="w-100 rounded-0 mt-3 py-2 fw-bold" 
-                        disabled={isActionSubmitting}
-                        onClick={handleOrderAction}
-                    >
+                    <Button variant="dark" className="w-100 rounded-0 mt-3 py-2 fw-bold" disabled={isActionSubmitting} onClick={handleOrderAction}>
                         {isActionSubmitting ? "PROCESSING..." : `SUBMIT ${actionType.toUpperCase()} REQUEST`}
                     </Button>
                 </Modal.Body>
             </Modal>
 
-            <ReviewModal 
-                show={showReviewModal} 
-                onHide={() => setShowReviewModal(false)}
-                selectedItem={selectedItem}
-                rating={rating}
-                hover={hover}
-                comment={comment}
-                isSubmitting={isSubmitting}
-                setRating={setRating}
-                setHover={setHover}
-                setComment={setComment}
-                onSubmit={submitReview}
-            />
+            <ReviewModal show={showReviewModal} onHide={() => setShowReviewModal(false)} selectedItem={selectedItem} rating={rating} hover={hover} comment={comment} isSubmitting={isSubmitting} setRating={setRating} setHover={setHover} setComment={setComment} onSubmit={submitReview} />
         </div>
     );
 };
