@@ -33,6 +33,20 @@ export const OrderDetailPage = () => {
         { label: 'Delivered', icon: 'bi-house-check' }
     ];
 
+    const returnStages = [
+        { label: 'Return Requested', icon: 'bi-arrow-left-right' },
+        { label: 'Pickup Pending', icon: 'bi-box-seam' },
+        { label: 'Picked Up', icon: 'bi-truck' },
+        { label: 'Returned', icon: 'bi-check-circle' }
+    ];
+
+    const replaceStages = [
+        { label: 'Replace Requested', icon: 'bi-arrow-repeat' },
+        { label: 'Processing', icon: 'bi-gear' },
+        { label: 'Shipped', icon: 'bi-truck' },
+        { label: 'Replaced', icon: 'bi-house-check' }
+    ];
+
     const checkReviewStatus = useCallback(async (items) => {
         const statusMap = {};
         for (const item of items) {
@@ -111,21 +125,37 @@ export const OrderDetailPage = () => {
 
     const getStatusStyle = (status) => {
         const s = status?.toLowerCase();
-        if (s === 'delivered') return { color: "#16a34a", bg: "#f0fdf4", border: "#bcf0da" };
+        if (['delivered', 'returned', 'replaced'].includes(s)) return { color: "#16a34a", bg: "#f0fdf4", border: "#bcf0da" };
         if (s === 'cancelled') return { color: "#dc2626", bg: "#fef2f2", border: "#fecaca" };
-        if (s === 'shipped') return { color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" };
+        if (s === 'shipped' || s.includes('pending')) return { color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" };
         return { color: "#d97706", bg: "#fffbeb", border: "#fde68a" };
     };
 
     if (isLoading) return <div className="text-center py-5">Loading...</div>;
     if (!order) return <div className="text-center py-5">Order not found.</div>;
 
+    const orderStatus = order.orderStatus.toLowerCase();
     const statusStyle = getStatusStyle(order.orderStatus);
-    const currentStep = stages.findIndex(s => s.label.toLowerCase() === order.orderStatus.toLowerCase());
     
-    const isDelivered = order.orderStatus.toLowerCase() === 'delivered';
-    const isCancelled = order.orderStatus.toLowerCase() === 'cancelled';
-    const isActionPending = ['return_pending', 'replace_pending', 'returned', 'replaced'].includes(order.orderStatus.toLowerCase());
+    let activeStages = stages;
+    let currentStep = stages.findIndex(s => s.label.toLowerCase() === orderStatus);
+    
+    const isReturning = orderStatus.includes('return');
+    const isReplacing = orderStatus.includes('replace');
+
+    if (isReturning) {
+        activeStages = returnStages;
+        if (orderStatus === 'return_pending') currentStep = 0;
+        if (orderStatus === 'returned') currentStep = 3;
+    } else if (isReplacing) {
+        activeStages = replaceStages;
+        if (orderStatus === 'replace_pending') currentStep = 0;
+        if (orderStatus === 'replaced') currentStep = 3;
+    }
+
+    const isDelivered = orderStatus === 'delivered';
+    const isCancelled = orderStatus === 'cancelled';
+    const isActionPending = ['return_pending', 'replace_pending', 'returned', 'replaced'].includes(orderStatus);
 
     const actionButtonStyle = { fontSize: '12px', fontWeight: '600' };
 
@@ -191,8 +221,13 @@ export const OrderDetailPage = () => {
                     </div>
                 </div>
 
-                {order.orderStatus.toLowerCase() !== 'cancelled' && (
-                    <OrderStatusTracker stages={stages} currentStep={currentStep} />
+                {!isCancelled && (
+                    <div className="mb-4">
+                        <h6 className="text-center mb-4 text-muted small fw-bold">
+                            {isReturning ? "RETURN TRACKER" : isReplacing ? "REPLACEMENT TRACKER" : "ORDER TRACKER"}
+                        </h6>
+                        <OrderStatusTracker stages={activeStages} currentStep={currentStep} />
+                    </div>
                 )}
 
                 <Row className="g-4">

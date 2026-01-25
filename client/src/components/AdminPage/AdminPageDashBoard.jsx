@@ -53,6 +53,22 @@ export const AdminDashboard = () => {
     }
   };
 
+  const postSaleStatuses = ['delivered', 'returned', 'replaced', 'return pending', 'replace pending'];
+  
+  const deliveredOrders = orderProducts.filter(order => 
+    postSaleStatuses.includes(order.orderStatus?.toLowerCase())
+  );
+  
+  const activeOrders = orderProducts.filter(order => 
+    !postSaleStatuses.includes(order.orderStatus?.toLowerCase()) && order.orderStatus?.toLowerCase() !== 'cancelled'
+  );
+
+  const getTabData = () => {
+    if (activeTab === 'orders') return activeOrders;
+    if (activeTab === 'delivered') return deliveredOrders;
+    return pendingProducts;
+  };
+
   return (
     <Container fluid className="p-0 bg-[#f8fafc] min-vh-100" style={{ fontFamily: "'Inter', sans-serif" }}>
       <Row className="g-0">
@@ -61,7 +77,8 @@ export const AdminDashboard = () => {
             activeTab={activeTab} 
             setActiveTab={setActiveTab} 
             pendingCount={pendingProducts.length} 
-            ordersCount={orderProducts.length} 
+            ordersCount={activeOrders.length} 
+            deliveredCount={deliveredOrders.length}
           />
         </Col>
 
@@ -70,7 +87,9 @@ export const AdminDashboard = () => {
           
           <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
             <div className="px-4 py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
-              <span className="fw-bold text-[#475569] small">RECENT ACTIVITY</span>
+              <span className="fw-bold text-[#475569] small">
+                {activeTab === 'delivered' ? 'POST-SALE ACTIVITY' : 'RECENT ACTIVITY'}
+              </span>
               <button className="btn btn-link p-0 text-muted text-decoration-none" onClick={fetchData}>
                 <span className="material-symbols-outlined fs-5">refresh</span>
               </button>
@@ -78,8 +97,8 @@ export const AdminDashboard = () => {
 
             <ActivityTable 
               loading={loading}
-              activeTab={activeTab}
-              data={activeTab === 'orders' ? orderProducts : pendingProducts}
+              activeTab={activeTab === 'delivered' ? 'orders' : activeTab}
+              data={getTabData()}
               statusUpdateLoading={statusUpdateLoading}
               handleOrderStatusUpdate={handleOrderStatusUpdate}
               handleStatusUpdate={handleStatusUpdate}

@@ -1,20 +1,23 @@
 import React from "react";
-import { Table, Spinner, Badge, Form, Button } from "react-bootstrap";
+import { Table, Spinner, Form, Button } from "react-bootstrap";
 
 const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOrderStatusUpdate, handleStatusUpdate }) => {
+  
   const getStatusConfig = (status) => {
-    const config = {
-      'Delivered': { bg: '#def7ec', color: '#03543f' },
-      'Cancelled': { bg: '#fde8e8', color: '#9b1c1c' },
-      'Shipped': { bg: '#e1effe', color: '#1e429f' },
-      'Processing': { bg: '#fef3c7', color: '#92400e' },
-      'Order Placed': { bg: '#f3f4f6', color: '#374151' },
-      'Return Pending': { bg: '#ffedd5', color: '#9a3412' },
-      'Returned': { bg: '#f3e8ff', color: '#6b21a8' },
-      'Replace Pending': { bg: '#dcfce7', color: '#166534' },
-      'Replaced': { bg: '#ecfeff', color: '#083344' }
+    const s = status?.toLowerCase().trim() || 'default';
+    const colors = {
+      'delivered': { bg: '#10b981', color: '#ffffff' },      
+      'cancelled': { bg: '#ef4444', color: '#ffffff' },      
+      'shipped': { bg: '#3b82f6', color: '#ffffff' },        
+      'processing': { bg: '#f59e0b', color: '#ffffff' },     
+      'order placed': { bg: '#64748b', color: '#ffffff' },   
+      'return pending': { bg: '#f97316', color: '#ffffff' }, 
+      'returned': { bg: '#8b5cf6', color: '#ffffff' },       
+      'replace pending': { bg: '#06b6d4', color: '#ffffff' }, 
+      'replaced': { bg: '#ec4899', color: '#ffffff' },       
+      'default': { bg: '#94a3b8', color: '#ffffff' }
     };
-    return config[status] || config['Order Placed'];
+    return colors[s] || colors['default'];
   };
 
   if (loading) {
@@ -39,19 +42,19 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
       <tbody>
         {data.length > 0 ? (
           data.map((item) => {
-            const statusConfig = getStatusConfig(item.orderStatus || 'Order Placed');
+            const statusConfig = getStatusConfig(item.orderStatus);
             const lastAction = item.actionHistory?.[item.actionHistory.length - 1];
             
             return (
               <tr key={item._id} className="border-bottom transition-all hover:bg-gray-50">
                 <td className="ps-4 py-3" style={{ maxWidth: '280px' }}>
                   <div className="fw-bold text-[#1e293b]" style={{ fontSize: '12.5px' }}>
-                    {activeTab === 'orders' ? `ID: #${item._id.toUpperCase()}` : item.name}
+                    {activeTab === 'approvals' ? item.name : `ID: #${item._id.toUpperCase()}`}
                   </div>
                   <div className="text-muted fw-medium" style={{ fontSize: '11px' }}>
-                    {activeTab === 'orders' ? `${item.items.length} items • ${item.paymentMethod}` : `${item.brand} • ${item.productType}`}
+                    {activeTab === 'approvals' ? `${item.brand} • ${item.productType}` : `${item.items.length} items • ${item.paymentMethod}`}
                   </div>
-                  {activeTab === 'orders' && lastAction && (
+                  {activeTab !== 'approvals' && lastAction && (
                     <div className="mt-1 p-2 bg-[#fff1f2] border-start border-danger border-2 rounded-1" style={{ fontSize: '10.5px' }}>
                       <span className="text-danger fw-bold text-uppercase">Reason: </span>
                       <span className="text-[#475569]">{lastAction.reason}</span>
@@ -60,28 +63,38 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                 </td>
                 <td className="py-3">
                   <div className="fw-semibold text-[#475569]" style={{ fontSize: '12px' }}>
-                    {activeTab === 'orders' ? item.shippingAddress.phone : (item.sellerId?.name || "Independent")}
+                    {activeTab === 'approvals' ? (item.sellerId?.name || "Independent") : item.shippingAddress.phone}
                   </div>
-                  {activeTab === 'orders' && <div className="text-muted" style={{ fontSize: '10.5px' }}>{item.shippingAddress.city}</div>}
+                  {activeTab !== 'approvals' && <div className="text-muted" style={{ fontSize: '10.5px' }}>{item.shippingAddress.city}</div>}
                 </td>
                 <td className="fw-bold text-[#1e293b] text-center" style={{ fontSize: '12.5px' }}>
-                  ₹{(activeTab === 'orders' ? item.totalAmount : item.sellingPrice).toLocaleString()}
+                  ₹{(activeTab === 'approvals' ? item.sellingPrice : item.totalAmount).toLocaleString()}
                 </td>
                 <td className="text-center py-3">
-                  <Badge 
-                    style={{ backgroundColor: statusConfig.bg, color: statusConfig.color, fontSize: '9.5px' }} 
-                    className="rounded-pill px-2 py-1.5 fw-bold border-0"
+                  <div
+                    style={{ 
+                      backgroundColor: statusConfig.bg, 
+                      color: statusConfig.color, 
+                      fontSize: '10px', 
+                      minWidth: '115px',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      fontWeight: '700',
+                      display: 'inline-block',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.4px'
+                    }} 
                   >
-                    {(item.orderStatus || 'ORDER PLACED').toUpperCase()}
-                  </Badge>
+                    {item.orderStatus || 'ORDER PLACED'}
+                  </div>
                 </td>
                 <td className="text-end pe-4 py-3">
-                  {activeTab === 'orders' ? (
+                  {activeTab !== 'approvals' ? (
                     <div className="d-flex align-items-center justify-content-end gap-1">
                       <Form.Select 
                         size="sm" 
                         className="border-0 bg-[#f1f5f9] text-[#475569] shadow-none"
-                        style={{ width: '120px', fontSize: '10.5px', height: '30px' }}
+                        style={{ width: '130px', fontSize: '11px', height: '32px', borderRadius: '4px' }}
                         defaultValue={item.orderStatus}
                         id={`sel-${item._id}`}
                       >
@@ -90,12 +103,12 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                         ))}
                       </Form.Select>
                       <Button 
-                        size="sm" className="px-2 border-0 shadow-none fw-bold"
-                        style={{ backgroundColor: '#1e293b', fontSize: '10.5px', height: '30px' }}
+                        size="sm" className="px-3 border-0 shadow-none fw-bold"
+                        style={{ backgroundColor: '#1e293b', fontSize: '10px', height: '32px', borderRadius: '4px' }}
                         disabled={statusUpdateLoading === item._id}
                         onClick={() => handleOrderStatusUpdate(item._id, document.getElementById(`sel-${item._id}`).value)}
                       >
-                        {statusUpdateLoading === item._id ? '...' : 'Save'}
+                        {statusUpdateLoading === item._id ? '...' : 'SAVE'}
                       </Button>
                     </div>
                   ) : (
