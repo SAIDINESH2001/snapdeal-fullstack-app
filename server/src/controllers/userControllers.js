@@ -36,7 +36,7 @@ exports.postUser = async (req,res,next) => {
     try {
         const validationResult = userInputValidation(req.body);
         if(!validationResult.success) {
-            res.status(404).json({
+            res.status(400).json({
                 success: false,
                 message: validationResult,
             })

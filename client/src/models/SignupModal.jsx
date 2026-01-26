@@ -16,18 +16,23 @@ const SignUpModal = forwardRef((_, ref) => {
   } = useSignup();
 
   const onContinue = async () => {
-    const res = await handleSubmit();
+    try {
+      const res = await handleSubmit();
 
-    if (res?.success) {
-      const modal = bootstrap.Modal.getOrCreateInstance(ref.current);
-      document.activeElement?.blur();
-      modal.hide();
+      if (res?.success) {
+        const modal = bootstrap.Modal.getOrCreateInstance(ref.current);
+        document.activeElement?.blur();
+        modal.hide();
 
-      ref.current.addEventListener(
-        "hidden.bs.modal",
-        () => navigate("/login"),
-        { once: true }
-      );
+        ref.current.addEventListener(
+          "hidden.bs.modal",
+          () => navigate("/login"),
+          { once: true }
+        );
+      }
+    } catch (err) {
+      // Prevents the "blank screen" crash if an error occurs during the process
+      console.error("Signup execution failed", err);
     }
   };
 
@@ -44,8 +49,6 @@ const SignUpModal = forwardRef((_, ref) => {
         style={{ maxWidth: "420px" }}
       >
         <div className="modal-content border-0 rounded-3 p-4">
-
-          {/* HEADER */}
           <div className="modal-header border-0 px-0">
             <div>
               <h5 className="modal-title fw-semibold mb-1">Sign Up</h5>
@@ -56,10 +59,16 @@ const SignUpModal = forwardRef((_, ref) => {
             <button className="btn-close" data-bs-dismiss="modal" />
           </div>
 
-          {/* BODY */}
           <div className="modal-body px-0 pb-0">
+            {/* API/SERVER ERROR DISPLAY */}
+            {errors.server && (
+              <div className="alert alert-danger py-2 small text-center border-0 mb-3">
+                {typeof errors.server === 'object' 
+                  ? (errors.server.message || "Invalid input") 
+                  : errors.server}
+              </div>
+            )}
 
-            {/* MOBILE */}
             <input
               name="phone"
               value={values.phone}
@@ -72,7 +81,6 @@ const SignUpModal = forwardRef((_, ref) => {
               <div className="text-danger small mb-2">{errors.phone}</div>
             )}
 
-            {/* EMAIL */}
             <input
               type="email"
               name="email"
@@ -86,7 +94,6 @@ const SignUpModal = forwardRef((_, ref) => {
               <div className="text-danger small mb-2">{errors.email}</div>
             )}
 
-            {/* NAME */}
             <input
               type="text"
               name="name"
@@ -100,7 +107,6 @@ const SignUpModal = forwardRef((_, ref) => {
               <div className="text-danger small mb-2">{errors.name}</div>
             )}
 
-            {/* DOB */}
             <input
               type="date"
               name="dob"
@@ -113,7 +119,6 @@ const SignUpModal = forwardRef((_, ref) => {
               <div className="text-danger small mb-2">{errors.dob}</div>
             )}
 
-            {/* PASSWORD */}
             <input
               type="password"
               name="password"
@@ -129,7 +134,6 @@ const SignUpModal = forwardRef((_, ref) => {
               </div>
             )}
 
-            {/* KEEP LOGGED IN */}
             <div className="form-check mb-3">
               <input
                 className="form-check-input"
@@ -147,12 +151,6 @@ const SignUpModal = forwardRef((_, ref) => {
               </label>
             </div>
 
-            {errors.server && (
-              <div className="text-danger small mb-2 text-center">
-                {errors.server}
-              </div>
-            )}
-
             <LoginButton
               className="w-100 mb-3"
               disabled={loading}
@@ -165,7 +163,6 @@ const SignUpModal = forwardRef((_, ref) => {
               By registering, I agree to{" "}
               <span className="text-primary">Terms & Conditions</span>
             </p>
-
           </div>
         </div>
       </div>
