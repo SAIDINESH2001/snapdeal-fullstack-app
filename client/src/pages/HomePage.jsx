@@ -7,6 +7,7 @@ import {OtpModal} from "../models/OtpModal";
 import { CategoryBar } from "../components/HomePage/CategoryBar/CategoryBar";
 import HomeCarousel from "../components/HomePage/HomeCarousal/HomeCarousal";
 import { HomeDeal } from "../components/HomePage/HomeDeals/homeDeals";
+import { ProductCartFooter } from "../components/ProductCart/ProductCartFooter";
 
 export const HomePage = () => {
   const loginRef = useRef(null);
@@ -38,6 +39,7 @@ export const HomePage = () => {
       <CategoryBar />
       <HomeCarousel />
       <HomeDeal />
+      <ProductCartFooter />
     </div>
   );
 };

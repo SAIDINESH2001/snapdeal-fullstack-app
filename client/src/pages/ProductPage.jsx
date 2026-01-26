@@ -5,6 +5,7 @@ import { AppNav } from "../components/common/ApplicationNavBar/AppNav";
 import { BreadcrumbAndTrending } from "../components/ProductsPage/BreadCrumb";
 import { ProductSideBar } from "../components/ProductsPage/ProductSideBar";
 import { useAuth } from "../hooks/useAuth";
+import { ProductCartFooter } from "../components/ProductCart/ProductCartFooter";
 
 export const ProductPage = () => {
     const { user } = useAuth();
@@ -68,6 +69,7 @@ export const ProductPage = () => {
             ) : (
                 <div className="text-center p-5"><h4>No products found</h4></div>
             )}
+            <ProductCartFooter />
         </>
     );
 };
