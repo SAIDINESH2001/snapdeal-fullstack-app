@@ -26,7 +26,6 @@ export const OrderDetailPage = () => {
     const [actionReason, setActionReason] = useState("");
     const [isActionSubmitting, setIsActionSubmitting] = useState(false);
 
-    // Standard order tracking stages
     const stages = [
         { label: 'Order Placed', icon: 'bi-box-seam' },
         { label: 'Processing', icon: 'bi-gear' },
@@ -34,7 +33,6 @@ export const OrderDetailPage = () => {
         { label: 'Delivered', icon: 'bi-house-check' }
     ];
 
-    // Return tracking stages
     const returnStages = [
         { label: 'Return Requested', icon: 'bi-arrow-left-right' },
         { label: 'Processing', icon: 'bi-gear' }, 
@@ -42,7 +40,6 @@ export const OrderDetailPage = () => {
         { label: 'Returned', icon: 'bi-check-circle' }
     ];
 
-    // Replacement tracking stages
     const replaceStages = [
         { label: 'Replace Requested', icon: 'bi-arrow-repeat' },
         { label: 'Processing', icon: 'bi-gear' },
@@ -140,7 +137,6 @@ export const OrderDetailPage = () => {
     const orderStatus = order.orderStatus.toLowerCase();
     const statusStyle = getStatusStyle(order.orderStatus);
     
-    // --- UPDATED PROGRESS LOGIC ---
     let activeStages = stages;
     let currentStep = stages.findIndex(s => s.label.toLowerCase() === orderStatus);
     
@@ -149,26 +145,15 @@ export const OrderDetailPage = () => {
 
     if (isReturning) {
         activeStages = returnStages;
-        // If pending, manually set to index 1 to show progress to "Processing"
-        if (orderStatus === 'return_pending') {
-            currentStep = 1;
-        } else if (orderStatus === 'returned') {
-            currentStep = 3;
-        } else {
-            currentStep = 0; // Request Received
-        }
+        if (orderStatus === 'return_pending') currentStep = 1;
+        else if (orderStatus === 'returned') currentStep = 3;
+        else currentStep = 0;
     } else if (isReplacing) {
         activeStages = replaceStages;
-        // If pending, manually set to index 1 to show progress to "Processing"
-        if (orderStatus === 'replace_pending') {
-            currentStep = 1;
-        } else if (orderStatus === 'replaced') {
-            currentStep = 3;
-        } else {
-            currentStep = 0; // Request Received
-        }
+        if (orderStatus === 'replace_pending') currentStep = 1;
+        else if (orderStatus === 'replaced') currentStep = 3;
+        else currentStep = 0;
     }
-    // -------------------------------
 
     const isDelivered = orderStatus === 'delivered';
     const isCancelled = orderStatus === 'cancelled';
@@ -196,7 +181,6 @@ export const OrderDetailPage = () => {
                                 CANCEL ORDER
                             </Button>
                         )}
-                        
                         {isDelivered && !isActionPending && (
                             <>
                                 <Button variant="outline-secondary" size="sm" className="rounded-0 px-3" style={actionButtonStyle} onClick={() => openActionModal('return')}>
@@ -207,7 +191,6 @@ export const OrderDetailPage = () => {
                                 </Button>
                             </>
                         )}
-
                         <Button variant="outline-secondary" size="sm" onClick={() => navigate(-1)} className="rounded-0 px-3" style={actionButtonStyle}>
                             BACK TO ORDERS
                         </Button>
@@ -215,7 +198,7 @@ export const OrderDetailPage = () => {
                 </div>
 
                 {!isCancelled && (
-                    <div className="mb-4">
+                    <div className="mb-5">
                         <h6 className="text-center mb-4 text-muted small fw-bold">
                             {isReturning ? "RETURN TRACKER" : isReplacing ? "REPLACEMENT TRACKER" : "ORDER TRACKER"}
                         </h6>
@@ -223,7 +206,7 @@ export const OrderDetailPage = () => {
                     </div>
                 )}
 
-                <Row className="g-4">
+                <Row className="g-4 mb-5">
                     <Col md={8}>
                         <Card className="rounded-0 border mb-4" style={{ boxShadow: 'none', border: `1px solid ${statusStyle.border}` }}>
                             <Card.Body className="p-3 d-flex justify-content-between align-items-center" style={{ backgroundColor: statusStyle.bg }}>
@@ -231,29 +214,78 @@ export const OrderDetailPage = () => {
                                     <span className="small text-muted me-2">Current Status:</span>
                                     <span className="fw-bold" style={{ color: statusStyle.color }}>{order.orderStatus.toUpperCase()}</span>
                                 </div>
-                                <div className="small text-muted">Placed on {new Date(order.orderedAt).toLocaleDateString('en-GB')}</div>
                             </Card.Body>
                         </Card>
-
                         <OrderItemList items={order.items} orderStatus={order.orderStatus} reviewedProducts={reviewedProducts} onOpenReview={handleOpenReview} />
                     </Col>
 
                     <Col md={4}>
                         <Card className="rounded-0 border sticky-top" style={{ boxShadow: 'none', top: '80px' }}>
-                            <Card.Header className="bg-white fw-bold small border-bottom">PRICE DETAILS</Card.Header>
-                            <Card.Body>
+                            <Card.Header className="bg-white fw-bold small py-3 border-bottom">PRICE & ORDER DETAILS</Card.Header>
+                            <Card.Body className="py-3">
                                 <div className="d-flex justify-content-between mb-3 small">
-                                    <span className="text-muted">Total Price</span>
-                                    <span className="text-dark">₹{order.totalAmount.toLocaleString()}</span>
+                                    <span className="text-muted">Total Items</span>
+                                    <span className="text-dark fw-500">{order.items.length}</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-3 small">
+                                    <span className="text-muted">Ordered On</span>
+                                    <span className="text-dark fw-500">{new Date(order.orderedAt).toLocaleString('en-GB', { dateStyle: 'medium' })}</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-3 small">
+                                    <span className="text-muted">Total MRP</span>
+                                    <span className="text-dark fw-500">₹{order.totalAmount.toLocaleString()}</span>
                                 </div>
                                 <div className="d-flex justify-content-between mb-3 small">
                                     <span className="text-muted">Delivery Charges</span>
-                                    <span className="text-success fw-500">FREE</span>
+                                    <span className="text-success fw-bold">FREE</span>
                                 </div>
                                 <hr className="my-3" style={{ opacity: '0.1' }} />
                                 <div className="d-flex justify-content-between align-items-center">
                                     <span className="fw-bold text-dark">Amount Paid</span>
                                     <span className="fw-bold text-danger fs-5">₹{order.totalAmount.toLocaleString()}</span>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+
+                <Row className="g-4 mb-4">
+                    <Col md={6}>
+                        <Card className="rounded-0 border h-100" style={{ boxShadow: 'none' }}>
+                            <Card.Header className="bg-white fw-bold small py-3 border-bottom">DELIVERY ADDRESS</Card.Header>
+                            <Card.Body className="p-4">
+                                <h6 className="fw-bold text-dark text-uppercase mb-2" style={{ fontSize: '13px' }}>{user?.name}</h6>
+                                <p className="text-muted mb-3" style={{ fontSize: '13px', lineHeight: '1.6' }}>
+                                    {order.shippingAddress.street},<br />
+                                    {order.shippingAddress.city}, {order.shippingAddress.state}<br />
+                                    India - <span className="fw-bold text-dark">{order.shippingAddress.zipCode}</span>
+                                </p>
+                                <div className="d-flex align-items-center gap-2" style={{ fontSize: '13px' }}>
+                                    <span className="text-muted">Mobile:</span>
+                                    <span className="fw-bold text-dark">{order.shippingAddress.phone}</span>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    <Col md={6}>
+                        <Card className="rounded-0 border h-100" style={{ boxShadow: 'none' }}>
+                            <Card.Header className="bg-white fw-bold small py-3 border-bottom">PAYMENT INFORMATION</Card.Header>
+                            <Card.Body className="p-4 d-flex flex-column justify-content-center">
+                                <div className="mb-4">
+                                    <p className="text-muted mb-2" style={{ fontSize: '12px', fontWeight: '500' }}>PAYMENT METHOD</p>
+                                    <div className="d-flex align-items-center gap-3">
+                                        <span className="fw-bold text-dark" style={{ fontSize: '14px' }}>{order.paymentMethod.toUpperCase()}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-muted mb-2" style={{ fontSize: '12px', fontWeight: '500' }}>PAYMENT STATUS</p>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <span className="rounded-circle" style={{ width: '10px', height: '10px', background: order.paymentStatus === 'Completed' ? '#16a34a' : '#d97706' }}></span>
+                                        <span className="fw-bold" style={{ fontSize: '14px', color: order.paymentStatus === 'Completed' ? '#16a34a' : '#d97706' }}>
+                                            {order.paymentStatus.toUpperCase()}
+                                        </span>
+                                    </div>
                                 </div>
                             </Card.Body>
                         </Card>

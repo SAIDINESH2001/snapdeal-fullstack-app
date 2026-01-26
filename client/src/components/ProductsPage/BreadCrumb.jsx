@@ -47,7 +47,7 @@ export const BreadcrumbAndTrending = () => {
         <div className="d-flex align-items-center flex-wrap gap-3">
           <span className="fw-bold text-muted small">📈 TRENDING:</span>
           {!loading && trends.map((item) => (
-            <button key={item} className="btn btn-white border px-3 bg-white small shadow-sm" onClick={() => navigate(`/products/trending/${encodeURIComponent(item)}`)}>{item}</button>
+            <button key={item} className="btn btn-white border px-2 bg-white small shadow-sm" onClick={() => navigate(`/products/trending/${encodeURIComponent(item)}`)}>{item}</button>
           ))}
         </div>
       </div>

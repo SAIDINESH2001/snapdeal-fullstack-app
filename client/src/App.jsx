@@ -22,9 +22,9 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/otp" element={<OtpPage />} />
+        <Route path="/product/:productId" element={<ProductSummaryPage />} />
         <Route path="/products/search" element={<ProductPage />} />
         <Route path="/products/trending/:keyword" element={<ProductPage />} />
-        <Route path="/product/:productId" element={<ProductSummaryPage />} />
         <Route path="/products/:mainCategory/:subCategory/:category" element={<ProductPage />} />
         <Route path="/products/:mainCategory/:subCategory" element={<ProductPage />} />
         <Route path="/products/:mainCategory" element={<ProductPage />} />

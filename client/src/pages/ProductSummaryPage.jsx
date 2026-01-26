@@ -6,6 +6,7 @@ import { ProductTabs } from "../components/ProductSummaryPage/ProductSummarySect
 import api from "../services/axios";
 import { useParams } from "react-router-dom";
 import { ReviewsSection } from "../components/ProductSummaryPage/reviewSection";
+import { ProductCartFooter } from "../components/ProductCart/ProductCartFooter";
 
 export const ProductSummaryPage = () => {
   const [product, setProduct] = useState(null);
@@ -15,7 +16,7 @@ export const ProductSummaryPage = () => {
     try {
       setLoading(true);
       const res = await api.get(`/products/${productId}`);
-      setProduct(res.data.data);
+      setProduct(res.data.product);
     } catch (err) {
       console.error("Error Fetching Product", err);
     } finally {
@@ -26,6 +27,9 @@ export const ProductSummaryPage = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  if (loading) return <div>Loading Product...</div>;
+if (!product) return <div>Product not found.</div>;
   return (
     <>
       <AppNav />
@@ -33,6 +37,7 @@ export const ProductSummaryPage = () => {
       <ProductDetails product={product} loading={loading}/>
       <ProductTabs product={product} loading={loading}/>
       <ReviewsSection product={product} />
+      <ProductCartFooter />
     </>
   );
 };

@@ -14,7 +14,7 @@ export const ProductCartMain = () => {
         setLoading(true);
         try {
             const res = await api.get(`products/${productId}`);
-            setCartProduct(res.data.data);
+            setCartProduct(res.data.product);
         }
         catch (error) {
             console.error("Fetch error:", error);
