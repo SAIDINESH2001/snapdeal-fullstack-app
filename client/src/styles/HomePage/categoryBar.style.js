@@ -61,6 +61,7 @@ export const SectionTitle = styled.h6`
   margin-bottom: 8px;
   text-transform: capitalize;
   &:first-child { margin-top: 0; }
+  &:hover { color: #ff3f6c; }
 `;
 
 export const ListItem = styled.div`

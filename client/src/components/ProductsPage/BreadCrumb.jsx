@@ -29,59 +29,26 @@ export const BreadcrumbAndTrending = () => {
     <div className="border-top bg-light">
       <div className="container-fluid px-5 py-3">
         <nav aria-label="breadcrumb">
-          <ol className="breadcrumb mb-3" style={{ fontSize: "14px", backgroundColor: "transparent" }}>
-            <li className="breadcrumb-item">
-              <Link to="/" className="text-decoration-none text-muted">Home</Link>
-            </li>
-            
+          <ol className="breadcrumb mb-3" style={{ fontSize: "14px" }}>
+            <li className="breadcrumb-item"><Link to="/" className="text-decoration-none text-muted">Home</Link></li>
             {mainCategory && (
-              <li className={`breadcrumb-item ${!subCategory ? "active fw-bold text-dark" : ""}`}>
-                {subCategory ? (
-                  <Link to={`/products/${mainCategory}`} className="text-decoration-none text-muted">
-                    {decodeURIComponent(mainCategory)}
-                  </Link>
-                ) : (
-                  decodeURIComponent(mainCategory)
-                )}
+              <li className={`breadcrumb-item ${!subCategory ? "active fw-bold" : ""}`}>
+                {subCategory ? <Link to={`/products/${mainCategory}`} className="text-decoration-none text-muted">{decodeURIComponent(mainCategory)}</Link> : decodeURIComponent(mainCategory)}
               </li>
             )}
-
             {subCategory && (
-              <li className={`breadcrumb-item ${!category ? "active fw-bold text-dark" : ""}`}>
-                {category ? (
-                  <Link to={`/products/${mainCategory}/${subCategory}`} className="text-decoration-none text-muted">
-                    {decodeURIComponent(subCategory)}
-                  </Link>
-                ) : (
-                  decodeURIComponent(subCategory)
-                )}
+              <li className={`breadcrumb-item ${!category ? "active fw-bold" : ""}`}>
+                {category ? <Link to={`/products/${mainCategory}/${subCategory}`} className="text-decoration-none text-muted">{decodeURIComponent(subCategory)}</Link> : decodeURIComponent(subCategory)}
               </li>
             )}
-
-            {category && (
-              <li className="breadcrumb-item active fw-bold text-dark" aria-current="page">
-                {decodeURIComponent(category)}
-              </li>
-            )}
+            {category && <li className="breadcrumb-item active fw-bold">{decodeURIComponent(category)}</li>}
           </ol>
         </nav>
-
         <div className="d-flex align-items-center flex-wrap gap-3">
-          <span className="fw-bold text-muted" style={{ fontSize: "13px" }}>📈 TRENDING:</span>
-          {loading ? (
-            <div className="spinner-border spinner-border-sm text-secondary"></div>
-          ) : (
-            trends.map((item) => (
-              <button
-                key={item}
-                className="btn btn-white border px-3 shadow-sm bg-white"
-                style={{ fontSize: "13px", paddingBlock: "4px" }}
-                onClick={() => navigate(`/products/${encodeURIComponent(item)}`)}
-              >
-                {item}
-              </button>
-            ))
-          )}
+          <span className="fw-bold text-muted small">📈 TRENDING:</span>
+          {!loading && trends.map((item) => (
+            <button key={item} className="btn btn-white border px-3 bg-white small shadow-sm" onClick={() => navigate(`/products/trending/${encodeURIComponent(item)}`)}>{item}</button>
+          ))}
         </div>
       </div>
     </div>
