@@ -8,13 +8,14 @@ import { Spinner, Container } from "react-bootstrap";
 export const ProductCartMain = () => {
     const [cartProduct, setCartProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [quantity, setQuantity] = useState(1);
     const { productId } = useParams();
 
     const fetchProductData = async () => {
         setLoading(true);
         try {
             const res = await api.get(`products/${productId}`);
-            setCartProduct(res.data.product);
+            setCartProduct(res.data.product || res.data.data);
         }
         catch (error) {
             console.error("Fetch error:", error);
@@ -40,10 +41,15 @@ export const ProductCartMain = () => {
 
     return (
         <div style={{ backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
-
-            <ProductCartBody cartProduct={cartProduct} />
+            <ProductCartBody 
+                cartProduct={cartProduct} 
+                quantity={quantity} 
+                setQuantity={setQuantity} 
+            />
             
-            <ProductCartFooter />
+            <ProductCartFooter 
+                isCheckoutDisabled={quantity === 0 || !cartProduct} 
+            />
         </div>
     );
 };
