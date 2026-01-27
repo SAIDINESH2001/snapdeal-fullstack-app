@@ -70,7 +70,10 @@ export const PaymentModal = ({ show, handleClose, passedProducts, passedQuantiti
     const orderItems = activeProducts.map(item => ({
       productId: item._id,
       quantity: activeQuantities[item._id] || 1,
-      price: item.sellingPrice
+      price: item.sellingPrice,
+      size: item.selectedSize || item.size || null,
+      name: item.name,           
+      image: item.image          
     }));
 
     try {
@@ -200,6 +203,7 @@ export const PaymentModal = ({ show, handleClose, passedProducts, passedQuantiti
                   <div className="flex-grow-1" style={{ fontSize: '11px' }}>
                     <div className="text-dark mb-1">{item.name}</div>
                     <div className="text-muted">Qty: {activeQuantities[item._id] || 1}</div>
+                    {(item.selectedSize || item.size) && <div className="text-muted">Size: {item.selectedSize || item.size}</div>}
                   </div>
                   <div className="fw-bold small">₹{(item.sellingPrice * (activeQuantities[item._id] || 1)).toLocaleString()}</div>
                 </div>

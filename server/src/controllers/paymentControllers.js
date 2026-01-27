@@ -70,14 +70,15 @@ exports.verifyPayment = async (req, res) => {
         const user = await User.findById(req.user.id).populate('cartItems');
         
         const orderItems = items.map(frontItem => {
-            const productData = user.cartItems.find(p => p._id.toString() === frontItem.productId);
+            const cartItem = user.cartItems.find(p => p._id.toString() === frontItem.productId);
             
             return {
                 productId: frontItem.productId,
                 quantity: frontItem.quantity,
                 price: frontItem.price,
-                name: productData ? productData.name : "Product Name Unavailable",
-                image: productData ? productData.image : []
+                size: frontItem.size || null,
+                name: frontItem.name || (cartItem ? cartItem.name : "Product Name Unavailable"),
+                image: frontItem.image || (cartItem ? cartItem.image : [])
             };
         });
 
@@ -94,7 +95,15 @@ exports.verifyPayment = async (req, res) => {
         });
 
         await newOrder.save();
-        await User.findByIdAndUpdate(req.user.id, { $set: { cartItems: [] } });
+
+        if (user.cartItems && user.cartItems.length > 0) {
+             const purchasedIds = items.map(i => i.productId);
+             const remainingCartIds = user.cartItems
+                .filter(item => !purchasedIds.includes(item._id.toString()))
+                .map(item => item._id);
+
+             await User.findByIdAndUpdate(req.user.id, { $set: { cartItems: remainingCartIds } });
+        }
 
         res.status(200).json({ 
             success: true, 
