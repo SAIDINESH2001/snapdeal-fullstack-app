@@ -95,7 +95,7 @@ const productSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'], 
     default: 'pending' 
   },
-  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
 }, { 
     timestamps: true
 });

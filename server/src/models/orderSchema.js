@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     items: [
         {
             productId: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
+                ref: 'SnapDeal-Products',
                 required: true
             },
             name: String,

@@ -5,8 +5,10 @@ export const HomeDeal = () => {
   const navigate = useNavigate();
 
   const handleDealClick = (deal) => {
-    const searchTerm = deal.title || deal.name;
-    navigate(`/products/trending/${encodeURIComponent(searchTerm)}`);
+    if(deal.productType) {
+      navigate(`/products/${encodeURIComponent(deal.productMainCategory)}/${encodeURIComponent(deal.subCategory)}/${encodeURIComponent(deal.productType)}`); 
+    }
+    else navigate(`/products/${encodeURIComponent(deal.productMainCategory)}/${encodeURIComponent(deal.subCategory)}`);
   };
 
   return (

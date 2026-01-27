@@ -31,7 +31,6 @@ const SignUpModal = forwardRef((_, ref) => {
         );
       }
     } catch (err) {
-      // Prevents the "blank screen" crash if an error occurs during the process
       console.error("Signup execution failed", err);
     }
   };
@@ -60,7 +59,6 @@ const SignUpModal = forwardRef((_, ref) => {
           </div>
 
           <div className="modal-body px-0 pb-0">
-            {/* API/SERVER ERROR DISPLAY */}
             {errors.server && (
               <div className="alert alert-danger py-2 small text-center border-0 mb-3">
                 {typeof errors.server === 'object' 

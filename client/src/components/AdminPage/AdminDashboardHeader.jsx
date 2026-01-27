@@ -3,6 +3,8 @@ import { Button } from "react-bootstrap";
 
 const DashboardHeader = ({ activeTab }) => {
   const titles = {
+    overview: "Platform Overview",
+    inventory: "Product Inventory",
     approvals: "Product Approvals",
     orders: "Active Customer Orders",
     delivered: "Delivered & Post-Sale"

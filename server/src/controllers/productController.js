@@ -65,17 +65,33 @@ exports.updateProductStatus = async (req, res, next) => {
 
 exports.getProductByStatus = async(req,res,next) => {
   try {
-    const products = await Products.find({status: 'pending'});
+    const products = await Products.find({status: 'pending'}).populate('sellerId', 'name email');
     res.json({
       success: true,
       message: 'Products with Pending Status are available',
-      products: products,
+      data: products,
     })
   }
   catch(error) {
     next(error);
   }
 }
+
+exports.getAllProductsAdmin = async (req, res, next) => {
+    try {
+        const products = await Products.find()
+            .populate('sellerId', 'name email')
+            .sort({ createdAt: -1 });
+            
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 exports.getProductsByCategory = async (req, res, next) => {
   try {
@@ -161,7 +177,7 @@ exports.getProductById = async(req, res, next) => {
     if(!productId) {
       return res.status(400).json({ success: false, message: 'Product ID is required' });
     }
-    const product = await Products.findOne({ _id: productId, status: 'approved' });
+    const product = await Products.findOne({ _id: productId });
     if(!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }

@@ -1,147 +1,204 @@
-import React from "react";
-import { Table, Spinner, Form, Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { Table, Spinner, Form, Button, Badge, Modal, Row, Col } from "react-bootstrap";
 
 const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOrderStatusUpdate, handleStatusUpdate }) => {
-  
-  const getStatusConfig = (status) => {
-    const s = status?.toLowerCase().trim() || 'default';
-    const colors = {
-      'delivered': { bg: '#10b981', color: '#ffffff' },      
-      'cancelled': { bg: '#ef4444', color: '#ffffff' },      
-      'shipped': { bg: '#3b82f6', color: '#ffffff' },        
-      'processing': { bg: '#f59e0b', color: '#ffffff' },     
-      'order placed': { bg: '#64748b', color: '#ffffff' },   
-      'return pending': { bg: '#f97316', color: '#ffffff' }, 
-      'returned': { bg: '#8b5cf6', color: '#ffffff' },       
-      'replace pending': { bg: '#06b6d4', color: '#ffffff' }, 
-      'replaced': { bg: '#ec4899', color: '#ffffff' },
-      'refund initiated': { bg: '#6366f1', color: '#ffffff' },
-      'refund processing': { bg: '#8b5cf6', color: '#ffffff' },
-      'refunded': { bg: '#14b8a6', color: '#ffffff' },
-      'default': { bg: '#94a3b8', color: '#ffffff' }
-    };
-    return colors[s] || colors['default'];
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleViewProduct = (product) => {
+    setSelectedProduct(product);
+    setShowModal(true);
   };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedProduct(null);
+  };
+  
+  const getStatusColor = (status) => {
+    if(!status) return 'secondary';
+    const s = status.toLowerCase();
+    if(s === 'delivered' || s === 'approved' || s === 'refunded' || s === 'replaced') return 'success';
+    if(s === 'cancelled' || s === 'rejected') return 'danger';
+    if(s === 'shipped') return 'primary';
+    return 'warning';
+  }
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center py-5 bg-white">
-        <Spinner animation="border" variant="danger" size="sm" />
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="secondary" />
       </div>
     );
   }
 
+  const isProductTab = activeTab === 'approvals' || activeTab === 'inventory';
+
   return (
-    <Table borderless hover responsive className="mb-0 align-middle shadow-none">
-      <thead className="bg-[#f8fafc] border-bottom">
-        <tr className="text-muted fw-bold" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>
-          <th className="ps-4 py-2">INFORMATION</th>
-          <th className="py-2">CONTACT / SOURCE</th>
-          <th className="py-2 text-center">VALUE</th>
-          <th className="py-2 text-center">STATUS</th>
-          <th className="text-end pe-4 py-2">ACTIONS</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.length > 0 ? (
-          data.map((item) => {
-            const statusConfig = getStatusConfig(item.orderStatus);
-            const lastAction = item.actionHistory?.[item.actionHistory.length - 1];
-            
-            return (
-              <tr key={item._id} className="border-bottom transition-all hover:bg-gray-50">
-                <td className="ps-4 py-3" style={{ maxWidth: '280px' }}>
-                  <div className="fw-bold text-[#1e293b]" style={{ fontSize: '12.5px' }}>
-                    {activeTab === 'approvals' ? item.name : `ID: #${item._id.toUpperCase()}`}
-                  </div>
-                  <div className="text-muted fw-medium" style={{ fontSize: '11px' }}>
-                    {activeTab === 'approvals' ? `${item.brand} • ${item.productType}` : `${item.items.length} items • ${item.paymentMethod}`}
-                  </div>
-                  {activeTab !== 'approvals' && lastAction && (
-                    <div className="mt-1 p-2 bg-[#fff1f2] border-start border-danger border-2 rounded-1" style={{ fontSize: '10.5px' }}>
-                      <span className="text-danger fw-bold text-uppercase">Reason: </span>
-                      <span className="text-[#475569]">{lastAction.reason}</span>
+    <>
+      <Table hover responsive className="mb-0 align-middle">
+        <thead className="bg-light">
+          <tr className="text-secondary" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <th className="ps-4 py-3">Product / Order Info</th>
+            <th className="py-3">Contact</th>
+            <th className="text-center py-3">Value</th>
+            <th className="text-center py-3">Status</th>
+            <th className="text-end pe-4 py-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.length > 0 ? (
+            data.map((item) => {
+              return (
+                <tr key={item._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                  <td className="ps-4 py-3">
+                    <div className="fw-bold text-dark" style={{ fontSize: '13px' }}>
+                      {isProductTab ? item.name : `Order #${item._id.toUpperCase()}`}
                     </div>
-                  )}
-                </td>
-                <td className="py-3">
-                  <div className="fw-semibold text-[#475569]" style={{ fontSize: '12px' }}>
-                    {activeTab === 'approvals' ? (item.sellerId?.name || "Independent") : item.shippingAddress.phone}
-                  </div>
-                  {activeTab !== 'approvals' && <div className="text-muted" style={{ fontSize: '10.5px' }}>{item.shippingAddress.city}</div>}
-                </td>
-                <td className="fw-bold text-[#1e293b] text-center" style={{ fontSize: '12.5px' }}>
-                  ₹{(activeTab === 'approvals' ? item.sellingPrice : item.totalAmount).toLocaleString()}
-                </td>
-                <td className="text-center py-3">
-                  <div
-                    style={{ 
-                      backgroundColor: statusConfig.bg, 
-                      color: statusConfig.color, 
-                      fontSize: '10px', 
-                      minWidth: '115px',
-                      padding: '6px 10px',
-                      borderRadius: '6px',
-                      fontWeight: '700',
-                      display: 'inline-block',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.4px'
-                    }} 
-                  >
-                    {item.orderStatus || 'ORDER PLACED'}
-                  </div>
-                </td>
-                <td className="text-end pe-4 py-3">
-                  {activeTab !== 'approvals' ? (
-                    <div className="d-flex align-items-center justify-content-end gap-1">
-                      <Form.Select 
-                        size="sm" 
-                        className="border-0 bg-[#f1f5f9] text-[#475569] shadow-none"
-                        style={{ width: '130px', fontSize: '11px', height: '32px', borderRadius: '4px' }}
-                        defaultValue={item.orderStatus}
-                        id={`sel-${item._id}`}
-                      >
-                        {[
-                          'Order Placed', 
-                          'Processing', 
-                          'Shipped', 
-                          'Delivered', 
-                          'Cancelled', 
-                          'Return Pending', 
-                          'Returned', 
-                          'Refund Initiated',
-                          'Refund Processing',
-                          'Refunded',
-                          'Replace Pending', 
-                          'Replaced'
-                        ].map(s => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </Form.Select>
-                      <Button 
-                        size="sm" className="px-3 border-0 shadow-none fw-bold"
-                        style={{ backgroundColor: '#1e293b', fontSize: '10px', height: '32px', borderRadius: '4px' }}
-                        disabled={statusUpdateLoading === item._id}
-                        onClick={() => handleOrderStatusUpdate(item._id, document.getElementById(`sel-${item._id}`).value)}
-                      >
-                        {statusUpdateLoading === item._id ? '...' : 'SAVE'}
-                      </Button>
+                    <div className="text-muted" style={{ fontSize: '11px' }}>
+                      {isProductTab 
+                          ? `${item.brand} • ${item.productType}` 
+                          : `${item.items?.length || 0} Items • ${item.paymentMethod}`
+                      }
                     </div>
-                  ) : (
-                    <div className="d-flex justify-content-end gap-1">
-                      <Button variant="light" size="sm" className="text-success fw-bold px-2 py-1 rounded-2 border-0 shadow-none" style={{ fontSize: '11px' }} onClick={() => handleStatusUpdate(item._id, "approved")}>Accept</Button>
-                      <Button variant="link" size="sm" className="text-danger text-decoration-none fw-bold px-1" style={{ fontSize: '11px' }} onClick={() => handleStatusUpdate(item._id, "rejected")}>Decline</Button>
+                  </td>
+                  <td>
+                    <div className="fw-semibold text-dark" style={{ fontSize: '12px' }}>
+                      {isProductTab ? (item.sellerId?.name || "Seller") : item.shippingAddress?.phone}
                     </div>
-                  )}
-                </td>
-              </tr>
-            );
-          })
-        ) : (
-          <tr><td colSpan="5" className="text-center py-5 text-muted fw-medium" style={{ fontSize: '12px' }}>No records found.</td></tr>
+                    <div className="text-muted" style={{ fontSize: '11px' }}>
+                        {isProductTab ? item.sellerId?.email : item.shippingAddress?.city}
+                    </div>
+                  </td>
+                  <td className="text-center fw-bold text-dark" style={{ fontSize: '13px' }}>
+                    ₹{(isProductTab ? item.sellingPrice : item.totalAmount)?.toLocaleString()}
+                  </td>
+                  <td className="text-center">
+                    <Badge bg={getStatusColor(item.status || item.orderStatus)} style={{ fontSize: '10px', fontWeight: '600' }}>
+                        {(item.status || item.orderStatus || 'Unknown').toUpperCase()}
+                    </Badge>
+                  </td>
+                  <td className="text-end pe-4">
+                    {activeTab === 'approvals' ? (
+                      <div className="d-flex justify-content-end gap-2">
+                        <Button size="sm" variant="success" style={{ fontSize: '11px', fontWeight: 'bold' }} onClick={() => handleStatusUpdate(item._id, "approved")}>Approve</Button>
+                        <Button size="sm" variant="outline-danger" style={{ fontSize: '11px', fontWeight: 'bold' }} onClick={() => handleStatusUpdate(item._id, "rejected")}>Reject</Button>
+                      </div>
+                    ) : activeTab === 'inventory' ? (
+                       <Button size="sm" variant="outline-secondary" style={{ fontSize: '11px', fontWeight: '600' }} onClick={() => handleViewProduct(item)}>
+                          View
+                        </Button>
+                    ) : (
+                      <div className="d-flex justify-content-end align-items-center gap-2">
+                        <Form.Select 
+                          size="sm" 
+                          style={{ width: '130px', fontSize: '12px' }}
+                          defaultValue={item.orderStatus}
+                          id={`status-${item._id}`}
+                          className="shadow-none border-secondary-subtle"
+                        >
+                          <option value="Processing">Processing</option>
+                          <option value="Shipped">Shipped</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Cancelled">Cancelled</option>
+                          <option value="Returned">Returned</option>
+                        </Form.Select>
+                        <Button 
+                          size="sm" 
+                          variant="dark"
+                          style={{ fontSize: '11px', fontWeight: 'bold' }}
+                          disabled={statusUpdateLoading === item._id}
+                          onClick={() => handleOrderStatusUpdate(item._id, document.getElementById(`status-${item._id}`).value)}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr><td colSpan="5" className="text-center py-5 text-muted small">No records found</td></tr>
+          )}
+        </tbody>
+      </Table>
+
+      <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
+        {selectedProduct && (
+          <>
+            <Modal.Header closeButton className="border-bottom-0 pb-0">
+              <Modal.Title className="fs-5 fw-bold text-dark">{selectedProduct.name}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="p-4">
+              <Row>
+                <Col md={5} className="mb-4 mb-md-0">
+                  <div className="bg-light rounded p-3 d-flex align-items-center justify-content-center mb-3 border" style={{ height: '300px' }}>
+                    <img 
+                        src={selectedProduct.image && selectedProduct.image[0]} 
+                        alt="Product" 
+                        className="img-fluid"
+                        style={{ maxHeight: '100%', objectFit: 'contain' }} 
+                    />
+                  </div>
+                  <div className="d-flex gap-2 overflow-auto pb-2">
+                      {selectedProduct.image && selectedProduct.image.map((img, index) => (
+                          <div key={index} className="border rounded p-1" style={{ width: '60px', height: '60px', flexShrink: 0 }}>
+                            <img src={img} alt="" className="w-100 h-100 object-fit-contain" />
+                          </div>
+                      ))}
+                  </div>
+                </Col>
+                <Col md={7}>
+                   <div className="mb-3">
+                        <Badge bg={getStatusColor(selectedProduct.status)} className="mb-2 px-3 py-2">
+                            {selectedProduct.status.toUpperCase()}
+                        </Badge>
+                   </div>
+                   
+                   <Row className="g-3 mb-4">
+                       <Col xs={6}>
+                           <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Brand</label>
+                           <div className="fw-bold text-dark" style={{ fontSize: '14px' }}>{selectedProduct.brand}</div>
+                       </Col>
+                       <Col xs={6}>
+                           <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Category</label>
+                           <div className="fw-bold text-dark" style={{ fontSize: '14px' }}>{selectedProduct.subCategory}</div>
+                       </Col>
+                       <Col xs={6}>
+                           <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Price</label>
+                           <div className="d-flex align-items-baseline gap-2">
+                               <span className="fw-bold text-dark fs-5">₹{selectedProduct.sellingPrice}</span>
+                               <span className="text-decoration-line-through text-muted small">₹{selectedProduct.mrp}</span>
+                           </div>
+                       </Col>
+                       <Col xs={6}>
+                           <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Stock</label>
+                           <div className={`fw-bold ${selectedProduct.stockQuantity < 5 ? 'text-danger' : 'text-success'}`} style={{ fontSize: '14px' }}>
+                               {selectedProduct.stockQuantity} Units Left
+                           </div>
+                       </Col>
+                   </Row>
+
+                   <div className="p-3 bg-light rounded border mb-3">
+                       <label className="text-muted mb-1" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Seller Information</label>
+                       <div className="fw-bold text-dark" style={{ fontSize: '13px' }}>{selectedProduct.sellerId?.name}</div>
+                       <div className="text-muted" style={{ fontSize: '12px' }}>{selectedProduct.sellerId?.email}</div>
+                   </div>
+
+                   <div>
+                       <label className="text-muted mb-1" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Description</label>
+                       <p className="text-secondary small mb-0" style={{ lineHeight: '1.5' }}>
+                           {selectedProduct.description}
+                       </p>
+                   </div>
+                </Col>
+              </Row>
+            </Modal.Body>
+          </>
         )}
-      </tbody>
-    </Table>
+      </Modal>
+    </>
   );
 };
 
