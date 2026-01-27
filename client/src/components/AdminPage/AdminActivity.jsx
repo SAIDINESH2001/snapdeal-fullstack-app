@@ -14,7 +14,10 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
       'return pending': { bg: '#f97316', color: '#ffffff' }, 
       'returned': { bg: '#8b5cf6', color: '#ffffff' },       
       'replace pending': { bg: '#06b6d4', color: '#ffffff' }, 
-      'replaced': { bg: '#ec4899', color: '#ffffff' },       
+      'replaced': { bg: '#ec4899', color: '#ffffff' },
+      'refund initiated': { bg: '#6366f1', color: '#ffffff' },
+      'refund processing': { bg: '#8b5cf6', color: '#ffffff' },
+      'refunded': { bg: '#14b8a6', color: '#ffffff' },
       'default': { bg: '#94a3b8', color: '#ffffff' }
     };
     return colors[s] || colors['default'];
@@ -98,7 +101,20 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                         defaultValue={item.orderStatus}
                         id={`sel-${item._id}`}
                       >
-                        {['Order Placed', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Pending', 'Returned', 'Replace Pending', 'Replaced'].map(s => (
+                        {[
+                          'Order Placed', 
+                          'Processing', 
+                          'Shipped', 
+                          'Delivered', 
+                          'Cancelled', 
+                          'Return Pending', 
+                          'Returned', 
+                          'Refund Initiated',
+                          'Refund Processing',
+                          'Refunded',
+                          'Replace Pending', 
+                          'Replaced'
+                        ].map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </Form.Select>

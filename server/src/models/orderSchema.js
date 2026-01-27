@@ -56,6 +56,9 @@ const orderSchema = new mongoose.Schema({
             'Cancelled',
             'Return Pending',
             'Returned',
+            'Refund Initiated',
+            'Refund Processing',
+            'Refunded',
             'Replace Pending',
             'Replaced'
         ],

@@ -53,7 +53,16 @@ export const AdminDashboard = () => {
     }
   };
 
-  const postSaleStatuses = ['delivered', 'returned', 'replaced', 'return pending', 'replace pending'];
+  const postSaleStatuses = [
+    'delivered', 
+    'returned', 
+    'replaced', 
+    'return pending', 
+    'replace pending',
+    'refund initiated',
+    'refund processing',
+    'refunded'
+  ];
   
   const deliveredOrders = orderProducts.filter(order => 
     postSaleStatuses.includes(order.orderStatus?.toLowerCase())
