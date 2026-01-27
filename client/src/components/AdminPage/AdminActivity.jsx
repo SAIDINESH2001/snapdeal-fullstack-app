@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Table, Spinner, Form, Button, Badge, Modal, Row, Col } from "react-bootstrap";
+import { Table, Spinner, Button, Badge, Modal, Row, Col, Dropdown } from "react-bootstrap";
 
 const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOrderStatusUpdate, handleStatusUpdate }) => {
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [tempStatuses, setTempStatuses] = useState({});
 
   const handleViewProduct = (product) => {
     setSelectedProduct(product);
@@ -14,14 +15,31 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
     setShowModal(false);
     setSelectedProduct(null);
   };
+
+  const handleTempStatusChange = (orderId, status) => {
+    setTempStatuses(prev => ({
+      ...prev,
+      [orderId]: status
+    }));
+  };
+
+  const executeStatusUpdate = (orderId, originalStatus) => {
+    const newStatus = tempStatuses[orderId];
+    if (newStatus && newStatus !== originalStatus) {
+        handleOrderStatusUpdate(orderId, newStatus);
+    }
+  };
   
   const getStatusColor = (status) => {
     if(!status) return 'secondary';
     const s = status.toLowerCase();
-    if(s === 'delivered' || s === 'approved' || s === 'refunded' || s === 'replaced') return 'success';
-    if(s === 'cancelled' || s === 'rejected') return 'danger';
-    if(s === 'shipped') return 'primary';
-    return 'warning';
+    
+    if(['delivered', 'approved', 'refunded', 'replaced', 'returned'].includes(s)) return 'success';
+    if(['cancelled', 'rejected'].includes(s)) return 'danger';
+    if(['shipped', 'refund initiated', 'return pending', 'replace pending'].includes(s)) return 'primary';
+    if(['processing', 'order placed', 'refund processing', 'pending'].includes(s)) return 'warning';
+    
+    return 'secondary';
   }
 
   if (loading) {
@@ -49,11 +67,14 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
         <tbody>
           {data.length > 0 ? (
             data.map((item) => {
+              const currentStatus = tempStatuses[item._id] || item.orderStatus;
+              const isChanged = tempStatuses[item._id] && tempStatuses[item._id] !== item.orderStatus;
+
               return (
                 <tr key={item._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                   <td className="ps-4 py-3">
                     <div className="fw-bold text-dark" style={{ fontSize: '13px' }}>
-                      {isProductTab ? item.name : `Order #${item._id.toUpperCase()}`}
+                      {isProductTab ? item.name : `Order #${item._id.slice(-8).toUpperCase()}`}
                     </div>
                     <div className="text-muted" style={{ fontSize: '11px' }}>
                       {isProductTab 
@@ -89,28 +110,63 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                           View
                         </Button>
                     ) : (
-                      <div className="d-flex justify-content-end align-items-center gap-2">
-                        <Form.Select 
-                          size="sm" 
-                          style={{ width: '130px', fontSize: '12px' }}
-                          defaultValue={item.orderStatus}
-                          id={`status-${item._id}`}
-                          className="shadow-none border-secondary-subtle"
+                      <div className="d-flex justify-content-end gap-2">
+                        <Dropdown 
+                            drop="down" 
+                            onSelect={(eventKey) => handleTempStatusChange(item._id, eventKey)}
                         >
-                          <option value="Processing">Processing</option>
-                          <option value="Shipped">Shipped</option>
-                          <option value="Delivered">Delivered</option>
-                          <option value="Cancelled">Cancelled</option>
-                          <option value="Returned">Returned</option>
-                        </Form.Select>
+                          <Dropdown.Toggle 
+                            variant="outline-dark" 
+                            size="sm" 
+                            disabled={statusUpdateLoading === item._id}
+                            className="border-secondary-subtle"
+                            style={{ 
+                                fontSize: '11px', 
+                                fontWeight: 'bold', 
+                                width: '150px', 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center' 
+                            }}
+                          >
+                            {currentStatus || 'Select Status'}
+                          </Dropdown.Toggle>
+
+                          <Dropdown.Menu 
+                            style={{ fontSize: '12px' }}
+                            popperConfig={{
+                              strategy: "fixed",
+                              modifiers: [
+                                {
+                                  name: "flip",
+                                  enabled: false,
+                                },
+                              ],
+                            }}
+                          >
+                            <Dropdown.Item eventKey="Order Placed">Order Placed</Dropdown.Item>
+                            <Dropdown.Item eventKey="Processing">Processing</Dropdown.Item>
+                            <Dropdown.Item eventKey="Shipped">Shipped</Dropdown.Item>
+                            <Dropdown.Item eventKey="Delivered">Delivered</Dropdown.Item>
+                            <Dropdown.Item eventKey="Cancelled" className="text-danger">Cancelled</Dropdown.Item>
+                            <Dropdown.Item eventKey="Return Pending">Return Pending</Dropdown.Item>
+                            <Dropdown.Item eventKey="Returned">Returned</Dropdown.Item>
+                            <Dropdown.Item eventKey="Refund Initiated">Refund Initiated</Dropdown.Item>
+                            <Dropdown.Item eventKey="Refund Processing">Refund Processing</Dropdown.Item>
+                            <Dropdown.Item eventKey="Refunded">Refunded</Dropdown.Item>
+                            <Dropdown.Item eventKey="Replace Pending">Replace Pending</Dropdown.Item>
+                            <Dropdown.Item eventKey="Replaced">Replaced</Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                        
                         <Button 
-                          size="sm" 
-                          variant="dark"
-                          style={{ fontSize: '11px', fontWeight: 'bold' }}
-                          disabled={statusUpdateLoading === item._id}
-                          onClick={() => handleOrderStatusUpdate(item._id, document.getElementById(`status-${item._id}`).value)}
+                            size="sm" 
+                            variant="dark"
+                            style={{ fontSize: '11px', fontWeight: 'bold' }}
+                            disabled={!isChanged || statusUpdateLoading === item._id}
+                            onClick={() => executeStatusUpdate(item._id, item.orderStatus)}
                         >
-                          Save
+                            {statusUpdateLoading === item._id ? '...' : 'Save'}
                         </Button>
                       </div>
                     )}
