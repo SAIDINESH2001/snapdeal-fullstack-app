@@ -34,7 +34,13 @@ export const HomeDeal = () => {
           </div>
         ))}
       </div>
-      <div className="d-flex px-5 w-100 mt-3 mb-4" onClick={() => navigate(`/products/trending/Sneakers`)}><img src="https://g.sdlcdn.com/imgs/a/b/c/sdtv/campusshoeswebpagebanner.jpg" alt="" /></div>
+      <div 
+        className="d-flex px-5 w-100 mt-3 mb-4" 
+        onClick={() => navigate(`/products/search?q=Campus`)}
+        style={{ cursor: 'pointer' }}
+      >
+        <img src="https://g.sdlcdn.com/imgs/a/b/c/sdtv/campusshoeswebpagebanner.jpg" alt="" />
+      </div>
       <Link className="d-flex px-5 w-100 mt-3 mb-4" target="blank" to={'https://play.google.com/store/apps/details?id=com.snapdeal.main'}><img  className="border border-dark w-100 " src="https://g.sdlcdn.com/imgs/a/b/c/sdtv/appdownloadbannerhomeweb_4.jpg" alt="" /></Link>
     </>
   );
