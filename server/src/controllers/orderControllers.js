@@ -51,16 +51,30 @@ exports.getAllOrders = async (req, res, next) => {
     const orders = await Order.find()
       .populate("user", "name")
       .sort({ createdAt: -1 });
-    const totalRevenue = orders.reduce(
-      (acc, order) => acc + order.totalAmount,
-      0,
-    );
+
+    const excludedStatuses = [
+      'Cancelled', 
+      'Return Pending', 
+      'Returned', 
+      'Refund Initiated', 
+      'Refund Processing', 
+      'Refunded'
+    ];
+
+    const totalRevenue = orders.reduce((acc, order) => {
+        if (excludedStatuses.includes(order.orderStatus)) {
+            return acc;
+        }
+        return acc + order.totalAmount;
+    }, 0);
+
     const pendingOrders = orders.filter(
       (o) =>
         !["Delivered", "Cancelled", "Returned", "Refunded"].includes(
           o.orderStatus,
         ),
     ).length;
+    
     const productStatsRaw = await Product.aggregate([
       {
         $group: {
@@ -106,6 +120,29 @@ exports.updateOrderStatus = async (req, res) => {
     );
 
     res.status(200).json({ success: true, data: updatedOrder });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.updateSellerOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    
+    if (!status) {
+        return res.status(400).json({ success: false, message: "Status is required" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+        return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    order.orderStatus = status;
+    await order.save();
+
+    res.status(200).json({ success: true, data: order });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -237,6 +274,15 @@ exports.getSellerOrders = async (req, res, next) => {
     let totalRevenue = 0;
     let pendingOrders = 0;
 
+    const excludedStatuses = [
+        'Cancelled', 
+        'Return Pending', 
+        'Returned', 
+        'Refund Initiated', 
+        'Refund Processing', 
+        'Refunded'
+    ];
+
     const sellerOrders = orders.map((order) => {
       const sellerItems = order.items.filter((item) =>
         productIds.includes(item.productId.toString()),
@@ -247,7 +293,9 @@ exports.getSellerOrders = async (req, res, next) => {
         0,
       );
 
-      totalRevenue += sellerTotal;
+      if (!excludedStatuses.includes(order.orderStatus)) {
+          totalRevenue += sellerTotal;
+      }
 
       if (
         !["Delivered", "Cancelled", "Returned", "Refunded"].includes(

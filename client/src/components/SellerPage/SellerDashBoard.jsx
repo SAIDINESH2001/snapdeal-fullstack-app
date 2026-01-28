@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Table, Badge, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Table, Badge, ProgressBar, Modal, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Box, ShoppingBag, Clock, IndianRupee } from 'lucide-react'; 
 import api from '../../services/axios';
@@ -9,6 +9,11 @@ export const SellerDashboard = ({ sellerProducts }) => {
     const [orders, setOrders] = useState([]);
     const [analytics, setAnalytics] = useState({ totalRevenue: 0, totalOrders: 0, pendingOrders: 0 });
     const [loadingOrders, setLoadingOrders] = useState(true);
+
+    const [showModal, setShowModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [tempStatus, setTempStatus] = useState("");
+    const [updatingStatus, setUpdatingStatus] = useState(false);
 
     useEffect(() => {
         const fetchSellerOrders = async () => {
@@ -32,6 +37,55 @@ export const SellerDashboard = ({ sellerProducts }) => {
         acc.total += 1;
         return acc;
     }, { approved: 0, pending: 0, rejected: 0, total: 0 });
+
+    const handleShowOrder = (order) => {
+        setSelectedOrder(order);
+        setTempStatus(order.orderStatus);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedOrder(null);
+        setTempStatus("");
+    };
+
+    const handleSaveChanges = async () => {
+        if (!selectedOrder || !tempStatus) return;
+        
+        if (tempStatus === selectedOrder.orderStatus) {
+            alert("No changes to save.");
+            return;
+        }
+
+        setUpdatingStatus(true);
+        try {
+            const res = await api.put(`/seller/orders/${selectedOrder._id}/status`, { status: tempStatus });
+            
+            if (res.data.success) {
+                const updatedOrder = { ...selectedOrder, orderStatus: tempStatus };
+                setSelectedOrder(updatedOrder);
+                setOrders(prev => prev.map(o => o._id === selectedOrder._id ? updatedOrder : o));
+                alert("Order status updated successfully!");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to update status: " + (error.response?.data?.message || error.message));
+        } finally {
+            setUpdatingStatus(false);
+        }
+    };
+
+    const getStatusVariant = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'delivered': return 'success';
+            case 'cancelled': return 'danger';
+            case 'shipped': return 'info';
+            case 'order packed': return 'primary';
+            case 'processing': return 'warning';
+            default: return 'secondary';
+        }
+    };
 
     return (
         <Container className="py-5">
@@ -140,12 +194,18 @@ export const SellerDashboard = ({ sellerProducts }) => {
                             orders.map(order => (
                                 <tr key={order._id} style={{ borderBottom: '1px solid #f0f0f0' }}>
                                     <td className="ps-4">
-                                        <div className="fw-bold text-primary" style={{ fontSize: '13px' }}>#{order._id.toUpperCase()}</div>
+                                        <div 
+                                            className="fw-bold text-primary" 
+                                            style={{ fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
+                                            onClick={() => handleShowOrder(order)}
+                                        >
+                                            #{order._id.toUpperCase()}
+                                        </div>
                                     </td>
                                     <td className="text-dark fw-semibold" style={{ fontSize: '13px' }}>{order.user?.name || "Guest"}</td>
                                     <td className="py-3">
-                                        {order.items.map((item, idx) => (
-                                            <div key={idx} className="d-flex align-items-center gap-3 mb-2">
+                                        {order.items.slice(0, 1).map((item, idx) => (
+                                            <div key={idx} className="d-flex align-items-center gap-3">
                                                  <img 
                                                     src={item.image[0]} 
                                                     width="40" height="40" 
@@ -158,15 +218,16 @@ export const SellerDashboard = ({ sellerProducts }) => {
                                                  </div>
                                             </div>
                                         ))}
+                                        {order.items.length > 1 && (
+                                            <div className="small text-muted fw-bold ps-5 mt-1" style={{ fontSize: '11px' }}>
+                                                + {order.items.length - 1} more items
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="fw-bold text-success text-center" style={{ fontSize: '14px' }}>₹{order.sellerTotal.toLocaleString()}</td>
                                     <td className="text-center">
-                                        <Badge bg={
-                                            order.orderStatus === 'Delivered' ? 'success' : 
-                                            order.orderStatus === 'Cancelled' ? 'danger' : 
-                                            'warning'
-                                        } className="px-2 py-1 fw-normal" style={{ fontSize: '10px' }}>
-                                            {order.orderStatus.toUpperCase()}
+                                        <Badge bg={getStatusVariant(order.orderStatus)} className="px-2 py-1 fw-normal" style={{ fontSize: '10px', textTransform: 'uppercase' }}>
+                                            {order.orderStatus}
                                         </Badge>
                                     </td>
                                     <td className="text-end pe-4 text-muted small">{new Date(order.createdAt).toLocaleDateString()}</td>
@@ -224,6 +285,84 @@ export const SellerDashboard = ({ sellerProducts }) => {
                     </tbody>
                 </Table>
             </Card>
+
+            <Modal show={showModal} onHide={handleCloseModal} centered size="lg">
+                <Modal.Header closeButton className="border-0 pb-0">
+                    <Modal.Title className="fw-bold" style={{ fontSize: '18px' }}>
+                        Order Details <span className="text-primary">#{selectedOrder?._id.toUpperCase()}</span>
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="pt-2">
+                    {selectedOrder && (
+                        <>
+                            <div className="d-flex justify-content-between align-items-center mb-3 bg-light p-3 rounded">
+                                <div>
+                                    <p className="mb-0 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Customer</p>
+                                    <p className="mb-0 fw-bold text-dark" style={{ fontSize: '14px' }}>{selectedOrder.user?.name || "Guest"}</p>
+                                </div>
+                                <div className="text-end">
+                                    <p className="mb-0 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Date</p>
+                                    <p className="mb-0 text-dark" style={{ fontSize: '14px' }}>{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                                </div>
+                            </div>
+
+                            <h6 className="fw-bold mb-3 small text-uppercase text-muted" style={{ fontSize: '12px' }}>Items Ordered</h6>
+                            <div className="border rounded mb-3">
+                                {selectedOrder.items.map((item, idx) => (
+                                    <div key={idx} className="d-flex align-items-center gap-3 p-3 border-bottom last-border-0">
+                                        <img 
+                                            src={item.image[0]} 
+                                            width="50" height="50" 
+                                            style={{ objectFit: 'contain', border: '1px solid #eee', borderRadius: '4px' }} 
+                                            alt="" 
+                                        />
+                                        <div className="flex-grow-1">
+                                            <div className="fw-bold text-dark" style={{ fontSize: '14px' }}>{item.name}</div>
+                                            <div className="small text-muted" style={{ fontSize: '12px' }}>Price: ₹{item.price} x {item.quantity}</div>
+                                        </div>
+                                        <div className="fw-bold text-dark" style={{ fontSize: '14px' }}>₹{item.price * item.quantity}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mt-4 p-3 bg-light rounded gap-3">
+                                <div className="d-flex align-items-center gap-2">
+                                    <div>
+                                        <p className="mb-1 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Update Status</p>
+                                        <div className="d-flex gap-2">
+                                            <Form.Select 
+                                                size="sm" 
+                                                value={tempStatus} 
+                                                onChange={(e) => setTempStatus(e.target.value)}
+                                                disabled={updatingStatus}
+                                                style={{ width: '180px', fontSize: '13px', fontWeight: '500' }}
+                                                className="border-secondary"
+                                            >
+                                                <option value="Processing">Processing</option>
+                                                <option value="Order Packed">Order Packed</option>
+                                            </Form.Select>
+                                            <Button 
+                                                variant="dark" 
+                                                size="sm" 
+                                                onClick={handleSaveChanges} 
+                                                disabled={updatingStatus || tempStatus === selectedOrder.orderStatus}
+                                                className="fw-bold"
+                                                style={{ fontSize: '12px' }}
+                                            >
+                                                {updatingStatus ? 'Saving...' : 'Update Status'}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-end">
+                                    <p className="mb-0 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Total Earnings</p>
+                                    <h4 className="fw-bold text-success mb-0">₹{selectedOrder.sellerTotal.toLocaleString()}</h4>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </Modal.Body>
+            </Modal>
         </Container>
     );
 };

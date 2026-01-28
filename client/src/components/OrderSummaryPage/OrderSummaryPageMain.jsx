@@ -37,6 +37,7 @@ export const OrderDetailPage = () => {
   const stages = [
     { label: "Order Placed", icon: "bi-box-seam" },
     { label: "Processing", icon: "bi-gear" },
+    { label: "Order Packed", icon: "bi-box-fill" },
     { label: "Shipped", icon: "bi-truck" },
     { label: "Delivered", icon: "bi-house-check" },
   ];
@@ -162,7 +163,7 @@ export const OrderDetailPage = () => {
       return { color: "#16a34a", bg: "#f0fdf4", border: "#bcf0da" };
     if (s === "cancelled")
       return { color: "#dc2626", bg: "#fef2f2", border: "#fecaca" };
-    if (s === "shipped" || s.includes("pending") || s.includes("processing") || s.includes("initiated"))
+    if (s === "shipped" || s === "order packed" || s.includes("pending") || s.includes("processing") || s.includes("initiated"))
       return { color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" };
     return { color: "#d97706", bg: "#fffbeb", border: "#fde68a" };
   };
