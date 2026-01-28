@@ -77,7 +77,7 @@ export const CartModal = ({ show, handleClose }) => {
                           value={currentQty} 
                           onChange={(e) => handleQuantityChange(item._id, e.target.value)}
                         >
-                          {[1, 2, 3, 4, 5].map(num => (
+                          {[1, 2, 3].map(num => (
                             <option key={num} value={num}>{num}</option>
                           ))}
                         </Form.Select>

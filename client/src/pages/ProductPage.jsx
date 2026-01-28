@@ -19,6 +19,7 @@ export const ProductPage = () => {
     const [sortType, setSortType] = useState("popularity");
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         const fetchData = async () => {
             setLoading(true);
             try {
