@@ -66,7 +66,6 @@ export const SellerDashboard = ({ sellerProducts }) => {
                 const updatedOrder = { ...selectedOrder, orderStatus: tempStatus };
                 setSelectedOrder(updatedOrder);
                 setOrders(prev => prev.map(o => o._id === selectedOrder._id ? updatedOrder : o));
-                alert("Order status updated successfully!");
             }
         } catch (error) {
             console.error(error);

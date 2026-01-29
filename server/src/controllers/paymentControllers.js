@@ -2,6 +2,7 @@ const Razorpay = require('razorpay');
 const User = require('../models/userSchema');
 const crypto = require('crypto');
 const Order = require('../models/orderSchema');
+const Products = require('../models/productSchema');
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -11,7 +12,6 @@ const razorpay = new Razorpay({
 exports.createRazorpayOrder = async (req, res) => {
     try {
         const { items } = req.body;
-        const userId = req.user.id;
 
         if (!items || items.length === 0) {
             return res.status(400).json({ success: false, message: "No items provided" });
@@ -95,6 +95,17 @@ exports.verifyPayment = async (req, res) => {
         });
 
         await newOrder.save();
+
+        const bulkOperations = orderItems.map(item => ({
+            updateOne: {
+                filter: { _id: item.productId },
+                update: { $inc: { stockQuantity : -item.quantity } } 
+            }
+        }));
+
+        if (bulkOperations.length > 0) {
+            await Products.bulkWrite(bulkOperations);
+        }
 
         if (user.cartItems && user.cartItems.length > 0) {
              const purchasedIds = items.map(i => i.productId);

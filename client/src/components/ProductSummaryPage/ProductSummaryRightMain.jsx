@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Col, Badge, Button, Row, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import api from '../../services/axios';
+import api from "../../services/axios";
 import { PaymentModal } from "../../models/PaymentModal/PaymentModal";
 
 export const ProductSummaryRightMain = ({ product, loading }) => {
@@ -11,32 +11,39 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
   const handleAddToCart = async () => {
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       if (!product?._id) return;
       if (product.sizes?.length > 0 && !selectedSize) {
         alert("Please select a size first!");
         return;
       }
 
-      const res = await api.post(`/users/addToCart/${product._id}`, {
-        size: selectedSize 
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const res = await api.post(
+        `/users/addToCart/${product._id}`,
+        {
+          size: selectedSize,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       if (res.data.success) {
         console.log("Product added:", res.data);
         navigate(`/cart/addToCart/${product._id}`);
       }
     } catch (error) {
-      console.error("Failed to add to cart:", error.response?.data?.message || error.message);
-      
+      console.error(
+        "Failed to add to cart:",
+        error.response?.data?.message || error.message,
+      );
+
       if (error.response?.status === 401) {
         alert("Please login to add items to your cart");
-        navigate('/login');
+        navigate("/login");
       } else {
         alert("Something went wrong while adding the product to the cart.");
       }
@@ -44,11 +51,11 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
   };
 
   const handleBuyNow = () => {
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem("token");
+
     if (!token) {
       alert("Please login to purchase items");
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
@@ -74,7 +81,9 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
         <div className="my-2 small">
           <span className="text-warning">★ {product.rating}</span>
           <span className="ms-2 text-primary cursor-pointer">
-            {product.ratingsCount > 0 ? `(${product.ratingsCount} ratings)` : 'Be the first to review'}
+            {product.ratingsCount > 0
+              ? `(${product.ratingsCount} ratings)`
+              : "Be the first to review"}
           </span>
           <span className="mx-2 text-muted">|</span>
           <span className="text-primary cursor-pointer">Have a question?</span>
@@ -94,7 +103,11 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
             <h2 className="text-danger fw-bold m-0">
               Rs. {product.sellingPrice}
             </h2>
-            <Badge bg="light" text="dark" className="border px-3 py-2 fw-normal">
+            <Badge
+              bg="light"
+              text="dark"
+              className="border px-3 py-2 fw-normal"
+            >
               {product.discount}% OFF
             </Badge>
           </div>
@@ -102,9 +115,15 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
         <div className="mb-4">
           <p className="small fw-bold text-muted mb-2">Color</p>
-          <div className="border border-primary d-inline-block p-1" style={{ width: "60px" }}>
+          <div
+            className="border border-primary d-inline-block p-1"
+            style={{ width: "60px" }}
+          >
             <img src={product.image[0]} alt="color" className="img-fluid" />
-            <div className="text-center x-small text-muted" style={{ fontSize: "10px" }}>
+            <div
+              className="text-center x-small text-muted"
+              style={{ fontSize: "10px" }}
+            >
               Multicolor
             </div>
           </div>
@@ -127,18 +146,22 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
               </Button>
             ))}
           </div>
-          {product.stockQuantity <= 10 ? (
-            <div className="text-danger x-small fw-bold">{product.stockQuantity} Left</div>
+          {product.stockQuantity <= 0 ? (
+            <div className="text-danger x-small fw-bold">Out of Stock</div>
+          ) : product.stockQuantity <= 10 ? (
+            <div className="text-danger x-small fw-bold">
+              Hurry!!! Only {product.stockQuantity} Left
+            </div>
           ) : (
-            <div className="x-small fw-bold text-success">{product.stockQuantity} In Stock</div>
+            <div className="x-small fw-bold text-success">In Stock</div>
           )}
         </div>
-
         <div className="d-flex gap-3 mb-4">
           <Button
             variant="dark"
             className="px-5 py-3 fw-bold rounded-0 flex-grow-1"
             style={{ backgroundColor: "#333" }}
+            disabled={product.stockQuantity <= 0}
             onClick={handleAddToCart}
           >
             ADD TO CART
@@ -147,6 +170,7 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
             variant="danger"
             className="px-5 py-3 fw-bold rounded-0 flex-grow-1"
             style={{ backgroundColor: "#e40046" }}
+            disabled={product.stockQuantity <= 0}
             onClick={handleBuyNow}
           >
             BUY NOW
@@ -155,7 +179,9 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
         <div className="bg-light p-3 border rounded">
           <Row className="align-items-center g-2">
-            <Col xs={12} md={3} className="small fw-bold">Delivery</Col>
+            <Col xs={12} md={3} className="small fw-bold">
+              Delivery
+            </Col>
             <Col xs={8} md={6}>
               <Form.Control
                 type="text"
@@ -164,7 +190,11 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
               />
             </Col>
             <Col xs={4} md={3}>
-              <Button variant="dark" className="w-100 rounded-0" style={{ backgroundColor: "#333" }}>
+              <Button
+                variant="dark"
+                className="w-100 rounded-0"
+                style={{ backgroundColor: "#333" }}
+              >
                 CHECK
               </Button>
             </Col>
@@ -175,11 +205,11 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
         </div>
       </Col>
 
-      <PaymentModal 
+      <PaymentModal
         show={showPaymentModal}
         handleClose={() => setShowPaymentModal(false)}
-        passedProducts={[{...product, selectedSize: selectedSize}]}
-        passedQuantities={{[product._id]: 1}}
+        passedProducts={[{ ...product, selectedSize: selectedSize }]}
+        passedQuantities={{ [product._id]: 1 }}
       />
     </>
   );

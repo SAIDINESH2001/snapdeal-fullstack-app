@@ -45,14 +45,13 @@ exports.getMyOrders = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.getAllOrders = async (req, res, next) => {
   try {
     const orders = await Order.find()
       .populate("user", "name")
       .sort({ createdAt: -1 });
 
-    const excludedStatuses = [
+    const excludedRevenueStatuses = [
       'Cancelled', 
       'Return Pending', 
       'Returned', 
@@ -61,18 +60,25 @@ exports.getAllOrders = async (req, res, next) => {
       'Refunded'
     ];
 
+    const nonPendingStatuses = [
+        "Delivered", 
+        "Cancelled", 
+        "Returned", 
+        "Return Pending", 
+        "Refund Initiated", 
+        "Refund Processing", 
+        "Refunded"
+    ];
+
     const totalRevenue = orders.reduce((acc, order) => {
-        if (excludedStatuses.includes(order.orderStatus)) {
+        if (excludedRevenueStatuses.includes(order.orderStatus)) {
             return acc;
         }
         return acc + order.totalAmount;
     }, 0);
 
     const pendingOrders = orders.filter(
-      (o) =>
-        !["Delivered", "Cancelled", "Returned", "Refunded"].includes(
-          o.orderStatus,
-        ),
+      (o) => !nonPendingStatuses.includes(o.orderStatus)
     ).length;
     
     const productStatsRaw = await Product.aggregate([
@@ -274,13 +280,24 @@ exports.getSellerOrders = async (req, res, next) => {
     let totalRevenue = 0;
     let pendingOrders = 0;
 
-    const excludedStatuses = [
-        'Cancelled', 
-        'Return Pending', 
-        'Returned', 
-        'Refund Initiated', 
-        'Refund Processing', 
-        'Refunded'
+    const excludedRevenueStatuses = [
+      'Cancelled',
+      'Return Pending',
+      'Returned',
+      'Refund Initiated',
+      'Refund Processing',
+      'Refunded'
+    ];
+
+    const nonPendingStatuses = [
+        "Delivered",
+        "Cancelled",
+        "Returned",
+        "Return Pending",
+        "Refund Initiated", 
+        "Refund Processing", 
+        "Refunded",
+        "Replaced"
     ];
 
     const sellerOrders = orders.map((order) => {
@@ -293,15 +310,11 @@ exports.getSellerOrders = async (req, res, next) => {
         0,
       );
 
-      if (!excludedStatuses.includes(order.orderStatus)) {
-          totalRevenue += sellerTotal;
+      if (!excludedRevenueStatuses.includes(order.orderStatus)) {
+        totalRevenue += sellerTotal;
       }
 
-      if (
-        !["Delivered", "Cancelled", "Returned", "Refunded"].includes(
-          order.orderStatus,
-        )
-      ) {
+      if (!nonPendingStatuses.includes(order.orderStatus)) {
         pendingOrders++;
       }
 

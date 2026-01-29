@@ -98,7 +98,6 @@ export const OrderDetailPage = () => {
       await api.post(`/my-orders/${orderId}/${actionType}`, {
         reason: actionReason,
       });
-      alert(`Order ${actionType} request submitted successfully.`);
       setShowActionModal(false);
       fetchOrderDetail();
     } catch (err) {
@@ -114,10 +113,19 @@ export const OrderDetailPage = () => {
     setShowActionModal(true);
   };
 
+  const handleCloseReviewModal = () => {
+    setShowReviewModal(false);
+    setSelectedItem(null);
+    setRating(0);
+    setComment("");
+    setHover(0);
+  };
+
   const handleOpenReview = async (item) => {
     setSelectedItem(item);
     setRating(0);
     setComment("");
+    
     if (reviewedProducts[item.productId]) {
       try {
         const res = await api.get(`/products/${item.productId}/reviews`);
@@ -137,6 +145,8 @@ export const OrderDetailPage = () => {
 
   const submitReview = async (e) => {
     e.preventDefault();
+    if (!selectedItem) return;
+    
     try {
       setIsSubmitting(true);
       await api.post(`/reviews/upsert/${selectedItem.productId}`, {
@@ -145,11 +155,13 @@ export const OrderDetailPage = () => {
         userName: user.name,
         orderId: order._id,
       });
+      
       setReviewedProducts((prev) => ({
         ...prev,
         [selectedItem.productId]: true,
       }));
-      setShowReviewModal(false);
+      
+      handleCloseReviewModal();
     } catch (err) {
       alert(err.response?.data?.message || "Error");
     } finally {
@@ -531,7 +543,7 @@ export const OrderDetailPage = () => {
 
       <ReviewModal
         show={showReviewModal}
-        onHide={() => setShowReviewModal(false)}
+        onHide={handleCloseReviewModal}
         selectedItem={selectedItem}
         rating={rating}
         hover={hover}
