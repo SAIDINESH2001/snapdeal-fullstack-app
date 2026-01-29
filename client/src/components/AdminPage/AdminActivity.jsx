@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Table, Spinner, Button, Badge, Modal, Row, Col, Dropdown } from "react-bootstrap";
+import { AlertCircle } from "lucide-react";
 
 const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOrderStatusUpdate, handleStatusUpdate }) => {
   const [showProductModal, setShowProductModal] = useState(false);
@@ -60,6 +61,21 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
     return 'secondary';
   };
 
+  const getOrderReason = (order) => {
+    if (order.cancellationReason) return order.cancellationReason;
+    if (order.returnReason) return order.returnReason;
+    if (order.comments) return order.comments;
+    
+    if (order.actionHistory && order.actionHistory.length > 0) {
+        const latestAction = order.actionHistory[order.actionHistory.length - 1];
+        if (latestAction && latestAction.reason) {
+            return latestAction.reason;
+        }
+    }
+    
+    return "No specific reason provided.";
+  };
+
   const renderStatusDropdown = (order) => {
       const currentStatus = tempStatuses[order._id] || order.orderStatus;
       const isChanged = tempStatuses[order._id] && tempStatuses[order._id] !== order.orderStatus;
@@ -102,7 +118,6 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                 <Dropdown.Header>Delivery Process</Dropdown.Header>
                 <Dropdown.Item 
                     eventKey="Shipped" 
-                    disabled={!isPacked}
                     title={!isPacked ? "Waiting for Seller to Pack Order" : "Mark as Shipped"}
                 >
                     Shipped
@@ -257,24 +272,57 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                   </div>
                 </Col>
                 <Col md={7}>
-                    <div className="mb-3">
-                        <Badge bg={getStatusColor(selectedProduct.status)} className="mb-2 px-3 py-2">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                        <Badge bg={getStatusColor(selectedProduct.status)} className="px-3 py-2">
                             {selectedProduct.status.toUpperCase()}
                         </Badge>
+                        <div className="text-end">
+                            <small className="text-muted d-block text-uppercase" style={{fontSize: '10px', fontWeight: 'bold'}}>Inventory Stock</small>
+                            <span className={`fw-bold fs-5 ${selectedProduct.stockQuantity < 10 ? 'text-danger' : 'text-success'}`}>
+                                {selectedProduct.stockQuantity} Units
+                            </span>
+                        </div>
                     </div>
+                    
                     <Row className="g-3 mb-4">
                         <Col xs={6}>
                             <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Brand</label>
-                            <div className="fw-bold text-dark" style={{ fontSize: '14px' }}>{selectedProduct.brand}</div>
+                            <div className="fw-bold text-dark">{selectedProduct.brand}</div>
                         </Col>
                         <Col xs={6}>
-                            <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Price</label>
-                            <div className="d-flex align-items-baseline gap-2">
-                               <span className="fw-bold text-dark fs-5">₹{selectedProduct.sellingPrice}</span>
-                               <span className="text-decoration-line-through text-muted small">₹{selectedProduct.mrp}</span>
-                            </div>
+                            <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Category</label>
+                            <div className="fw-bold text-dark">{selectedProduct.productMainCategory}</div>
+                            <div className="small text-muted">{selectedProduct.subCategory} &gt; {selectedProduct.productType}</div>
+                        </Col>
+                        <Col xs={6}>
+                            <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Gender</label>
+                            <div className="fw-bold text-dark">{selectedProduct.genderCategory}</div>
+                        </Col>
+                        <Col xs={6}>
+                            <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Discount</label>
+                            <div className="fw-bold text-success">{selectedProduct.discount}% OFF</div>
                         </Col>
                     </Row>
+
+                    <div className="bg-light p-3 rounded mb-3">
+                         <Row className="align-items-center">
+                             <Col xs={6}>
+                                 <label className="text-muted small text-uppercase">MRP</label>
+                                 <div className="text-decoration-line-through text-muted fw-bold">₹{selectedProduct.mrp}</div>
+                             </Col>
+                             <Col xs={6} className="text-end">
+                                 <label className="text-muted small text-uppercase">Selling Price</label>
+                                 <div className="fw-bold text-dark fs-4">₹{selectedProduct.sellingPrice}</div>
+                             </Col>
+                         </Row>
+                    </div>
+
+                    <div>
+                        <label className="text-muted" style={{ fontSize: '11px', textTransform: 'uppercase' }}>Description</label>
+                        <p className="small text-muted mb-0" style={{ maxHeight: '80px', overflowY: 'auto' }}>
+                            {selectedProduct.description}
+                        </p>
+                    </div>
                 </Col>
               </Row>
             </Modal.Body>
@@ -294,11 +342,25 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
           <Modal.Body className="pt-2">
               {activeOrder && (
                   <>
+                      {(['Cancelled', 'Returned', 'Replaced', 'Return Pending', 'Replace Pending'].some(status => activeOrder.orderStatus.includes(status))) && (
+                          <div className="alert alert-danger d-flex gap-3 align-items-start mb-4 rounded-3 mt-3">
+                              <AlertCircle size={20} className="mt-1 text-danger" />
+                              <div>
+                                  <h6 className="fw-bold mb-1 text-danger">Customer Comment ({activeOrder.orderStatus})</h6>
+                                  <p className="mb-0 small text-dark">
+                                      {getOrderReason(activeOrder)}
+                                  </p>
+                              </div>
+                          </div>
+                      )}
+
                       <div className="d-flex justify-content-between align-items-start mb-3 bg-light p-3 rounded mt-3">
                           <div>
                               <p className="mb-0 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Customer Info</p>
                               <p className="mb-0 fw-bold text-dark" style={{ fontSize: '14px' }}>{activeOrder.user?.name || "Guest"}</p>
                               <p className="mb-0 text-muted small">{activeOrder.user?.email}</p>
+                              <p className="mb-0 mt-2 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Order Date</p>
+                              <p className="mb-0 text-dark small">{new Date(activeOrder.createdAt).toLocaleString()}</p>
                           </div>
                           <div className="text-end">
                               <p className="mb-0 small text-muted text-uppercase fw-bold" style={{ fontSize: '11px' }}>Shipping To</p>
@@ -309,7 +371,7 @@ const ActivityTable = ({ loading, activeTab, data, statusUpdateLoading, handleOr
                       </div>
 
                       <h6 className="fw-bold mb-3 small text-uppercase text-muted" style={{ fontSize: '12px' }}>Items Ordered</h6>
-                      <div className="border rounded mb-3">
+                      <div className="border rounded mb-3" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                           {activeOrder.items.map((item, idx) => (
                               <div key={idx} className="d-flex align-items-center gap-3 p-3 border-bottom last-border-0">
                                   <img 
