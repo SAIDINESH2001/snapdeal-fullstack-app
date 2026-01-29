@@ -14,5 +14,6 @@ router.get('/products/admin/all', auth, authorize('admin'), productController.ge
 
 router.post('/products', auth, authorize('seller', 'admin'), productController.postProduct);
 router.patch('/products/:productId/status', auth, authorize('admin'), productController.updateProductStatus);
+router.patch('/products/:productId/stock', auth, authorize('seller'), productController.updateProductStock);
 
 module.exports = router;

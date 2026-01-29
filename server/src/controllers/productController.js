@@ -63,6 +63,34 @@ exports.updateProductStatus = async (req, res, next) => {
   }
 };
 
+exports.updateProductStock = async (req, res, next) => {
+    try {
+        const { productId } = req.params;
+        const { stockQuantity } = req.body;
+        
+        if (stockQuantity === undefined || stockQuantity < 0) {
+            return res.status(400).json({ success: false, message: "Valid stock quantity is required" });
+        }
+
+        const product = await Products.findOne({ _id: productId, sellerId: req.user.id });
+        
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found or unauthorized" });
+        }
+
+        product.stockQuantity = stockQuantity;
+        await product.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Stock updated successfully",
+            product
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.getProductByStatus = async(req,res,next) => {
   try {
     const products = await Products.find({status: 'pending'}).populate('sellerId', 'name email');
