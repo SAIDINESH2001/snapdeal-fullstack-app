@@ -12,6 +12,7 @@ import { AdminPage } from "./pages/AdminPage";
 import { ProductCartPage } from "./pages/ProductCartPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { OrderSummaryPage } from "./pages/OrderSummaryPage";
+import { SellerLogin } from "./components/SellerLoginPage/SellerLogin";
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/cart/addToCart/:productId" element={<ProductCartPage />} />
         <Route path="/myOrders" element={<OrdersPage />} />
         <Route path="/order-details/:orderId" element={<OrderSummaryPage />} />
+        <Route path="/seller/login" element={<SellerLogin />} />
       </Routes>
     </>
   );
