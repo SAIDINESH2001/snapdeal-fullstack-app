@@ -63,7 +63,7 @@ export const CartModal = ({ show, handleClose }) => {
                         <div>
                           <p className="mb-1 small fw-bold text-dark">{item.name}</p>
                           <div 
-                            className="text-muted mt-2 d-flex align-items-center gap-1 small cursor-pointer" style={{ cursor: 'pointer' }}
+                            className="text-muted mt-2 d-flex align-items-center gap-1 small cursor-pointer" 
                             onClick={() => handleRemove(item._id)}
                           >
                             <span className="material-symbols-outlined fs-6">close</span> REMOVE
@@ -118,7 +118,12 @@ export const CartModal = ({ show, handleClose }) => {
         )}
       </S.StyledModal>
 
-      <PaymentModal show={showPayment} handleClose={() => setShowPayment(false)} />
+      <PaymentModal 
+        show={showPayment} 
+        handleClose={() => setShowPayment(false)} 
+        passedProducts={cartProducts}
+        passedQuantities={quantities}
+      />
     </>
   );
 };

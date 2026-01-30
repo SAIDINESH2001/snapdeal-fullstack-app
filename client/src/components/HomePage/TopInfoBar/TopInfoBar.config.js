@@ -12,6 +12,6 @@ export   const topInfoItems = [
     {
       svgName: "box",
       itemText: "Sell on Snapdeal",
-      path: "https://setu.snapdeal.com/",
+      path: "/seller/login",
     },
   ];

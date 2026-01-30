@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import * as S from '../../../styles/HomePage/categoryBar.style'; 
 import { fetchCategory } from './categoryService';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const CategoryBar = () => {
   const [activeTab, setActiveTab] = useState(null);
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const getCategoriesData = async () => {
@@ -30,17 +29,14 @@ export const CategoryBar = () => {
     return chunkedArr;
   };
 
-  const handleItemClick = async (e) => {
-    try {
-          const category = e.target.textContent;
-          const section = e.target.dataset.section;
-          const cat = e.target.dataset.category;
-          navigate(`/products/${encodeURIComponent(cat)}/${encodeURIComponent(section)}/${encodeURIComponent(category)}`);
-    }
-    catch(err) {
-      console.log(err);
-    }
-  }
+  const handleNavigation = (mainCat, subCat, type = "all") => {
+    const main = encodeURIComponent(mainCat);
+    const sub = encodeURIComponent(subCat);
+    const pType = encodeURIComponent(type);
+    
+    navigate(`/products/${main}/${sub}/${pType}`);
+  };
+
   return (
     <S.NavWrapper onMouseLeave={() => setActiveTab(null)}>
       <Container>
@@ -65,11 +61,28 @@ export const CategoryBar = () => {
                 <Col key={colIdx} md={3} className={colIdx !== 3 ? "border-end" : ""}>
                   {columnSections.map((section, secIdx) => (
                     <div key={secIdx} className="mb-4">
-                      <S.SectionTitle>{section.sectionName}</S.SectionTitle>
+                      <S.SectionTitle 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleNavigation(cat.categoryName, section.sectionName)}
+                      >
+                        {section.sectionName}
+                      </S.SectionTitle>
+
                       {section.items.map((item, i) => (
-                        <S.ListItem key={i}  data-category={cat.categoryName} data-section={section.sectionName} onClick={handleItemClick}>{item.itemName}</S.ListItem>
+                        <S.ListItem 
+                          key={i} 
+                          onClick={() => handleNavigation(cat.categoryName, section.sectionName, item.itemName)}
+                        >
+                          {item.itemName}
+                        </S.ListItem>
                       ))}
-                      <S.ViewAll>View All </S.ViewAll>
+
+                      <S.ViewAll 
+                        onClick={() => handleNavigation(cat.categoryName, section.sectionName)}
+                      >
+                        View All
+                      </S.ViewAll>
+
                       {secIdx < columnSections.length - 1 && <hr className="my-3 opacity-25" />}
                     </div>
                   ))}

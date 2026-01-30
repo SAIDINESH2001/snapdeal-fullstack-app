@@ -14,8 +14,8 @@ const OrderCard = ({ order }) => {
   };
 
   const status = getStatusStyle(order.orderStatus);
-  const displayItems = order.items.slice(0, 5);
-  const remaining = order.items.length - 5;
+  const displayItems = (order.items || []).slice(0, 5);
+  const remaining = (order.items?.length || 0) - 5;
 
   return (
     <Card className="mb-4 rounded-0" style={{ border: 'none', borderBottom: '1px solid #eee', boxShadow: 'none' }}>
@@ -24,7 +24,7 @@ const OrderCard = ({ order }) => {
           <div className="d-flex gap-5">
             <div>
               <div className="text-muted mb-1" style={{ fontSize: '10px', textTransform: 'uppercase' }}>Order ID</div>
-              <div className="fw-bold text-dark" style={{ fontSize: '12px' }}>#{order._id.toUpperCase()}</div>
+              <div className="fw-bold text-dark" style={{ fontSize: '12px' }}>#{order._id?.toUpperCase()}</div>
             </div>
             <div>
               <div className="text-muted mb-1" style={{ fontSize: '10px', textTransform: 'uppercase' }}>Placed</div>
@@ -32,11 +32,11 @@ const OrderCard = ({ order }) => {
             </div>
             <div>
               <div className="text-muted mb-1" style={{ fontSize: '10px', textTransform: 'uppercase' }}>Total Price</div>
-              <div className="fw-bold text-dark" style={{ fontSize: '12px' }}>₹{order.totalAmount.toLocaleString()}</div>
+              <div className="fw-bold text-dark" style={{ fontSize: '12px' }}>₹{order.totalAmount?.toLocaleString()}</div>
             </div>
           </div>
           <div className="px-2 py-1 fw-bold" style={{ fontSize: '10px', backgroundColor: status.bg, color: status.color, border: `1px solid ${status.border}`, borderRadius: '2px' }}>
-            {order.orderStatus.toUpperCase()}
+            {order.orderStatus?.toUpperCase()}
           </div>
         </div>
 
@@ -45,7 +45,7 @@ const OrderCard = ({ order }) => {
             <div className="d-flex align-items-center gap-2 flex-wrap mb-2">
               {displayItems.map((item, index) => (
                 <div key={index} style={{ position: 'relative', width: '60px', height: '60px', border: '1px solid #f0f0f0', borderRadius: '4px', padding: '2px', backgroundColor: '#fff' }}>
-                  <img src={item.image[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  <img src={item.image?.[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   {index === 4 && remaining > 0 && (
                     <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', borderRadius: '3px' }}>
                       +{remaining}
@@ -55,8 +55,9 @@ const OrderCard = ({ order }) => {
               ))}
             </div>
             <div className="mt-2 text-dark fw-bold" style={{ fontSize: '13px' }}>
-              {order.items[0]?.name.slice(0, 60)}{order.items[0]?.name.length > 60 ? '...' : ''}
-              {order.items.length > 1 && <span className="text-muted fw-normal ms-1"> + {order.items.length - 1} other items</span>}
+              {(order.items?.[0]?.name || "Product details unavailable").slice(0, 60)}
+              {(order.items?.[0]?.name?.length || 0) > 60 ? '...' : ''}
+              {(order.items?.length || 0) > 1 && <span className="text-muted fw-normal ms-1"> + {order.items.length - 1} other items</span>}
             </div>
           </Col>
           <Col md={4} className="text-end">

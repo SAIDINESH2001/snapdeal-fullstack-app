@@ -7,9 +7,10 @@ const {authorize} = require('../middlewares/roleHandler');
 router.post('/create', auth, orderController.createOrder);
 router.get('/my-orders', auth, orderController.getMyOrders);
 router.get('/orders', auth, authorize('admin'), orderController.getAllOrders);
+router.get('/seller/orders', auth, authorize('seller'), orderController.getSellerOrders);
+router.put('/seller/orders/:orderId/status', auth, authorize('seller'), orderController.updateSellerOrderStatus);
 router.patch('/orders/:orderId/status', auth, authorize('admin'), orderController.updateOrderStatus);
 router.get('/my-orders/:orderId', auth, orderController.getOrderDetail);
 router.post('/my-orders/:orderId/:action', auth, orderController.handleOrderAction);
-
 
 module.exports = router;

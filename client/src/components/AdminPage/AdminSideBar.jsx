@@ -1,11 +1,13 @@
 import React from "react";
 import { Nav, Badge } from "react-bootstrap";
 
-const Sidebar = ({ activeTab, setActiveTab, pendingCount, ordersCount }) => {
+const Sidebar = ({ activeTab, setActiveTab, pendingCount, ordersCount, deliveredCount }) => {
   const menuItems = [
+    { id: 'overview', label: 'Overview', icon: 'dashboard', count: 0 },
+    { id: 'inventory', label: 'Inventory', icon: 'inventory_2', count: 0 },
     { id: 'approvals', label: 'Review Queue', icon: 'pending', count: pendingCount },
-    { id: 'products', label: 'Inventory', icon: 'grid_view', count: 0 },
-    { id: 'orders', label: 'Orders', icon: 'shopping_bag', count: ordersCount }
+    { id: 'orders', label: 'Active Orders', icon: 'shopping_bag', count: ordersCount },
+    { id: 'delivered', label: 'Delivered / Post-Sale', icon: 'task_alt', count: deliveredCount }
   ];
 
   return (

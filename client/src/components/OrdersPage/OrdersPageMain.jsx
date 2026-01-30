@@ -29,7 +29,6 @@ export const OrdersPageMain = () => {
 
     return (
         <div className="w-100 d-flex flex-column align-items-center bg-white" style={{ minHeight: '100vh' }}>
-            {/* Breadcrumb Header */}
             <div className="p-3 border-bottom w-100 d-flex justify-content-center bg-white sticky-top" style={{ zIndex: 10 }}>
                 <div style={{ width: "80%", fontSize: '12px', color: '#888' }}>
                     Home / My Account / <span style={{ color: '#333', fontWeight: '500' }}>My Orders</span>

@@ -21,6 +21,8 @@ export const ProductCartBody = ({ cartProduct }) => {
 
   if (loading) return null;
 
+  const isCartEmpty = Number(cartCount) === 0 || subTotal === 0;
+
   return (
     <>
       <Container className="mt-4">
@@ -60,8 +62,8 @@ export const ProductCartBody = ({ cartProduct }) => {
             <div className="px-5 flex-grow-1 border-end" style={{ flexBasis: '0' }}>
               <div className="d-flex align-items-center gap-2 mb-2">
                 <span className="text-muted small">Your Order</span>
-                <span className="badge rounded-pill border border-success text-success fw-normal px-2" style={{ fontSize: "11px" }}>
-                  {cartCount} {cartCount === 1 ? 'Item' : 'Items'}
+                <span className={`badge rounded-pill border ${isCartEmpty ? 'border-secondary text-secondary' : 'border-success text-success'} fw-normal px-2`} style={{ fontSize: "11px" }}>
+                  {cartCount} {Number(cartCount) === 1 ? 'Item' : 'Items'}
                 </span>
               </div>
               <h4 className="m-0 fw-normal" style={{fontSize: '18px'}}>
@@ -71,16 +73,22 @@ export const ProductCartBody = ({ cartProduct }) => {
 
             <div className="d-flex gap-3 ps-4 align-items-center">
               <Button
-                className="px-4 py-2 border-0 fw-bold"
-                style={{ backgroundColor: "#E40046", fontSize: "13px", borderRadius: '2px' }}
-                onClick={handleOpenPayment} 
+                className="px-4 py-2 border-0 fw-bold text-uppercase"
+                style={{ 
+                    backgroundColor: isCartEmpty ? "#ccc" : "#E40046", 
+                    fontSize: "13px", 
+                    borderRadius: '2px',
+                    cursor: isCartEmpty ? "not-allowed" : "pointer" 
+                }}
+                onClick={handleOpenPayment}
+                disabled={isCartEmpty}
               >
                 PROCEED TO CHECKOUT
               </Button>
               
               <Button
                 variant="dark"
-                className="px-4 py-2 fw-bold"
+                className="px-4 py-2 fw-bold text-uppercase"
                 style={{ backgroundColor: "#333", fontSize: "13px", borderRadius: '2px' }}
                 onClick={handleOpenCart}
               >

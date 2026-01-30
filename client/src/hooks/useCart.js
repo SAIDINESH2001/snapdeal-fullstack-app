@@ -14,7 +14,6 @@ export const useCart = (show) => {
 
     try {
       setLoading(true);
-      
       const [cartRes, profileRes] = await Promise.allSettled([
         api.get("/users/getCart"),
         api.get("/users/profile") 
@@ -25,17 +24,20 @@ export const useCart = (show) => {
         setCartProducts(products);
         setCartCount(products.length); 
         
-        const initialQuantities = {};
-        products.forEach(item => {
-          initialQuantities[item._id] = 1; 
+        setQuantities(prev => {
+          const updated = { ...prev };
+          products.forEach(item => {
+            if (updated[item._id] === undefined) {
+                updated[item._id] = 1;
+            }
+          });
+          return updated;
         });
-        setQuantities(initialQuantities);
       }
 
       if (profileRes.status === "fulfilled" && profileRes.value.data?.success) {
         setSavedAddresses(profileRes.value.data.user.address || []); 
       }
-
     } catch (error) {
       console.error("Checkout fetch error:", error);
     } finally {
@@ -52,6 +54,11 @@ export const useCart = (show) => {
       const res = await api.delete(`/users/removeFromCart/${productId}`);
       if (res.data.success) {
         setCartProducts(prev => prev.filter(p => p._id !== productId));
+        setQuantities(prev => {
+            const next = { ...prev };
+            delete next[productId];
+            return next;
+        });
         fetchCartCount(); 
       }
     } catch (err) {
@@ -75,6 +82,7 @@ export const useCart = (show) => {
     loading, 
     subTotal, 
     handleQuantityChange, 
-    handleRemove 
+    handleRemove,
+    refreshCart: fetchCheckoutData
   };
 };

@@ -36,7 +36,7 @@ exports.postUser = async (req,res,next) => {
     try {
         const validationResult = userInputValidation(req.body);
         if(!validationResult.success) {
-            res.status(404).json({
+            res.status(400).json({
                 success: false,
                 message: validationResult,
             })
@@ -107,3 +107,42 @@ exports.addAddress = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.registerSeller = async (req, res) => {
+    try {
+        const validationResult = userInputValidation(req.body);
+        
+        if (!validationResult.success) {
+            return res.status(400).json({
+                success: false,
+                message: validationResult, 
+            });
+        }
+
+        const { name, email, phone, password } = req.body;
+        const dob = validationResult.parsedDate; 
+
+        const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "User already exists" });
+        }
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        const newUser = new User({
+            name,
+            email,
+            phone,
+            password: hashedPassword,
+            dob,
+            role: 'seller' 
+        });
+
+        await newUser.save();
+
+        res.status(201).json({ success: true, message: "Seller registered successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Registration failed", error: error.message });
+    }
+};
+

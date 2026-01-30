@@ -16,7 +16,7 @@ export const MainNavbar = ({ user, onCartClick }) => {
   useEffect(() => {
     const getCategoriesData = async () => {
       try {
-        const data = await fetchCategory(); //
+        const data = await fetchCategory(); 
         setCategories(data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);

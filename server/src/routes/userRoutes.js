@@ -11,5 +11,7 @@ router.get('/users/profile', auth, userControllers.getUserProfile);
 router.post('/add-address', auth, userControllers.addAddress);
 router.post('/users/create-order', auth, razorPayController.createRazorpayOrder);
 router.post('/users/verify-payment', auth, razorPayController.verifyPayment);
+router.post('/seller/auth/register', userControllers.registerSeller);
+
 
 module.exports = router;
