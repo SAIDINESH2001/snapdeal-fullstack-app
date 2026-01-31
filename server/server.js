@@ -34,6 +34,9 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(morgan('dev'));
 
+app.get('/api/health', (req, res) => {
+    res.status(200).send('OK');
+});
 //Routing
 app.use('/api', userRoutes);
 app.use("/api", otpRoutes);
