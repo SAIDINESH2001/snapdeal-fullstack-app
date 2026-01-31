@@ -37,6 +37,9 @@ app.use(morgan('dev'));
 app.get('/api/health', (req, res) => {
     res.status(200).send('OK');
 });
+app.get('/', (req, res) => {
+    res.send('API is running successfully');
+});
 //Routing
 app.use('/api', userRoutes);
 app.use("/api", otpRoutes);
