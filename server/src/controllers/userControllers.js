@@ -146,3 +146,27 @@ exports.registerSeller = async (req, res) => {
     }
 };
 
+exports.resetPassword = async (req, res) => {
+  const { type, value, newPassword } = req.body;
+
+  if (!type || !value || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const user = await User.findOne({ [type]: value });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

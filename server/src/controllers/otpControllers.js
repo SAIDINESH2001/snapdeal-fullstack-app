@@ -80,3 +80,35 @@ exports.verifyOtp = async (req, res) => {
 
   return res.json({ token , type, value, role, user});
 };
+
+
+exports.loginWithPassword = async (req, res) => {
+  const { type, value, password } = req.body;
+
+  if (!type || !value || !password)
+    return res.status(400).json({ error: "Missing required fields" });
+
+  if (!["phone", "email"].includes(type))
+    return res.status(400).json({ error: "Invalid type" });
+  const user = await User.findOne({ [type]: value });
+
+  if (!user)
+    return res.status(400).json({ error: "User not found" });
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch)
+    return res.status(400).json({ error: "Invalid credentials" });
+
+  const role = user.role || "customer";
+  const name = user.name;
+  const id = user._id;
+
+  const token = jwt.sign(
+    { id, type, value, role, name },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  return res.json({ token, type, value, role, user });
+};

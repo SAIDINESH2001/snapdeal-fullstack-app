@@ -1,38 +1,26 @@
+import { useState } from "react";
 import { LoginButton } from "../../styles/HomePage/homePageNavBar.style";
-import { useEffect, useState } from "react";
 import api from "../../services/axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { userNavigation } from "../../utils/navigations/loginNavigation";
 
-export const OtpPageRightCard = ({ type, value }) => {
+export const PasswordPageRightCard = ({ type, value, onForgotPassword }) => {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
-  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const sendOtp = async () => {
-      try {
-        setError("");
-        await api.post("/auth/send-otp", { type, value });
-      } catch {
-        setError("Failed to send OTP");
-      }
-    };
-
-    if (type && value) {
-      sendOtp();
-    } else {
-      setError("Invalid login identifier");
+  const handleLogin = async () => {
+    if (!password) {
+      setError("Please enter your password");
+      return;
     }
-  }, [type, value]);
 
-  const handleVerify = async () => {
-    if (!/^\d{6}$/.test(otp)) {
-      setError("Enter valid 6-digit OTP");
+    if (!type || !value) {
+      setError("Session expired.");
       return;
     }
 
@@ -40,21 +28,21 @@ export const OtpPageRightCard = ({ type, value }) => {
       setLoading(true);
       setError("");
 
-      const res = await api.post("/auth/verify-otp", {
+      const res = await api.post("/users/password-validate", {
         type,
         value,
-        otp,
+        password,
       });
 
       localStorage.setItem("token", res.data.token);
-
-      const me = await api.get("/auth/refresh");
-      setUser(me.data.user);
+      setUser(res.data.user);
 
       userNavigation(navigate, res.data.role);
     } catch (err) {
       setError(
-        err?.response?.data?.error || "Invalid or expired OTP"
+        err?.response?.data?.error || 
+        err?.response?.data?.message || 
+        "Invalid Credentials"
       );
     } finally {
       setLoading(false);
@@ -64,32 +52,40 @@ export const OtpPageRightCard = ({ type, value }) => {
   return (
     <div
       className="bg-white shadow rounded-3 p-4 position-absolute top-50 translate-middle-y"
-      style={{ width: "340px", right: "140px", minHeight: "420px" }}
+      style={{ width: "340px", right: "140px", minHeight: "400px" }}
     >
       <h5 className="fw-medium mb-3">Login On Snapdeal</h5>
 
       <p className="text-center text-muted mb-3" style={{ fontSize: "13px" }}>
-        Enter OTP sent to
-        <br />
+        Welcome back! Please enter your password for <br />
         <strong>{value}</strong>
       </p>
 
       <input
-        className="form-control text-center mb-2"
-        placeholder="Code"
-        maxLength={6}
-        value={otp}
+        type="password"
+        className="form-control mb-3"
+        placeholder="Password"
+        value={password}
         onChange={(e) => {
-          setOtp(e.target.value);
+          setPassword(e.target.value);
           setError("");
         }}
         style={{
           height: "44px",
           fontSize: "14px",
-          letterSpacing: "6px",
           boxShadow: "none",
         }}
       />
+
+      <div className="d-flex justify-content-end mb-3">
+        <span 
+          className="text-primary small" 
+          style={{ cursor: "pointer", fontSize: "12px", fontWeight: "500" }}
+          onClick={onForgotPassword}
+        >
+          Forgot Password?
+        </span>
+      </div>
 
       {error && (
         <div className="text-danger small text-center mb-2">
@@ -99,10 +95,10 @@ export const OtpPageRightCard = ({ type, value }) => {
 
       <LoginButton
         className="w-100"
-        onClick={handleVerify}
+        onClick={handleLogin}
         disabled={loading}
       >
-        {loading ? "VERIFYING..." : "CONTINUE"}
+        {loading ? "LOGGING IN..." : "LOGIN"}
       </LoginButton>
     </div>
   );

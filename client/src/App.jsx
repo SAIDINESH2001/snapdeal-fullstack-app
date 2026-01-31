@@ -13,6 +13,7 @@ import { ProductCartPage } from "./pages/ProductCartPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { OrderSummaryPage } from "./pages/OrderSummaryPage";
 import { SellerLogin } from "./components/SellerLoginPage/SellerLogin";
+import { PasswordPageRightCard } from "./components/LoginRegisterPage/PasswordPageRightCard";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/myOrders" element={<OrdersPage />} />
         <Route path="/order-details/:orderId" element={<OrderSummaryPage />} />
         <Route path="/seller/login" element={<SellerLogin />} />
+        <Route path="/password" element={<PasswordPageRightCard />}/>
       </Routes>
     </>
   );

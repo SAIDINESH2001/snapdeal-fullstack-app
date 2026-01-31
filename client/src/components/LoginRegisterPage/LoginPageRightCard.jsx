@@ -1,22 +1,8 @@
 import { LoginButton } from "../../styles/HomePage/homePageNavBar.style";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useLogin from "../../hooks/useLogin";
 
-export const LoginPageRightCard = () => {
-  const navigate = useNavigate();
-
-  const onExistingUser = (value, type) => {
-    navigate("/otp", {
-      state: { value, type },
-    });
-  };
-
-  const onNewUser = (value, type) => {
-    navigate("/register", {
-      state: { value, type },
-    });
-  };
-
+export const LoginPageRightCard = ({ onExistingUser, onNewUser }) => {
   const { mobile, setMobile, handleContinue, error } = useLogin({
     mode: "page",
     onExistingUser,
@@ -36,7 +22,6 @@ export const LoginPageRightCard = () => {
         <h5 className="fw-medium mb-0" style={{ fontSize: "14px" }}>
           Login/Sign Up On Snapdeal
         </h5>
-        <button className="btn-close" />
       </div>
 
       <p className="small text-muted mb-3" style={{ fontSize: "11px" }}>

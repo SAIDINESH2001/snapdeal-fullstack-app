@@ -4,14 +4,14 @@ import useLogin from "../hooks/useLogin";
 export default function LoginModal({
   loginRef,
   signupRef,
-  otpRef,
+  passwordRef,
   setLoginPhone,
 }) {
   const { mobile, setMobile, handleContinue, error } = useLogin({
     mode: "modal",
     loginRef,
     signupRef,
-    otpRef,
+    passwordRef,
     setLoginPhone,
   });
 

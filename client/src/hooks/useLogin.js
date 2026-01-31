@@ -6,7 +6,7 @@ import { checkUserLogin } from "../utils/validations/userInputValidations";
 export default function useLogin({
   mode,
   loginRef,
-  otpRef,
+  passwordRef,
   signupRef,
   setLoginPhone,
   onExistingUser,
@@ -30,8 +30,6 @@ export default function useLogin({
       const checkRes = await api.post("/users/check", { type, value });
 
       if (checkRes.data.exists) {
-        await api.post("/auth/send-otp", { type, value });
-
         if (mode === "modal") {
           setLoginPhone({ type, value });
 
@@ -39,8 +37,8 @@ export default function useLogin({
           const modalInst = bootstrap.Modal.getInstance(loginRef.current);
           modalInst?.hide();
 
-          const otpModal = new bootstrap.Modal(otpRef.current);
-          otpModal.show();
+          const passwordModal = new bootstrap.Modal(passwordRef.current);
+          passwordModal.show();
         }
 
         if (mode === "page") {
