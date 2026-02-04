@@ -7,7 +7,7 @@ import { userNavigation } from "../utils/navigations/loginNavigation";
 import { useAuth } from "../hooks/useAuth";
 
 export const OtpModal = forwardRef(({ type, value }, ref) => {
-  const {setUser} = useAuth();
+  const { setUser } = useAuth();
   const navigate = useNavigate();
 
   const [otp, setOtp] = useState("");
@@ -46,8 +46,8 @@ export const OtpModal = forwardRef(({ type, value }, ref) => {
       setError("");
 
       const res = await api.post("/auth/verify-otp", {
-        type,   
-        value, 
+        type,
+        value,
         otp,
       });
 
@@ -59,7 +59,11 @@ export const OtpModal = forwardRef(({ type, value }, ref) => {
 
       userNavigation(navigate, res.data.role);
     } catch (err) {
-      setError(err?.response?.data?.error || err?.response?.data?.message || "Invalid or expired OTP");
+      setError(
+        err?.response?.data?.error ||
+          err?.response?.data?.message ||
+          "Invalid or expired OTP",
+      );
     } finally {
       setLoading(false);
     }
@@ -80,18 +84,36 @@ export const OtpModal = forwardRef(({ type, value }, ref) => {
   };
 
   return (
-    <div ref={ref} id="otpModal" className="modal fade" tabIndex="-1" aria-hidden="true">
-      <div className="modal-dialog modal-dialog-centered modal-sm" style={{width: '350px'}}>
-        <div className="modal-content border-0 rounded-3 p-4" style={{width: '350px'}}>
-          <div className="modal-header border-0">
-            <h5 className="modal-title fw-semibold" style={{ fontSize: "16px" }}>
+    <div
+      ref={ref}
+      id="otpModal"
+      className="modal fade"
+      tabIndex="-1"
+      aria-hidden="true"
+    >
+      <div
+        className="modal-dialog modal-dialog-centered modal-sm"
+        style={{ maxWidth: "400px", margin: "1.75rem auto" }}
+      >
+        <div
+          className="modal-content border-0 rounded-3 p-3 p-md-4 mx-3 mx-md-0"
+        >
+          <div className="modal-header border-0 px-0">
+            <h5
+              className="modal-title fw-semibold"
+              style={{ fontSize: "15px" }}
+            >
               Verify OTP
             </h5>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" />
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="modal"
+            />
           </div>
 
-          <div className="modal-body text-center px-4">
-            <p className="text-muted mb-3" style={{ fontSize: "13px" }}>
+          <div className="modal-body text-center px-0 px-md-2">
+            <p className="text-muted mb-3" style={{ fontSize: "12px" }}>
               Enter OTP sent to <br />
               <strong>{value || "your device"}</strong>
             </p>
@@ -114,18 +136,25 @@ export const OtpModal = forwardRef(({ type, value }, ref) => {
               }}
             />
 
-            {error && <div className="text-danger small mb-2">{error}</div>}
-            {resendStatus && <div className="text-success small mb-2">{resendStatus}</div>}
+            {error && <div className="text-danger small mb-2" style={{fontSize: "11px"}}>{error}</div>}
+            {resendStatus && (
+              <div className="text-success small mb-2" style={{fontSize: "11px"}}>{resendStatus}</div>
+            )}
 
             <div
               className="text-primary small mb-4"
-              style={{ cursor: "pointer", fontWeight: "500" }}
+              style={{ cursor: "pointer", fontWeight: "500", fontSize: "12px" }}
               onClick={resendOtp}
             >
               Resend OTP
             </div>
 
-            <LoginButton className="w-100" onClick={handleVerify} disabled={loading}>
+            <LoginButton
+              className="w-100"
+              onClick={handleVerify}
+              disabled={loading}
+              style={{fontSize: "13px"}}
+            >
               {loading ? "VERIFYING..." : "CONTINUE"}
             </LoginButton>
           </div>

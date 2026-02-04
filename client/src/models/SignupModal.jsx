@@ -7,13 +7,7 @@ import useSignup from "../hooks/useSignUp";
 const SignUpModal = forwardRef((_, ref) => {
   const navigate = useNavigate();
 
-  const {
-    values,
-    errors,
-    loading,
-    handleChange,
-    handleSubmit,
-  } = useSignup();
+  const { values, errors, loading, handleChange, handleSubmit } = useSignup();
 
   const onContinue = async () => {
     try {
@@ -27,7 +21,7 @@ const SignUpModal = forwardRef((_, ref) => {
         ref.current.addEventListener(
           "hidden.bs.modal",
           () => navigate("/login"),
-          { once: true }
+          { once: true },
         );
       }
     } catch (err) {
@@ -45,13 +39,13 @@ const SignUpModal = forwardRef((_, ref) => {
     >
       <div
         className="modal-dialog modal-dialog-centered modal-sm"
-        style={{ maxWidth: "420px" }}
+        style={{ maxWidth: "450px", margin: "1.75rem auto" }}
       >
-        <div className="modal-content border-0 rounded-3 p-4">
+        <div className="modal-content border-0 rounded-3 p-3 p-md-4 mx-3 mx-md-0">
           <div className="modal-header border-0 px-0">
             <div>
-              <h5 className="modal-title fw-semibold mb-1">Sign Up</h5>
-              <p className="small text-muted mb-0">
+              <h5 className="modal-title fw-semibold mb-1" style={{fontSize: "15px"}}>Sign Up</h5>
+              <p className="small text-muted mb-0" style={{fontSize: "12px"}}>
                 Create an account on Snapdeal
               </p>
             </div>
@@ -60,9 +54,9 @@ const SignUpModal = forwardRef((_, ref) => {
 
           <div className="modal-body px-0 pb-0">
             {errors.server && (
-              <div className="alert alert-danger py-2 small text-center border-0 mb-3">
-                {typeof errors.server === 'object' 
-                  ? (errors.server.message || "Invalid input") 
+              <div className="alert alert-danger py-2 small text-center border-0 mb-3" style={{fontSize: "12px"}}>
+                {typeof errors.server === "object"
+                  ? errors.server.message || "Invalid input"
                   : errors.server}
               </div>
             )}
@@ -73,10 +67,10 @@ const SignUpModal = forwardRef((_, ref) => {
               onChange={handleChange}
               className="form-control mb-2"
               placeholder="Mobile"
-              style={{ boxShadow: "none" }}
+              style={{ boxShadow: "none", fontSize: "13px" }}
             />
             {errors.phone && (
-              <div className="text-danger small mb-2">{errors.phone}</div>
+              <div className="text-danger small mb-2" style={{fontSize: "11px"}}>{errors.phone}</div>
             )}
 
             <input
@@ -86,10 +80,10 @@ const SignUpModal = forwardRef((_, ref) => {
               onChange={handleChange}
               className="form-control mb-2"
               placeholder="Email"
-              style={{ boxShadow: "none" }}
+              style={{ boxShadow: "none", fontSize: "13px" }}
             />
             {errors.email && (
-              <div className="text-danger small mb-2">{errors.email}</div>
+              <div className="text-danger small mb-2" style={{fontSize: "11px"}}>{errors.email}</div>
             )}
 
             <input
@@ -99,10 +93,10 @@ const SignUpModal = forwardRef((_, ref) => {
               onChange={handleChange}
               className="form-control mb-2"
               placeholder="Name"
-              style={{ boxShadow: "none" }}
+              style={{ boxShadow: "none", fontSize: "13px" }}
             />
             {errors.name && (
-              <div className="text-danger small mb-2">{errors.name}</div>
+              <div className="text-danger small mb-2" style={{fontSize: "11px"}}>{errors.name}</div>
             )}
 
             <input
@@ -111,10 +105,10 @@ const SignUpModal = forwardRef((_, ref) => {
               value={values.dob}
               onChange={handleChange}
               className="form-control mb-2"
-              style={{ boxShadow: "none" }}
+              style={{ boxShadow: "none", fontSize: "13px" }}
             />
             {errors.dob && (
-              <div className="text-danger small mb-2">{errors.dob}</div>
+              <div className="text-danger small mb-2" style={{fontSize: "11px"}}>{errors.dob}</div>
             )}
 
             <input
@@ -124,12 +118,10 @@ const SignUpModal = forwardRef((_, ref) => {
               onChange={handleChange}
               className="form-control mb-2"
               placeholder="Password"
-              style={{ boxShadow: "none" }}
+              style={{ boxShadow: "none", fontSize: "13px" }}
             />
             {errors.password && (
-              <div className="text-danger small mb-2">
-                {errors.password}
-              </div>
+              <div className="text-danger small mb-2" style={{fontSize: "11px"}}>{errors.password}</div>
             )}
 
             <div className="form-check mb-3">
@@ -141,10 +133,7 @@ const SignUpModal = forwardRef((_, ref) => {
                 onChange={handleChange}
                 id="keepLoggedIn"
               />
-              <label
-                className="form-check-label small"
-                htmlFor="keepLoggedIn"
-              >
+              <label className="form-check-label small" htmlFor="keepLoggedIn" style={{fontSize: "12px"}}>
                 Keep me logged in
               </label>
             </div>
@@ -153,11 +142,12 @@ const SignUpModal = forwardRef((_, ref) => {
               className="w-100 mb-3"
               disabled={loading}
               onClick={onContinue}
+              style={{fontSize: "13px"}}
             >
               {loading ? "PLEASE WAIT…" : "CONTINUE"}
             </LoginButton>
 
-            <p className="text-center small text-muted mb-0">
+            <p className="text-center small text-muted mb-0" style={{fontSize: "11px"}}>
               By registering, I agree to{" "}
               <span className="text-primary">Terms & Conditions</span>
             </p>
