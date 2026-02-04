@@ -47,28 +47,22 @@ exports.sendOtp = async (req, res) => {
       { upsert: true }
     );
 
-    try {
-      // Add timeout for email sending (10 seconds)
-      const emailPromise = sendOtpEmail(user.email, otp, user.name);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Email sending timeout')), 10000)
-      );
-      
-      await Promise.race([emailPromise, timeoutPromise]);
-      console.log(`OTP sent to ${user.email}:`, otp);
+    // Send OTP email asynchronously (fire-and-forget)
+    // Don't await - let it send in background
+    sendOtpEmail(user.email, otp, user.name)
+      .then(() => {
+        console.log(`OTP sent to ${user.email}:`, otp);
+      })
+      .catch((error) => {
+        console.error('Email sending failed (background):', error.message || error);
+      });
 
-      res.json({
-        message: "OTP sent successfully to your registered email address",
-        email: user.email.replace(/(.{2})(.*)(@.*)/, "$1***$3"),
-        expiresIn: "10 minutes"
-      });
-    } catch (emailError) {
-      await Otp.deleteOne({ identifier: value, type });
-      console.error('Email sending failed:', emailError.message || emailError);
-      return res.status(500).json({
-        error: "Failed to send OTP email. Please try again later or contact support."
-      });
-    }
+    // Return success immediately to user
+    res.json({
+      message: "OTP sent successfully to your registered email address",
+      email: user.email.replace(/(.{2})(.*)(@.*)/, "$1***$3"),
+      expiresIn: "10 minutes"
+    });
 
   } catch (error) {
     console.error('Send OTP error:', error);
