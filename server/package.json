@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "npm i express nodemon mongoose cors dotenv helmet jsonwebtoken bcryptjs morgan otp-generator twilio",
+    "install": "npm i express nodemon mongoose cors dotenv helmet jsonwebtoken bcryptjs morgan otp-generator nodemailer",
     "dev": "nodemon server.js"
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -23,6 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.3",
     "morgan": "^1.10.1",
+    "nodemailer": "^7.0.13",
     "nodemon": "^3.1.11",
     "otp-generator": "^4.0.1",
     "razorpay": "^2.9.6"

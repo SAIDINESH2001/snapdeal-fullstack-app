@@ -28,11 +28,23 @@ const app = express();
 //Connect to dataBase
 connectDB();
 
+
+const PORT = process.env.PORT || 5000;
+
+
 //MiddleWares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(morgan('dev'));
+
+app.get('/api/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+app.get('/', (req, res) => {
+    res.send('API is running successfully');
+});
 
 //Routing
 app.use('/api', userRoutes);
@@ -52,7 +64,7 @@ app.use(errorHandler);
 
 
 //Start Server
-const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
     console.log(`Server connected to http://localhost:${PORT}`);
     console.log(`Environment : ${process.env.NODE_ENV || 'development'}`);
