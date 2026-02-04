@@ -36,11 +36,11 @@ export const HomeCarousel = () => {
           ))}
         </Carousel>
       </S.CarouselWrapper>
-      <div className='text-center'>
+      <div className='text-center px-4'>
         <img 
           src="https://g.sdlcdn.com/imgs/a/b/c/feedConfig/freedeliverystripwebupdated.jpg" 
           alt="Free Delivery" 
-          className='mt-3 object-fit-cover rounded mb-5' 
+          className='mt-3 object-fit-cover rounded mb-5 w-100' 
           style={{ width: '98%' }}
         />
       </div>

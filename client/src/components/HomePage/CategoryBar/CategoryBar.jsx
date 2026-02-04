@@ -39,26 +39,27 @@ export const CategoryBar = () => {
 
   return (
     <S.NavWrapper onMouseLeave={() => setActiveTab(null)}>
-      <Container>
+      <div className='w-100'>
         <S.NavContainer>
           {categories.map((cat) => (
             <S.NavItem 
               key={cat._id} 
               onMouseEnter={() => setActiveTab(cat._id)}
+              onClick={() => setActiveTab(activeTab === cat._id ? null : cat._id)}
             >
               <img src={cat.categoryImage} alt="" />
               {cat.categoryName}
             </S.NavItem>
           ))}
         </S.NavContainer>
-      </Container>
+      </div>
 
       {categories.map((cat) => (
         <S.MegaDropdown key={`drop-${cat._id}`} $show={activeTab === cat._id}>
-          <Container>
-            <Row className="gx-5">
+          <Container fluid className='px-3 px-md-4'>
+            <Row className="g-3 g-md-4 gx-lg-5">
               {chunkArray(cat.sections || [], 2).map((columnSections, colIdx) => (
-                <Col key={colIdx} md={3} className={colIdx !== 3 ? "border-end" : ""}>
+                <Col key={colIdx} xs={12} sm={6} md={3} className={colIdx !== 3 ? "border-end" : ""}>
                   {columnSections.map((section, secIdx) => (
                     <div key={secIdx} className="mb-4">
                       <S.SectionTitle 
@@ -83,7 +84,7 @@ export const CategoryBar = () => {
                         View All
                       </S.ViewAll>
 
-                      {secIdx < columnSections.length - 1 && <hr className="my-3 opacity-25" />}
+                      {secIdx < columnSections.length - 1 && (<hr className="my-3 opacity-25" />)}
                     </div>
                   ))}
                 </Col>
