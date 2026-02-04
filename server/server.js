@@ -28,6 +28,10 @@ const app = express();
 //Connect to dataBase
 connectDB();
 
+
+const PORT = process.env.PORT || 5000;
+
+
 //MiddleWares
 app.use(cors());
 app.use(express.json());
