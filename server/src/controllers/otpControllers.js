@@ -48,7 +48,13 @@ exports.sendOtp = async (req, res) => {
     );
 
     try {
-      await sendOtpEmail(user.email, otp, user.name);
+      // Add timeout for email sending (10 seconds)
+      const emailPromise = sendOtpEmail(user.email, otp, user.name);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Email sending timeout')), 10000)
+      );
+      
+      await Promise.race([emailPromise, timeoutPromise]);
       console.log(`OTP sent to ${user.email}:`, otp);
 
       res.json({
@@ -58,7 +64,7 @@ exports.sendOtp = async (req, res) => {
       });
     } catch (emailError) {
       await Otp.deleteOne({ identifier: value, type });
-      console.error('Email sending failed:', emailError);
+      console.error('Email sending failed:', emailError.message || emailError);
       return res.status(500).json({
         error: "Failed to send OTP email. Please try again later or contact support."
       });
