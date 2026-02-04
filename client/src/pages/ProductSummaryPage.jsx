@@ -5,7 +5,7 @@ import { ProductDetails } from "../components/ProductSummaryPage/ProductSummaryM
 import { ProductTabs } from "../components/ProductSummaryPage/ProductSummarySection";
 import api from "../services/axios";
 import { useParams } from "react-router-dom";
-import { ReviewsSection } from "../components/ProductSummaryPage/reviewSection";
+import { ReviewsSection } from "../components/ProductSummaryPage/ReviewSection";
 import { ProductCartFooter } from "../components/ProductCart/ProductCartFooter";
 
 export const ProductSummaryPage = () => {
