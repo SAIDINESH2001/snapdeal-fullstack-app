@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Container, Alert, Button } from "react-bootstrap";
-import { CartModal } from "../../models/CartModel/CartModal"; 
-import { PaymentModal } from "../../models/PaymentModal/PaymentModal"; 
+import { CartModal } from "../../models/CartModel/CartModal";
+import { PaymentModal } from "../../models/PaymentModal/PaymentModal";
 import { useCartContext } from "../../contexts/cartContext";
-import { useCart } from "../../hooks/useCart"; 
+import { useCart } from "../../hooks/useCart";
 
 export const ProductCartBody = ({ cartProduct }) => {
   const [active, setActive] = useState(true);
   const [showCartModal, setShowCartModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false); 
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleOpenCart = () => setShowCartModal(true);
   const handleCloseCart = () => setShowCartModal(false);
@@ -25,20 +25,27 @@ export const ProductCartBody = ({ cartProduct }) => {
 
   return (
     <>
-      <Container className="mt-4">
-        <div className="border rounded shadow-sm bg-white overflow-hidden">
+      <Container
+        className="mt-3 mt-md-4 px-2 px-md-3"
+        style={{ maxWidth: "1200px" }}
+      >
+        <div className="rounded-3 shadow bg-white overflow-hidden">
           {active && (
             <Alert
-              className="text-light d-flex align-items-center p-3 m-0 border-0 rounded-0"
-              style={{ background: "#19bc9c" }}
+              className="text-white d-flex align-items-center p-3 m-0 border-0 rounded-0"
+              style={{
+                background: "linear-gradient(135deg, #19bc9c 0%, #15a589 100%)",
+              }}
             >
-              <span className="material-symbols-outlined me-3">check_circle</span>
-              <p className="m-0 flex-grow-1" style={{ fontSize: "14px" }}>
+              <span className="material-symbols-outlined me-3 fs-5">
+                check_circle
+              </span>
+              <p className="m-0 flex-grow-1 fw-medium" style={{ fontSize: "14px" }}>
                 {cartProduct?.name} is added to the cart.
               </p>
-              <span 
-                className="material-symbols-outlined ms-auto" 
-                style={{ cursor: 'pointer' }}
+              <span
+                className="material-symbols-outlined ms-auto"
+                style={{ cursor: "pointer", opacity: 0.9 }}
                 onClick={() => setActive(false)}
               >
                 close
@@ -46,52 +53,115 @@ export const ProductCartBody = ({ cartProduct }) => {
             </Alert>
           )}
 
-          <div className="d-flex align-items-center justify-content-between p-5 bg-white">
-            <div className="d-flex align-items-center gap-3 flex-grow-1 border-end pe-4" style={{ flexBasis: '0' }}>
-              <img
-                src={cartProduct?.image?.[0]} 
-                alt="Product"
-                style={{ width: "60px", height: "60px", objectFit: "contain" }}
-              />
-              <div>
-                <p className="m-0 text-muted small mb-1">{cartProduct?.name}</p>
-                <p className="m-0 fw-bold fs-6">Rs. {cartProduct?.sellingPrice}</p>
+          <div className="p-3 p-md-4">
+            {/* Product Info Section */}
+            <div className="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+              <div
+                className="bg-light rounded p-2 d-flex align-items-center justify-content-center"
+                style={{ width: "80px", height: "80px", flexShrink: 0 }}
+              >
+                <img
+                  src={cartProduct?.image?.[0]}
+                  alt="Product"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+              <div className="flex-grow-1">
+                <p
+                  className="m-0 text-muted mb-1"
+                  style={{
+                    fontSize: "12px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Product
+                </p>
+                <p
+                  className="m-0 text-dark fw-semibold mb-2"
+                  style={{ fontSize: "15px" }}
+                >
+                  {cartProduct?.name}
+                </p>
+                <p
+                  className="m-0 fw-bold text-danger"
+                  style={{ fontSize: "20px" }}
+                >
+                  ₹{cartProduct?.sellingPrice?.toLocaleString()}
+                </p>
               </div>
             </div>
 
-            <div className="px-5 flex-grow-1 border-end" style={{ flexBasis: '0' }}>
-              <div className="d-flex align-items-center gap-2 mb-2">
-                <span className="text-muted small">Your Order</span>
-                <span className={`badge rounded-pill border ${isCartEmpty ? 'border-secondary text-secondary' : 'border-success text-success'} fw-normal px-2`} style={{ fontSize: "11px" }}>
-                  {cartCount} {Number(cartCount) === 1 ? 'Item' : 'Items'}
+            {/* Order Summary Section */}
+            <div className="mb-4 pb-3 border-bottom">
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <div className="d-flex align-items-center gap-2">
+                  <span
+                    className="material-symbols-outlined text-primary"
+                    style={{ fontSize: "20px" }}
+                  >
+                    shopping_bag
+                  </span>
+                  <span className="text-dark fw-semibold">Your Order</span>
+                </div>
+                <span>
+                  <span className={`badge ${isCartEmpty ? "bg-secondary" : "bg-success"} rounded-pill px-3 py-2`}>
+                    {cartCount} {Number(cartCount) === 1 ? "Item" : "Items"}
+                  </span>
                 </span>
               </div>
-              <h4 className="m-0 fw-normal" style={{fontSize: '18px'}}>
-                You Pay: <span className="fw-semibold">Rs. {subTotal.toLocaleString()}</span>
-              </h4>
+
+              <div className="d-flex align-items-center justify-content-between">
+                <span className="text-muted" style={{ fontSize: "14px" }}>
+                  Total Amount:
+                </span>
+                <h4
+                  className="m-0 fw-bold text-danger"
+                  style={{ fontSize: "24px" }}
+                >
+                  ₹{subTotal.toLocaleString()}
+                </h4>
+              </div>
             </div>
 
-            <div className="d-flex gap-3 ps-4 align-items-center">
+            {/* Action Buttons */}
+            <div className="d-flex flex-column flex-sm-row gap-3">
               <Button
-                className="px-4 py-2 border-0 fw-bold text-uppercase"
-                style={{ 
-                    backgroundColor: isCartEmpty ? "#ccc" : "#E40046", 
-                    fontSize: "13px", 
-                    borderRadius: '2px',
-                    cursor: isCartEmpty ? "not-allowed" : "pointer" 
+                className="flex-grow-1 py-3 border-0 fw-bold text-uppercase shadow-sm"
+                style={{
+                  backgroundColor: isCartEmpty ? "#ccc" : "#e40046",
+                  fontSize: "14px",
+                  borderRadius: "8px",
+                  cursor: isCartEmpty ? "not-allowed" : "pointer",
+                  letterSpacing: "0.5px",
                 }}
                 onClick={handleOpenPayment}
                 disabled={isCartEmpty}
               >
+                <span className="material-symbols-outlined me-2 align-middle" style={{ fontSize: "18px" }}>
+                  shopping_cart_checkout
+                </span>
                 PROCEED TO CHECKOUT
               </Button>
-              
+
               <Button
-                variant="dark"
-                className="px-4 py-2 fw-bold text-uppercase"
-                style={{ backgroundColor: "#333", fontSize: "13px", borderRadius: '2px' }}
+                variant="outline-dark"
+                className="flex-grow-1 py-3 fw-bold text-uppercase shadow-sm"
+                style={{
+                  fontSize: "14px",
+                  borderRadius: "8px",
+                  borderWidth: "2px",
+                  letterSpacing: "0.5px",
+                }}
                 onClick={handleOpenCart}
               >
+                <span className="material-symbols-outlined me-2 align-middle" style={{ fontSize: "18px" }}>
+                  shopping_cart
+                </span>
                 VIEW CART
               </Button>
             </div>

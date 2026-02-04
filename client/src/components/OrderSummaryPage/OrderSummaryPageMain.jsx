@@ -234,7 +234,7 @@ export const OrderDetailPage = () => {
         className="p-3 border-bottom w-100 d-flex justify-content-center bg-white sticky-top"
         style={{ zIndex: 10 }}
       >
-        <div style={{ width: "80%", fontSize: "12px", color: "#888" }}>
+        <div className="w-100 px-3 px-md-0" style={{ maxWidth: "1200px", fontSize: "12px", color: "#888" }}>
           Home / My Orders /{" "}
           <span style={{ color: "#333", fontWeight: "500" }}>
             #{order._id.toUpperCase()}
@@ -242,8 +242,8 @@ export const OrderDetailPage = () => {
         </div>
       </div>
 
-      <Container className="py-5" style={{ width: "80%" }}>
-        <div className="d-flex justify-content-between align-items-center mb-4">
+      <Container className="py-3 py-md-5 px-3 px-md-4" style={{ maxWidth: "1200px" }}>
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
           <div>
             <h4 className="fw-normal m-0" style={{ fontSize: "22px" }}>
               Order Details
@@ -252,7 +252,7 @@ export const OrderDetailPage = () => {
               Order ID: #{order._id.toUpperCase()}
             </p>
           </div>
-          <div className="d-flex gap-2">
+          <div className="d-flex flex-wrap gap-2">
             {!isDelivered && !isCancelled && !isActionLocked && (
               <Button
                 variant="outline-secondary"
@@ -315,7 +315,7 @@ export const OrderDetailPage = () => {
         )}
 
         <Row className="g-4 mb-5">
-          <Col md={8}>
+          <Col xs={12} md={8}>
             <Card
               className="rounded-0 border mb-4"
               style={{
@@ -346,7 +346,7 @@ export const OrderDetailPage = () => {
             />
           </Col>
 
-          <Col md={4}>
+          <Col xs={12} md={4}>
             <Card
               className="rounded-0 border sticky-top"
               style={{ boxShadow: "none", top: "80px" }}
@@ -390,7 +390,7 @@ export const OrderDetailPage = () => {
         </Row>
 
         <Row className="g-4 mb-4">
-          <Col md={6}>
+          <Col xs={12} md={6}>
             <Card
               className="rounded-0 border h-100"
               style={{ boxShadow: "none" }}
@@ -430,7 +430,7 @@ export const OrderDetailPage = () => {
             </Card>
           </Col>
 
-          <Col md={6}>
+          <Col xs={12} md={6}>
             <Card
               className="rounded-0 border h-100"
               style={{ boxShadow: "none" }}

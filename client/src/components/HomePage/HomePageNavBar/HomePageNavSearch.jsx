@@ -18,14 +18,14 @@ export const HomePageNavSearch = () => {
   };
 
   return (
-    <div className="mx-4 d-flex justify-content-end" style={{ width: "720px" }}>
-      <div className="input-group border border-dark rounded overflow-hidden">
+    <div className="w-100 d-flex justify-content-center" >
+      <div className="input-group border border-dark rounded overflow-hidden w-100">
         <span 
-          className="input-group-text bg-white border-end-0" 
+          className="input-group-text bg-white border-end-0 px-2 px-md-3" 
           onClick={performSearch}
           style={{ cursor: 'pointer' }}
         >
-          <span className="material-symbols-outlined fs-5 text-muted">
+          <span className="material-symbols-outlined fs-5 text-muted" style={{fontSize: "clamp(18px, 3vw, 20px)"}}>
             search
           </span>
         </span>
@@ -38,8 +38,8 @@ export const HomePageNavSearch = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}
           style={{
-            height: "44px",
-            fontSize: "14px",
+            height: "clamp(36px, 5vw, 44px)",
+            fontSize: "clamp(12px, 2vw, 14px)",
             outline: "none",
           }}
         />

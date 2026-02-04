@@ -51,10 +51,11 @@ export const MainNavbar = ({ user, onCartClick }) => {
       }}
       onMouseLeave={() => setActiveTab(null)}
     >
-      <div className="container-fluid d-flex align-items-center gap-4 px-5">
-        <div className="d-flex align-items-center gap-3 text-white fw-bold fs-4">
-          <Link to={user?.role === "seller" ? "/seller" : "/"}>
-            <img src="/snapdeal-white.png" alt="Logo" width={150} height={30} style={{ objectFit: "cover" }} />
+      <div className="container-fluid d-flex flex-column flex-md-row align-items-center gap-2 gap-md-4 px-2 px-md-5 py-2 py-md-0">
+        <div className="d-flex align-items-center gap-2">
+          <Link to={user?.role === "seller" ? "/seller" : "/"} className="flex-shrink-0">
+            <img src="/snapdeal-white.png" alt="Logo" width={120} height={24} className="d-md-none" style={{ objectFit: "cover" }} />
+            <img src="/snapdeal-white.png" alt="Logo" width={150} height={30} className="d-none d-md-block" style={{ objectFit: "cover" }} />
           </Link>
           
           <div className="position-relative d-flex align-items-center" style={{ height: "50px" }}>
@@ -68,7 +69,7 @@ export const MainNavbar = ({ user, onCartClick }) => {
 
             {activeTab && (
               <div 
-                className="position-absolute shadow-lg bg-white text-dark fw-normal d-flex"
+                className="position-absolute shadow-lg bg-white text-dark fw-normal d-none d-md-flex"
                 style={{ 
                   top: '100%', 
                   left: '-165px', 
@@ -147,22 +148,37 @@ export const MainNavbar = ({ user, onCartClick }) => {
           </div>
         </div>
 
-        <div className="flex-grow-1">
-          <form onSubmit={handleSearch} className="input-group w-75 mx-auto">
+        <div className="d-flex d-md-none align-items-center gap-3">
+          {user?.role === 'customer' && (
+            <div className="btn text-light d-flex align-items-center border-0 p-1 position-relative" onClick={onCartClick}>
+              <span className="material-symbols-outlined pe-none">shopping_cart</span>
+              {cartCount > 0 && (
+                 <span className="position-absolute d-flex align-items-center justify-content-center text-danger rounded-circle fw-bold" style={{top: "-5px", right: "-8px", fontSize: "10px", background: "#fff", width: '18px', height: "18px"}}>{cartCount}</span>
+              )}
+            </div>
+          )}
+          <div className="btn text-light d-flex align-items-center border-0 p-1">
+            <span className="material-symbols-outlined">person</span>
+          </div>
+        </div>
+
+        <div className="flex-grow-1 w-100 w-md-auto">
+          <form onSubmit={handleSearch} className="input-group w-100 w-md-75 mx-auto">
             <input
               type="text"
-              className="form-control px-3 border-0 shadow-none"
+              className="form-control px-2 px-md-3 border-0 shadow-none"
+              style={{ fontSize: "14px", maxWidth: "600px" }}
               placeholder="Search products & brands"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button type="submit" className="btn btn-dark px-4 border-0" style={{ backgroundColor: '#2d2d2d' }}>
+            <button type="submit" className="btn btn-dark px-3 px-md-4 border-0" style={{ backgroundColor: '#2d2d2d', fontSize: '14px' }}>
               Search
             </button>
           </form>
         </div>
 
-        <div className="d-flex align-items-center gap-4 text-white">
+        <div className="d-none d-md-flex align-items-center gap-4 text-white">
           {user?.role === "customer" && (
             <div className="btn text-light d-flex align-items-center gap-2 border-0 p-2 position-relative" onClick={onCartClick}>
               <span className="pe-none" style={{ fontSize: '14px' }}>Cart</span>

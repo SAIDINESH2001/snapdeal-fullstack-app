@@ -23,12 +23,17 @@ export default function LoginModal({
       tabIndex="-1"
       aria-hidden="true"
     >
-      <div className="modal-dialog modal-dialog-centered" style={{width: '350px'}}>
-        <div className="modal-content border-0 rounded-3 p-3" style={{height: '350px'}}>
-          <div className="modal-header border-0 mt-2">
+      <div
+        className="modal-dialog modal-dialog-centered"
+        style={{ maxWidth: "400px", margin: "1.75rem auto" }}
+      >
+        <div
+          className="modal-content border-0 rounded-3 p-2 p-md-3 mx-3 mx-md-0"
+        >
+          <div className="modal-header border-0 mt-2 px-3 px-md-4">
             <h5
               className="modal-title fw-semibold"
-              style={{ fontSize: "16px" }}
+              style={{ fontSize: "15px" }}
             >
               Login/Sign Up On Snapdeal
             </h5>
@@ -40,13 +45,13 @@ export default function LoginModal({
             />
           </div>
 
-          <div className="modal-body px-4 pb-4">
+          <div className="modal-body px-3 px-md-4 pb-4">
             <p
               className="text-center small text-muted mb-3"
               style={{ fontSize: "12px" }}
             >
               Please provide your Mobile Number or Email to
-              <br />
+              <br className="d-none d-sm-block"/>
               Login / Sign Up on Snapdeal
             </p>
 
@@ -56,7 +61,7 @@ export default function LoginModal({
               placeholder="Mobile Number / Email"
               style={{
                 height: "44px",
-                fontSize: "12px",
+                fontSize: "13px",
                 boxShadow: "none",
               }}
               value={mobile}

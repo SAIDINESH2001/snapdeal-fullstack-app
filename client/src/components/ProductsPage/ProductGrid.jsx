@@ -30,7 +30,7 @@ export const ProductGrid = ({ products = [] }) => {
   return (
     <div className="row g-4 mt-4 mx-4">
       {products.map((product, i) => (
-        <div key={product._id || i} className="col-6 col-md-4 col-lg-3 shadow-sm">
+        <div key={product._id || i} className="col-6 col-lg-3 shadow-sm">
           <div 
             className="card h-100 border-0" 
             style={{ cursor: 'pointer' }} 
