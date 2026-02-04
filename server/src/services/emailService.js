@@ -141,12 +141,13 @@ const sendOtpEmail = async (email, otp, userName = 'User') => {
     console.log(`OTP email sent successfully to ${email}:`, otp);
     return { success: true, messageId: info[0].statusCode };
   } catch (error) {
-    console.error('SendGrid Error:', {
+    const errorDetails = {
       message: error.message,
       code: error.code,
       status: error.status,
-      response: error.response?.body
-    });
+      errors: error.response?.body?.errors
+    };
+    console.error('SendGrid Error Details:', JSON.stringify(errorDetails, null, 2));
     throw new Error('Failed to send OTP email');
   }
 };
