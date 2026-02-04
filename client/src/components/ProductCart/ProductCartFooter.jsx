@@ -80,7 +80,7 @@ export const ProductCartFooter = () => {
             <ul className="list-unstyled d-grid gap-1">
               <li><Link to={`/products/Women's Fashion/Ethnic Wear/${encodeURIComponent("Lehengas")}`} target="_blank" className="text-decoration-none text-muted" style={{ fontSize: "12px" }}>Lehengas</Link></li>
               <li><Link to={`/products/Kid's Fashion/${encodeURIComponent("Boy's Clothing")}`} target="_blank" className="text-decoration-none text-muted" style={{ fontSize: "12px" }}>Kid's Clothing</Link></li>
-              <li><Link to={`/products//Women's Fashion/Ethnic Wear/${encodeURIComponent("Sarees")}`} target="_blank" className="text-decoration-none text-muted" style={{ fontSize: "12px" }}>Sarees</Link></li>
+              <li><Link to={`/products/Women's Fashion/Ethnic Wear/${encodeURIComponent("Sarees")}`} target="_blank" className="text-decoration-none text-muted" style={{ fontSize: "12px" }}>Sarees</Link></li>
               <li><Link to={`/products/trending/${encodeURIComponent("Winter Wear")}`} target="_blank" className="text-decoration-none text-muted" style={{ fontSize: "12px" }}>Winter Wear</Link></li>
             </ul>
           </Col>
