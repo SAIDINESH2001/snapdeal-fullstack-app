@@ -1,4 +1,4 @@
-const transporter = require('../config/nodemailer');
+const sgMail = require('../config/sendgrid');
 
 const getOtpEmailTemplate = (otp, userName = 'User') => {
   return `
@@ -129,20 +129,20 @@ const getOtpEmailTemplate = (otp, userName = 'User') => {
 
 const sendOtpEmail = async (email, otp, userName = 'User') => {
   try {
-    const mailOptions = {
-      from: `"Snapdeal" <${process.env.EMAIL_USER}>`,
+    const msg = {
       to: email,
+      from: process.env.SENDGRID_FROM_EMAIL || 'noreply@snapdeal.com',
       subject: 'Your Snapdeal Login OTP - Verify Your Identity',
       html: getOtpEmailTemplate(otp, userName),
       text: `Hello ${userName},\n\nYour OTP for Snapdeal login is: ${otp}\n\nThis code is valid for 10 minutes.\n\nDo not share this code with anyone.\n\nIf you didn't request this, please ignore this email.\n\nThank you,\nSnapdeal Team`,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('OTP email sent successfully:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    const info = await sgMail.send(msg);
+    console.log(`OTP email sent successfully to ${email}:`, otp);
+    return { success: true, messageId: info[0].statusCode };
   } catch (error) {
-    console.error('Error sending OTP email:', error);
-    throw new Error('Failed to send OTP email. Please try again later.');
+    console.error('Error sending OTP email:', error.message || error);
+    throw new Error('Failed to send OTP email');
   }
 };
 
