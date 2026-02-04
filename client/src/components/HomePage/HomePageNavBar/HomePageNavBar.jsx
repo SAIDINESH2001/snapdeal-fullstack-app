@@ -16,32 +16,32 @@ export default function HomePageNavBar({ user }) {
 
   return (
     <>
-      <HeaderBar>
+      <HeaderBar style={{ height: "auto", minHeight: "60px", padding: "5px 0" }}>
         <div className="w-100 h-100 px-2 px-md-3 px-lg-4">
           <div className="d-flex flex-wrap align-items-center justify-content-between h-100 w-100 gap-2">
             <Link to="/" className="d-flex align-items-center flex-shrink-0">
               <img
                 src="./snapdeal-logo.png"
                 alt="Snap Deal Logo"
-                style={{ height: "35px", width: "auto" }}
+                style={{ height: "45px", width: "auto", objectFit: "contain" }}
                 className="d-md-none"
               />
               <img
                 src="./snapdeal-logo.png"
                 alt="Snap Deal Logo"
-                style={{ height: "45px", width: "auto" }}
+                style={{ height: "65px", width: "auto", objectFit: "contain" }}
                 className="d-none d-md-block d-lg-none"
               />
               <img
                 src="./snapdeal-logo.png"
                 alt="Snap Deal Logo"
-                style={{ height: "55px", width: "auto" }}
+                style={{ height: "100px", width: "auto", objectFit: "contain", margin: "-20px 0" }}
                 className="d-none d-lg-block d-xl-none"
               />
               <img
                 src="./snapdeal-logo.png"
                 alt="Snap Deal Logo"
-                style={{ height: "65px", width: "auto" }}
+                style={{ height: "120px", width: "auto", objectFit: "contain", margin: "-30px 0" }}
                 className="d-none d-xl-block"
               />
             </Link>

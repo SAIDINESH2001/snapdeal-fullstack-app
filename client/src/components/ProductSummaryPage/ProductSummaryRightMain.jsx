@@ -8,39 +8,39 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
   const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pincode, setPincode] = useState("");
+  const [pincodeMsg, setPincodeMsg] = useState({ text: "", isError: false });
+
+  const handlePincodeCheck = () => {
+    const pincodeRegex = /^[1-9][0-9]{5}$/;
+    if (!pincode) {
+      setPincodeMsg({ text: "Please enter a pincode", isError: true });
+      return;
+    }
+    if (pincodeRegex.test(pincode)) {
+      setPincodeMsg({ text: "Valid pincode! Delivery available.", isError: false });
+    } else {
+      setPincodeMsg({ text: "Invalid pincode! Please enter a 6-digit number.", isError: true });
+    }
+  };
 
   const handleAddToCart = async () => {
     try {
       const token = localStorage.getItem("token");
-
       if (!product?._id) return;
       if (product.sizes?.length > 0 && !selectedSize) {
         alert("Please select a size first!");
         return;
       }
-
       const res = await api.post(
         `/users/addToCart/${product._id}`,
-        {
-          size: selectedSize,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        { size: selectedSize },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (res.data.success) {
-        console.log("Product added:", res.data);
         navigate(`/cart/addToCart/${product._id}`);
       }
     } catch (error) {
-      console.error(
-        "Failed to add to cart:",
-        error.response?.data?.message || error.message,
-      );
-
       if (error.response?.status === 401) {
         alert("Please login to add items to your cart");
         navigate("/login");
@@ -52,18 +52,15 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
   const handleBuyNow = () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       alert("Please login to purchase items");
       navigate("/login");
       return;
     }
-
     if (product.sizes?.length > 0 && !selectedSize) {
       alert("Please select a size first!");
       return;
     }
-
     setShowPaymentModal(true);
   };
 
@@ -81,9 +78,7 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
         <div className="my-2 small">
           <span className="text-warning">★ {product.rating}</span>
           <span className="ms-2 text-primary cursor-pointer">
-            {product.ratingsCount > 0
-              ? `(${product.ratingsCount} ratings)`
-              : "Be the first to review"}
+            {product.ratingsCount > 0 ? `(${product.ratingsCount} ratings)` : "Be the first to review"}
           </span>
           <span className="mx-2 text-muted">|</span>
           <span className="text-primary cursor-pointer">Have a question?</span>
@@ -93,21 +88,11 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
         <div className="mb-3">
           <div className="text-muted small">
-            MRP{" "}
-            <span className="text-decoration-line-through">
-              Rs. {product.mrp}
-            </span>{" "}
-            (Inclusive of all taxes)
+            MRP <span className="text-decoration-line-through">Rs. {product.mrp}</span> (Inclusive of all taxes)
           </div>
           <div className="d-flex align-items-center gap-3 mt-1">
-            <h2 className="text-danger fw-bold m-0">
-              Rs. {product.sellingPrice}
-            </h2>
-            <Badge
-              bg="light"
-              text="dark"
-              className="border px-3 py-2 fw-normal"
-            >
+            <h2 className="text-danger fw-bold m-0">Rs. {product.sellingPrice}</h2>
+            <Badge bg="light" text="dark" className="border px-3 py-2 fw-normal">
               {product.discount}% OFF
             </Badge>
           </div>
@@ -115,17 +100,9 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
         <div className="mb-4">
           <p className="small fw-bold text-muted mb-2">Color</p>
-          <div
-            className="border border-primary d-inline-block p-1"
-            style={{ width: "60px" }}
-          >
+          <div className="border border-primary d-inline-block p-1" style={{ width: "60px" }}>
             <img src={product.image[0]} alt="color" className="img-fluid" />
-            <div
-              className="text-center x-small text-muted"
-              style={{ fontSize: "10px" }}
-            >
-              Multicolor
-            </div>
+            <div className="text-center x-small text-muted" style={{ fontSize: "10px" }}>Multicolor</div>
           </div>
         </div>
 
@@ -149,13 +126,12 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
           {product.stockQuantity <= 0 ? (
             <div className="text-danger x-small fw-bold">Out of Stock</div>
           ) : product.stockQuantity <= 10 ? (
-            <div className="text-danger x-small fw-bold">
-              Hurry!!! Only {product.stockQuantity} Left
-            </div>
+            <div className="text-danger x-small fw-bold">Hurry!!! Only {product.stockQuantity} Left</div>
           ) : (
             <div className="x-small fw-bold text-success">In Stock</div>
           )}
         </div>
+
         <div className="d-flex gap-3 mb-4">
           <Button
             variant="dark"
@@ -179,14 +155,14 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
 
         <div className="bg-light p-3 border rounded">
           <Row className="align-items-center g-2">
-            <Col xs={12} md={3} className="small fw-bold">
-              Delivery
-            </Col>
+            <Col xs={12} md={3} className="small fw-bold">Delivery</Col>
             <Col xs={8} md={6}>
               <Form.Control
                 type="text"
                 placeholder="Enter pincode"
                 className="rounded-0 shadow-none border-secondary"
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value)}
               />
             </Col>
             <Col xs={4} md={3}>
@@ -194,14 +170,18 @@ export const ProductSummaryRightMain = ({ product, loading }) => {
                 variant="dark"
                 className="w-100 rounded-0"
                 style={{ backgroundColor: "#333" }}
+                onClick={handlePincodeCheck}
               >
                 CHECK
               </Button>
             </Col>
           </Row>
-          <p className="mt-2 mb-0 x-small text-muted">
-            Generally delivered in 7 - 11 days
-          </p>
+          {pincodeMsg.text && (
+            <p className={`mt-2 mb-0 x-small fw-bold ${pincodeMsg.isError ? "text-danger" : "text-success"}`}>
+              {pincodeMsg.text}
+            </p>
+          )}
+          <p className="mt-2 mb-0 x-small text-muted">Generally delivered in 7 - 11 days</p>
         </div>
       </Col>
 
