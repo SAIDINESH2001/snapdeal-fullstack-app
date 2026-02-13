@@ -30,11 +30,11 @@ This project uses a modern JavaScript stack and depends on several tools and ser
 - Node.js and npm installed locally
 - MongoDB instance or cluster
 - Razorpay test account and API keys
-- Frontend: React JS, Vite, Redux for state, Tailwind CSS
+- Frontend: React JS, Vite, Bootstrap, Styled Components
 - Backend: Node.js with Express JS
 - Database: MongoDB using Mongoose ODM
 - Payments: Razorpay API test integration
-- Deployment: Vercel for frontend and Render or Railway for backend
+- Deployment: Vercel for frontend and Render for backend
 
 ## Installation
 
